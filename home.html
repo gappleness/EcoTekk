@@ -37,11 +37,11 @@
 
     <script>
         (function () {
-            var user = EcotekkAuth.currentUser();
-            var el = document.getElementById('nav-auth');
-            if (user) {
-                el.innerHTML = '<a href="profile.html">Profile</a>';
-            }
+            EcotekkAuth.ready.then(function () {
+                var user = EcotekkAuth.currentUser();
+                var el = document.getElementById('nav-auth');
+                if (user) el.innerHTML = '<a href="profile.html">Profile</a>';
+            });
 
             var btn = document.getElementById('locateBtn');
             var loading = document.getElementById('loadingScreen');
@@ -89,7 +89,7 @@
                             else if (err.code === 2) msg += 'Position unavailable. Showing default area.';
                             else msg += 'Request timed out. Showing default area.';
                             showError(msg);
-                            setTimeoutEcotekkAuth.ready.then(function () {
+                            setTimeout(function () {
                                 window.location.href = 'ewaste.html?fallback=1';
                             }, 2000);
                         }, wait);

@@ -15,21 +15,24 @@
   if (configured) {
     firebase.initializeApp(cfg);
     auth = firebase.auth(); db = firebase.firestore();
+    // Keep the account signed in across reloads and browser restarts.
+    const persistenceReady = auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     auth.onAuthStateChanged(u => {user=u; readyResolve(u);}, e=>{console.error(e);readyResolve(null);});
   } else {readyResolve(null);}
+  async function ensurePersistence(){requireConfig(); await persistenceReady;}
   function requireConfig(){if(!configured)throw new Error('Configure firebase-config.js first.');}
-  function profileRef(){if(!user)throw new Error('Please sign in.');return db.collection('profiles').doc(user.uid);}
+  function profileRef(){const active=auth && auth.currentUser;if(!active)throw new Error('Please sign in.');return db.collection('profiles').doc(active.uid);}
   async function ensureProfile(u, displayName) {
     const ref=db.collection('profiles').doc(u.uid);
     const snap=await ref.get();
     if(!snap.exists) await ref.set({name:displayName || u.displayName || u.email.split('@')[0], email:u.email || '', createdAt:firebase.firestore.FieldValue.serverTimestamp()});
   }
-  async function signup(name,password,email){requireConfig();if(!name.trim())throw new Error('Enter your name.');const c=await auth.createUserWithEmailAndPassword(email.trim(),password);await c.user.updateProfile({displayName:name.trim()});await ensureProfile(c.user,name.trim());await c.user.sendEmailVerification();return c.user;}
-  async function login(email,password){requireConfig();const c=await auth.signInWithEmailAndPassword(email.trim(),password);await ensureProfile(c.user);return c.user;}
-  async function googleLogin(){requireConfig();const provider=new firebase.auth.GoogleAuthProvider();const c=await auth.signInWithPopup(provider);await ensureProfile(c.user);return c.user;}
+  async function signup(name,password,email){await ensurePersistence();if(!name.trim())throw new Error('Enter your name.');const c=await auth.createUserWithEmailAndPassword(email.trim(),password);await c.user.updateProfile({displayName:name.trim()});await ensureProfile(c.user,name.trim());await c.user.sendEmailVerification();return c.user;}
+  async function login(email,password){await ensurePersistence();const c=await auth.signInWithEmailAndPassword(email.trim(),password);await ensureProfile(c.user);return c.user;}
+  async function googleLogin(){await ensurePersistence();const provider=new firebase.auth.GoogleAuthProvider();const c=await auth.signInWithPopup(provider);await ensureProfile(c.user);return c.user;}
   async function resetPassword(email){requireConfig();await auth.sendPasswordResetEmail(email.trim());}
   async function logout(){requireConfig();await auth.signOut();}
-  function currentUser(){return user ? {uid:user.uid,name:user.displayName || (user.email||'').split('@')[0],email:user.email,emailVerified:user.emailVerified} : null;}
+  function currentUser(){const active = auth ? auth.currentUser : user; return active ? {uid:active.uid,name:active.displayName || (active.email||'').split('@')[0],email:active.email,emailVerified:active.emailVerified} : null;}
   // No client-controlled cloud points: a verified server-side award/redemption workflow is required.
   global.EcotekkAuth={ready,currentUser,signup,login,googleLogin,resetPassword,logout,REWARDS:rewards,
     watchProfile(callback){requireConfig();return profileRef().onSnapshot(s=>callback(s.exists?s.data():null));},

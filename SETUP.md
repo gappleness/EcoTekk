@@ -11,3 +11,5 @@
 
 ## Security scope
 This package implements Firebase Authentication and owner-only cloud profile reads. It deliberately disables client-controlled points, disposal awards and reward redemption. Those require a trusted server-side workflow (e.g. Cloud Functions with verified disposal events and Firestore transactions) and separate rules. Do NOT make client-writable points fields or deploy test-mode open rules. This package is not a complete production rewards service.
+
+Persistence fix: Firebase Auth uses LOCAL persistence; pages wait for EcotekkAuth.ready before showing account status. Test on the same hostname and normal browser window (not private browsing).
