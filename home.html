@@ -76,7 +76,8 @@
                         setTimeout(function () {
                             window.location.href =
                                 'ewaste.html?lat=' + encodeURIComponent(lat) +
-                                '&lng=' + encodeURIComponent(lng);
+                                '&lng=' + encodeURIComponent(lng) +
+                                '&accuracy=' + encodeURIComponent(pos.coords.accuracy);
                         }, wait);
                     },
                     function (err) {
