@@ -12,11 +12,12 @@
     {id:'powerbank',name:'Refurbished power bank',cost:250,desc:'Certified refurbished, 10,000 mAh.'}
   ];
   let auth, db;
+  let persistenceReady = Promise.resolve();
   if (configured) {
     firebase.initializeApp(cfg);
     auth = firebase.auth(); db = firebase.firestore();
     // Keep the account signed in across reloads and browser restarts.
-    const persistenceReady = auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    persistenceReady = auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     auth.onAuthStateChanged(u => {user=u; readyResolve(u);}, e=>{console.error(e);readyResolve(null);});
   } else {readyResolve(null);}
   async function ensurePersistence(){requireConfig(); await persistenceReady;}

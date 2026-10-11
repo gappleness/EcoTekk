@@ -37,6 +37,8 @@
         </iframe>
     </div>
 
+    <div class="map-location-actions" id="locationActions" hidden></div>
+
     <section class="tracker-results">
         <h2>Nearby sites</h2>
         <div class="results-meta" id="resultsMeta">Sorted by estimated distance · call ahead to confirm accepted materials</div>
@@ -47,6 +49,16 @@
 
     <p class="tracker-footnote">DISTANCES ARE ESTIMATES · LISTINGS INSPIRED BY PUBLIC GOOGLE MAPS DATA · ALWAYS CALL AHEAD TO CONFIRM HOURS AND ACCEPTED MATERIALS</p>
 
+    <style>
+        /* Additions only: preserve the original map and dark-mode filter in stylesheet.css. */
+        .map-location-actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:12px 20px; margin:0 auto; max-width:1100px; font-size:14px; }
+        .map-location-actions[hidden] { display:none; }
+        .map-location-actions a { margin-left:auto; color:var(--brand-dark); font-weight:700; }
+        .location-dot { width:12px; height:12px; background:#2684ff; border:2px solid white; box-shadow:0 0 0 2px #2684ff; border-radius:50%; flex:none; }
+        .site-links { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+        .site-links .visit { display:inline-flex; align-items:center; justify-content:center; }
+        .site-links .directions-link { background:var(--brand-dark); color:white; }
+    </style>
     <script>
         (function () {
             EcotekkAuth.ready.then(function () {
@@ -56,7 +68,8 @@
             var params = new URLSearchParams(window.location.search);
             var lat = parseFloat(params.get('lat'));
             var lng = parseFloat(params.get('lng'));
-            var fallback = params.get('fallback') === '1' || isNaN(lat) || isNaN(lng);
+            var fallback = params.get('fallback') === '1' || !Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180;
+            var accuracy = parseFloat(params.get('accuracy'));
 
             // Demo sites around Calamba / Laguna area (approx coords)
             var SITES = [
@@ -106,8 +119,15 @@
             if (!fallback) {
                 document.getElementById('locLabel').textContent =
                     'Based on your live location (' + lat.toFixed(4) + ', ' + lng.toFixed(4) + '). Open a site in Maps or learn about disposal verification.';
+                // A Google Maps search embed cannot simultaneously guarantee a personal marker.
+                // A coordinate query reliably pins the browser-reported position instead.
                 document.getElementById('mapFrame').src =
-                    'https://www.google.com/maps?q=e-waste+recycling+center/@' + lat + ',' + lng + ',13z&output=embed';
+                    'https://www.google.com/maps?q=' + encodeURIComponent(lat + ',' + lng) + '&z=14&output=embed';
+                var actions = document.getElementById('locationActions');
+                actions.hidden = false;
+                var accuracyText = Number.isFinite(accuracy) && accuracy >= 0 ? ' · estimated accuracy ±' + Math.round(accuracy) + ' m' : ' · approximate browser location';
+                actions.innerHTML = '<span class="location-dot" aria-hidden="true"></span><strong>You are here</strong><span>' + accuracyText + '</span>' +
+                    '<a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lat + ',' + lng) + '">View my marker ↗</a>';
             } else {
                 document.getElementById('locLabel').textContent =
                     'Showing sites near Calamba, Laguna (default area). Allow location next time for results near you.';
@@ -118,6 +138,12 @@
                     dist: haversineKm(originLat, originLng, s.lat, s.lng)
                 });
             }).sort(function (a, b) { return a.dist - b.dist; });
+
+            function directionsUrl(s) {
+                var dest = encodeURIComponent(s.lat + ',' + s.lng);
+                return 'https://www.google.com/maps/dir/?api=1&destination=' + dest + '&travelmode=driving' +
+                    (fallback ? '' : '&origin=' + encodeURIComponent(lat + ',' + lng));
+            }
 
             function barCount(km) {
                 if (km < 4) return 4;
@@ -147,7 +173,8 @@
                     '</div>' +
                     '<button type="button" class="btn-dispose" data-site="' + s.name.replace(/"/g, '&quot;') + '">Disposal verification coming soon</button>' +
                     '</div>' +
-                    '<a href="' + s.maps + '" target="_blank" rel="noopener" class="visit">View on Maps</a>';
+                    '<div class="site-links"><a href="' + s.maps + '" target="_blank" rel="noopener" class="visit">View on Maps</a>' +
+                    '<a href="' + directionsUrl(s) + '" target="_blank" rel="noopener" class="visit directions-link">Get directions ↗</a></div>';
                 list.appendChild(card);
             });
 
