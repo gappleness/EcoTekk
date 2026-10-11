@@ -1,45 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ecotekk — profile</title>
-    <link rel="stylesheet" href="stylesheet.css">
-    <script src="theme.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
-    <script src="auth.js"></script>
-</head>
-<body>
-    <nav>
-        <a href="index.html" class="logo">ecotekk</a>
-        <ul>
-            <li><a href="home.html">Find drop-off</a></li>
-            <li><a href="profile.html">Profile</a></li>
-            <li id="nav-pts"></li>
-            <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
-        </ul>
-    </nav>
-
-    <div class="profile-wrap" id="profileRoot">
-        <!-- filled if logged in -->
-    </div>
-
-    <script>
-    EcotekkAuth.ready.then(function(){
-      const root=document.getElementById('profileRoot'),u=EcotekkAuth.currentUser();
-      if(!u){root.innerHTML='<h1>Profile</h1><p>Please sign in to see your account.</p><a class="getStarted" href="login.html">Login / Sign up</a>';return;}
-      const h=document.createElement('h1');h.textContent='Hi, '+u.name;
-      const mail=document.createElement('p');mail.textContent=u.email || '';
-      const verification=document.createElement('p');verification.textContent=u.emailVerified?'Email verified':'Email not yet verified (check your inbox if you registered by email).';
-      const info=document.createElement('p');info.textContent='Your profile is stored in Firebase. Points, disposal awards and redemptions are paused until secure verification is implemented.';
-      const status=document.createElement('p');status.textContent='Loading cloud profile…';
-      const logout=document.createElement('button');logout.className='btn-outline';logout.textContent='Log out';logout.onclick=async()=>{await EcotekkAuth.logout();location.href='index.html';};
-      root.replaceChildren(h,mail,verification,info,status,logout);
-      try{EcotekkAuth.watchProfile(p=>{status.textContent=p?'Cloud profile: '+p.name:'Cloud profile is being created.';});}catch(e){status.textContent=e.message;}
-    });
-    </script>
-</body>
-</html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ecotekk — my profile</title><link rel="stylesheet" href="stylesheet.css">
+<script src="theme.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script><script src="auth.js"></script>
+<style>
+.profile-wrap {max-width:1060px;padding:44px 24px 80px}
+.p-eyebrow{font:600 12px 'IBM Plex Mono',monospace;letter-spacing:.15em;text-transform:uppercase;color:var(--brand-dark)}
+.p-heading{font-size:clamp(30px,5vw,46px);line-height:1.12;margin:12px 0}
+.p-sub{color:var(--muted);line-height:1.6;margin:0}
+.p-hero{border:1px solid var(--line);background:var(--mist);border-radius:24px;padding:clamp(22px,4vw,38px);display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.p-identity{display:flex;align-items:center;gap:20px;min-width:0}
+.p-avatar{flex:none;width:76px;height:76px;border-radius:22px;background:var(--brand);color:white;display:grid;place-items:center;font:800 29px 'Plus Jakarta Sans',sans-serif}
+.p-identity h2{font-size:clamp(21px,3vw,29px);margin:0 0 6px;overflow-wrap:anywhere}
+.p-identity p{margin:0;color:var(--muted);overflow-wrap:anywhere}
+.p-pill{display:inline-flex;border:1px solid var(--line);background:var(--paper);border-radius:99px;padding:9px 13px;font-size:12px;font-weight:700;gap:7px;align-items:center}
+.p-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,.85fr);gap:18px;margin-top:20px}
+.p-panel{border:1px solid var(--line);background:var(--paper);border-radius:20px;padding:25px;min-width:0}
+.p-panel h3{font-size:19px;margin:0 0 8px}
+.p-panel p{line-height:1.55}
+.p-panel .p-muted{color:var(--muted);font-size:14px}
+.p-row{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line);padding:14px 0;font-size:14px}
+.p-row:last-child{border-bottom:0}
+.p-row span:first-child{color:var(--muted)}
+.p-row strong{font-weight:700;text-align:right;overflow-wrap:anywhere}
+.p-action{display:inline-flex;justify-content:center;align-items:center;text-decoration:none;border:0;border-radius:99px;background:var(--brand);color:white;font:700 14px 'Plus Jakarta Sans',sans-serif;padding:13px 19px;cursor:pointer}
+.p-action:hover{background:var(--brand-dark)}
+.p-action.secondary{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.p-action.secondary:hover{border-color:var(--brand)}
+.p-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.p-note{border-left:3px solid var(--brand);background:var(--mist);padding:14px 17px;border-radius:0 10px 10px 0;font-size:13px;line-height:1.6;color:var(--muted)}
+.p-loading{padding:50px 0;color:var(--muted)}
+@media(max-width:750px){.p-grid{grid-template-columns:1fr}.p-hero{align-items:flex-start}.p-identity{align-items:flex-start}.p-avatar{width:58px;height:58px;border-radius:17px;font-size:23px}}
+</style></head>
+<body><nav><a href="index.html" class="logo">ecotekk</a><ul><li><a href="home.html">Find drop-off</a></li><li><a href="profile.html" aria-current="page">Profile</a></li><li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li></ul></nav>
+<main class="profile-wrap" id="profileRoot"><p class="p-loading" role="status">Loading your profile…</p></main>
+<script>
+(function(){
+const root=document.getElementById('profileRoot');
+function node(tag,cls,text){const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;}
+function row(parent,label,value){const el=node('div','p-row');el.append(node('span','',label),node('strong','',value));parent.append(el);return el.lastChild;}
+function link(text,href,secondary){const a=node('a','p-action'+(secondary?' secondary':''),text);a.href=href;return a;}
+EcotekkAuth.ready.then(function(){
+const u=EcotekkAuth.currentUser();
+if(!u){root.replaceChildren(node('div','p-eyebrow','YOUR ECOTEKK ACCOUNT'),node('h1','p-heading','Your space for greener choices'),node('p','p-sub','Sign in to view your account and keep exploring drop-off locations.'));const a=link('Log in / Sign up','login.html');a.style.marginTop='24px';root.append(a);return;}
+const title=node('div','p-eyebrow','MY ECOTEKK / DASHBOARD');
+const heading=node('h1','p-heading','Welcome back.');
+const intro=node('p','p-sub','Your account, your next drop-off, and your EcoTekk journey in one place.');
+const hero=node('section','p-hero');hero.setAttribute('aria-label','Account overview');
+const identity=node('div','p-identity');const avatar=node('div','p-avatar',(u.name||'E').trim().slice(0,1).toUpperCase());avatar.setAttribute('aria-hidden','true');
+const who=node('div');const name=node('h2','',u.name||'EcoTekk member');const email=node('p','',u.email||'');who.append(name,email);identity.append(avatar,who);
+const badge=node('span','p-pill',u.emailVerified?'✓ Email verified':'Email verification pending');hero.append(identity,badge);
+const grid=node('div','p-grid');
+const left=node('section','p-panel');left.append(node('div','p-eyebrow','START HERE'),node('h3','','Ready for your next drop-off?'),node('p','p-muted','Explore nearby e-waste drop-off options and open directions when you find a suitable location.'));
+const actions=node('div','p-actions');actions.append(link('Find a drop-off →','home.html'),link('Browse locations','ewaste.html?fallback=1',true));left.append(actions);
+const note=node('p','p-note','Points, disposal awards, and reward redemption are currently paused until a secure verification process is available. No unverified points will be displayed.');note.style.marginTop='24px';left.append(note);
+const right=node('section','p-panel');right.append(node('div','p-eyebrow','ACCOUNT DETAILS'),node('h3','','Your information'));
+const nameValue=row(right,'Display name',u.name||'—');row(right,'Email',u.email||'—');row(right,'Verification',u.emailVerified?'Verified':'Not verified');const cloud=row(right,'Cloud profile','Loading…');
+const signout=node('button','p-action secondary','Log out');signout.type='button';signout.style.marginTop='20px';signout.addEventListener('click',async function(){signout.disabled=true;signout.textContent='Logging out…';try{await EcotekkAuth.logout();location.href='index.html';}catch(e){signout.disabled=false;signout.textContent='Log out';cloud.textContent='Logout failed: '+(e.message||'Please retry');}});right.append(signout);
+grid.append(left,right);root.replaceChildren(title,heading,intro,hero,grid);
+try{EcotekkAuth.watchProfile(function(p){cloud.textContent=p?'Connected':'Profile not available yet';if(p&&typeof p.name==='string'&&p.name.trim()){name.textContent=p.name;nameValue.textContent=p.name;avatar.textContent=p.name.trim().slice(0,1).toUpperCase();}});}catch(e){cloud.textContent='Unable to load profile';}
+}).catch(function(e){root.replaceChildren(node('p','p-muted','Unable to load account: '+(e.message||'Please refresh.')));});
+})();
+</script></body></html>

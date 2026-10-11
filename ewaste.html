@@ -58,7 +58,9 @@
     <p class="tracker-footnote">DISTANCES ARE ESTIMATES · LISTINGS INSPIRED BY PUBLIC GOOGLE MAPS DATA · ALWAYS CALL AHEAD TO CONFIRM HOURS AND ACCEPTED MATERIALS</p>
 
     <style>
-        /* Additions only: preserve the original map and dark-mode filter in stylesheet.css. */
+        /* Keep Google Maps in its original light appearance in both site themes. */
+        .map-frame #mapFrame,
+        [data-theme="dark"] .map-frame #mapFrame { filter: none !important; }
         .map-location-actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:12px 20px; margin:0 auto; max-width:1100px; font-size:14px; }
         .map-location-actions[hidden] { display:none; }
         .map-location-actions a { margin-left:auto; color:var(--brand-dark); font-weight:700; }

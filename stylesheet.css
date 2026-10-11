@@ -815,3 +815,7 @@ h1 {
     }
     .site-signal { text-align: left; }
 }
+.map-frame #mapFrame,
+[data-theme="dark"] .map-frame #mapFrame {
+    filter: none !important;
+}
