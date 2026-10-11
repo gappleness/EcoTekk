@@ -38,6 +38,12 @@
     </div>
 
     <div class="map-location-actions" id="locationActions" hidden></div>
+    <div class="map-location-actions" id="mapControls">
+      <button type="button" id="showNearest" class="visit">Show nearest drop-off</button>
+      <button type="button" id="showAll" class="visit">Search all nearby drop-offs</button>
+      <button type="button" id="showMe" class="visit" hidden>You are here</button>
+      <span id="mapStatus" role="status" aria-live="polite"></span>
+    </div>
 
     <section class="tracker-results">
         <h2>Nearby sites</h2>
@@ -55,9 +61,12 @@
         .map-location-actions[hidden] { display:none; }
         .map-location-actions a { margin-left:auto; color:var(--brand-dark); font-weight:700; }
         .location-dot { width:12px; height:12px; background:#2684ff; border:2px solid white; box-shadow:0 0 0 2px #2684ff; border-radius:50%; flex:none; }
+        #mapControls button { cursor:pointer; border:0; padding:10px 13px; border-radius:8px; background:var(--brand-dark); color:white; font:inherit; font-weight:650; }
+        #mapControls button[hidden] {display:none;}
+        #mapStatus {font-size:13px; opacity:.8;}
         .site-links { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
         .site-links .visit { display:inline-flex; align-items:center; justify-content:center; }
-        .site-links .directions-link { background:var(--brand-dark); color:white; }
+        .site-links button { border:0; cursor:pointer; font:inherit; padding:10px 12px; border-radius:8px; }\n        .site-links .directions-link { background:var(--brand-dark); color:white; }
     </style>
     <script>
         (function () {
@@ -133,12 +142,46 @@
                     'Showing sites near Calamba, Laguna (default area). Allow location next time for results near you.';
             }
 
+            var mapFrame = document.getElementById('mapFrame');
+            var status = document.getElementById('mapStatus');
+            // OPTIONAL: Use a dedicated Google Maps Embed API key, not the Firebase apiKey.
+            // Enable Maps Embed API and configure billing/restrictions in Google Cloud first.
+            var MAPS_EMBED_API_KEY = '';
+            function showSite(s) {
+                mapFrame.src = 'https://www.google.com/maps?q=' +
+                    encodeURIComponent(s.name + ', ' + s.addr) + '&z=15&output=embed';
+                status.textContent = 'Showing: ' + s.name;
+            }
+            function showDirections(s) {
+                if (!MAPS_EMBED_API_KEY) {
+                    showSite(s);
+                    status.textContent = 'Site shown. For a road route, use Open route in Google Maps. In-site routes require a Maps Embed API key.';
+                    return;
+                }
+                var origin = fallback ? 'Calamba, Laguna, Philippines' : lat + ',' + lng;
+                mapFrame.src = 'https://www.google.com/maps/embed/v1/directions?key=' +
+                    encodeURIComponent(MAPS_EMBED_API_KEY) + '&origin=' + encodeURIComponent(origin) +
+                    '&destination=' + encodeURIComponent(s.name + ', ' + s.addr) + '&mode=driving';
+                status.textContent = 'Driving route to ' + s.name;
+            }
+            document.getElementById('showMe').hidden = fallback;
+            document.getElementById('showMe').onclick = function () {
+                mapFrame.src = 'https://www.google.com/maps?q=' + encodeURIComponent(lat + ',' + lng) + '&z=14&output=embed';
+                status.textContent = 'Showing your browser-detected position';
+            };
+            document.getElementById('showAll').onclick = function () {
+                mapFrame.src = 'https://www.google.com/maps?q=' +
+                    encodeURIComponent('e-waste recycling near ' + (fallback ? 'Calamba Laguna' : lat + ',' + lng)) + '&output=embed';
+                status.textContent = 'Searching Maps for nearby e-waste facilities; listings may differ from the demonstration cards';
+            };
             var ranked = SITES.map(function (s) {
                 return Object.assign({}, s, {
                     dist: haversineKm(originLat, originLng, s.lat, s.lng)
                 });
             }).sort(function (a, b) { return a.dist - b.dist; });
 
+            document.getElementById('showNearest').onclick = function () { showSite(ranked[0]); };
+            showSite(ranked[0]);
             function directionsUrl(s) {
                 var dest = encodeURIComponent(s.lat + ',' + s.lng);
                 return 'https://www.google.com/maps/dir/?api=1&destination=' + dest + '&travelmode=driving' +
@@ -174,11 +217,17 @@
                     '<button type="button" class="btn-dispose" data-site="' + s.name.replace(/"/g, '&quot;') + '">Disposal verification coming soon</button>' +
                     '</div>' +
                     '<div class="site-links"><a href="' + s.maps + '" target="_blank" rel="noopener" class="visit">View on Maps</a>' +
-                    '<a href="' + directionsUrl(s) + '" target="_blank" rel="noopener" class="visit directions-link">Get directions ↗</a></div>';
+                    '<button type="button" class="visit directions-link map-site-btn" data-index="' + ranked.indexOf(s) + '">Show on map</button>' +
+                    '<button type="button" class="visit directions-link route-site-btn" data-index="' + ranked.indexOf(s) + '">Route on this page</button>' +
+                    '<a href="' + directionsUrl(s) + '" target="_blank" rel="noopener" class="visit directions-link">Open route in Google Maps ↗</a></div>';
                 list.appendChild(card);
             });
 
             list.addEventListener('click', function (e) {
+                var mapBtn = e.target.closest('.map-site-btn');
+                if (mapBtn) { showSite(ranked[Number(mapBtn.getAttribute('data-index'))]); return; }
+                var routeBtn = e.target.closest('.route-site-btn');
+                if (routeBtn) { showDirections(ranked[Number(routeBtn.getAttribute('data-index'))]); return; }
                 var btn = e.target.closest('.btn-dispose');
                 if (!btn) return;
                 var session = EcotekkAuth.currentUser();
