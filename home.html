@@ -6,6 +6,10 @@
     <title>ecotekk — find drop-off</title>
     <link rel="stylesheet" href="stylesheet.css">
     <script src="theme.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="auth.js"></script>
 </head>
 <body>
@@ -85,7 +89,7 @@
                             else if (err.code === 2) msg += 'Position unavailable. Showing default area.';
                             else msg += 'Request timed out. Showing default area.';
                             showError(msg);
-                            setTimeout(function () {
+                            setTimeoutEcotekkAuth.ready.then(function () {
                                 window.location.href = 'ewaste.html?fallback=1';
                             }, 2000);
                         }, wait);
@@ -93,7 +97,7 @@
                     { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
                 );
             });
-        })();
+        });
     </script>
 </body>
 </html>

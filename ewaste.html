@@ -6,6 +6,10 @@
     <title>ecotekk — nearest drop-offs</title>
     <link rel="stylesheet" href="stylesheet.css">
     <script src="theme.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="auth.js"></script>
 </head>
 <body>
@@ -20,7 +24,7 @@
 
     <section class="tracker-hero">
         <h1>Nearest e-waste drop-offs</h1>
-        <p id="locLabel">Based on your current location. Open a site in Maps or mark a disposal to earn points.</p>
+        <p id="locLabel">Based on your current location. Open a site in Maps or learn about disposal verification.</p>
     </section>
 
     <div class="map-frame">
@@ -44,7 +48,7 @@
     <p class="tracker-footnote">DISTANCES ARE ESTIMATES · LISTINGS INSPIRED BY PUBLIC GOOGLE MAPS DATA · ALWAYS CALL AHEAD TO CONFIRM HOURS AND ACCEPTED MATERIALS</p>
 
     <script>
-        (function () {
+        EcotekkAuth.ready.then(function () {
             var user = EcotekkAuth.currentUser();
             var navAuth = document.getElementById('nav-auth');
             if (user) {
@@ -103,7 +107,7 @@
 
             if (!fallback) {
                 document.getElementById('locLabel').textContent =
-                    'Based on your live location (' + lat.toFixed(4) + ', ' + lng.toFixed(4) + '). Open a site in Maps or mark a disposal to earn points.';
+                    'Based on your live location (' + lat.toFixed(4) + ', ' + lng.toFixed(4) + '). Open a site in Maps or learn about disposal verification.';
                 document.getElementById('mapFrame').src =
                     'https://www.google.com/maps?q=e-waste+recycling+center/@' + lat + ',' + lng + ',13z&output=embed';
             } else {
@@ -143,7 +147,7 @@
                     '<span' + (s.open ? ' class="open"' : '') + '>' + s.hours + '</span>' +
                     '<span>' + s.phone + '</span>' +
                     '</div>' +
-                    '<button type="button" class="btn-dispose" data-site="' + s.name.replace(/"/g, '&quot;') + '">I disposed here (+25 pts)</button>' +
+                    '<button type="button" class="btn-dispose" data-site="' + s.name.replace(/"/g, '&quot;') + '">Disposal verification coming soon</button>' +
                     '</div>' +
                     '<a href="' + s.maps + '" target="_blank" rel="noopener" class="visit">View on Maps</a>';
                 list.appendChild(card);
@@ -160,12 +164,9 @@
                 }
                 if (btn.disabled) return;
                 var siteName = btn.getAttribute('data-site');
-                var total = EcotekkAuth.recordDisposal(session.name, siteName, 25);
-                btn.disabled = true;
-                btn.textContent = 'Logged · +25 pts';
-                alert('Thanks! You earned 25 points. Balance: ' + total + ' pts.');
+                alert('Disposal logging and points require verification by an authorized collection partner. This demo does not award real points yet.');
             });
-        })();
+        });
     </script>
 </body>
 </html>

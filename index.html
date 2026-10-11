@@ -6,6 +6,10 @@
     <title>ecotekk — e-waste tracker</title>
     <link rel="stylesheet" href="stylesheet.css">
     <script src="theme.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="auth.js"></script>
 </head>
 <body>
@@ -46,13 +50,13 @@
     </section>
 
     <script>
-        (function () {
+        EcotekkAuth.ready.then(function () {
             var user = EcotekkAuth.currentUser();
             var el = document.getElementById('nav-auth');
             if (user) {
                 el.innerHTML = '<a href="profile.html">Profile</a>';
             }
-        })();
+        });
     </script>
 </body>
 </html>

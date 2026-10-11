@@ -6,6 +6,10 @@
     <title>ecotekk — login</title>
     <link rel="stylesheet" href="stylesheet.css">
     <script src="theme.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="auth.js"></script>
 </head>
 <body>
@@ -30,6 +34,8 @@
                 <button type="submit" class="btn-primary" id="submitBtn">Login</button>
             </form>
 
+            <button type="button" class="btn-secondary" id="googleBtn" style="width:100%;margin-top:12px;">Continue with Google</button>
+            <button type="button" id="resetBtn" style="margin-top:12px;">Forgot password?</button>
             <p id="message" class="message"></p>
 
             <p class="auth-toggle">
@@ -40,78 +46,28 @@
     </section>
 
     <script>
-        (function () {
-            // Already logged in?
-            if (EcotekkAuth.currentUser()) {
-                window.location.href = 'profile.html';
-                return;
-            }
-
-            var mode = 'login'; // or 'signup'
-            var form = document.getElementById('authForm');
-            var nameInput = document.getElementById('nameInput');
-            var emailInput = document.getElementById('emailInput');
-            var passwordInput = document.getElementById('passwordInput');
-            var message = document.getElementById('message');
-            var title = document.getElementById('formTitle');
-            var subtitle = document.getElementById('formSubtitle');
-            var submitBtn = document.getElementById('submitBtn');
-            var toggleBtn = document.getElementById('toggleMode');
-            var toggleHint = document.getElementById('toggleHint');
-
-            function setMode(m) {
-                mode = m;
-                message.textContent = '';
-                message.classList.remove('success');
-                if (mode === 'signup') {
-                    title.textContent = 'Join Ecotekk';
-                    subtitle.textContent = 'Create an account to earn points for proper disposal';
-                    submitBtn.textContent = 'Sign up';
-                    emailInput.style.display = 'block';
-                    toggleHint.textContent = 'Already have an account?';
-                    toggleBtn.textContent = 'Sign in';
-                    passwordInput.setAttribute('autocomplete', 'new-password');
-                } else {
-                    title.textContent = 'Welcome back';
-                    subtitle.textContent = 'Sign in to track points and redeem rewards';
-                    submitBtn.textContent = 'Login';
-                    emailInput.style.display = 'none';
-                    toggleHint.textContent = 'New here?';
-                    toggleBtn.textContent = 'Create an account';
-                    passwordInput.setAttribute('autocomplete', 'current-password');
-                }
-            }
-
-            toggleBtn.addEventListener('click', function () {
-                setMode(mode === 'login' ? 'signup' : 'login');
-            });
-
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-                var name = nameInput.value;
-                var pass = passwordInput.value;
-                var email = emailInput.value;
-
-                var result = mode === 'signup'
-                    ? EcotekkAuth.signup(name, pass, email)
-                    : EcotekkAuth.login(name, pass);
-
-                if (!result.ok) {
-                    message.textContent = result.error;
-                    message.classList.remove('success');
-                    return;
-                }
-
-                message.textContent = mode === 'signup'
-                    ? 'Account created! Taking you to your profile…'
-                    : 'Welcome back, ' + result.user.name + '!';
-                message.classList.add('success');
-
-                setTimeout(function () {
-                    window.location.href = 'profile.html';
-                }, 600);
-            });
-        })();
+    EcotekkAuth.ready.then(function(){
+      if(EcotekkAuth.currentUser()){location.href='profile.html';return;}
+      const form=document.getElementById('authForm'), name=document.getElementById('nameInput'), email=document.getElementById('emailInput'), pass=document.getElementById('passwordInput'), msg=document.getElementById('message');
+      let signup=false;
+      name.style.display='none';name.required=false;
+      email.style.display='block';email.required=true;email.placeholder='Email address';
+      document.getElementById('toggleMode').onclick=function(){
+        signup=!signup;name.style.display=signup?'block':'none';name.required=signup;
+        document.getElementById('formTitle').textContent=signup?'Join Ecotekk':'Welcome back';
+        document.getElementById('submitBtn').textContent=signup?'Sign up':'Login';
+        document.getElementById('toggleHint').textContent=signup?'Already have an account?':'New here?';
+        this.textContent=signup?'Sign in':'Create an account';msg.textContent='';
+        pass.autocomplete=signup?'new-password':'current-password';
+      };
+      async function run(action){msg.classList.remove('success');msg.textContent='Please wait…';
+        try {await action();msg.classList.add('success');msg.textContent='Success! Opening profile…';location.href='profile.html';}
+        catch(e){msg.textContent=e.message || 'Something went wrong. Try again.';}
+      }
+      form.onsubmit=e=>{e.preventDefault();run(()=>signup?EcotekkAuth.signup(name.value,pass.value,email.value):EcotekkAuth.login(email.value,pass.value));};
+      document.getElementById('googleBtn').onclick=()=>run(()=>EcotekkAuth.googleLogin());
+      document.getElementById('resetBtn').onclick=async()=>{if(!email.value.trim()){msg.textContent='Enter your email first.';return;}try{await EcotekkAuth.resetPassword(email.value);msg.textContent='If an account exists for that email, check your inbox for a reset link.';}catch(e){msg.textContent=e.message;}};
+    });
     </script>
 </body>
 </html>

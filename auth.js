@@ -1,149 +1,40 @@
-(function (global) {
-  var USERS_KEY = 'ecotekk-users';
-  var SESSION_KEY = 'ecotekk-session';
-  var POINTS_KEY = 'ecotekk-points';
-  var HISTORY_KEY = 'ecotekk-history';
-
-  var REWARDS = [
-    { id: 'tote', name: 'Recycled tote bag', cost: 50, desc: 'Made from recovered PET bottles.' },
-    { id: 'plant', name: 'Seedling kit', cost: 80, desc: 'Grow a small indoor plant at home.' },
-    { id: 'voucher', name: '₱50 local cafe voucher', cost: 120, desc: 'Partner cafe near major drop-off hubs.' },
-    { id: 'powerbank', name: 'Refurbished power bank', cost: 250, desc: 'Certified refurbished, 10,000 mAh.' }
+/* Firebase compat SDK is loaded by the HTML before this file. */
+(function(global) {
+  const cfg = global.ECOTEKK_FIREBASE_CONFIG;
+  const configured = cfg && cfg.apiKey !== 'REPLACE_ME' && cfg.projectId !== 'REPLACE_ME';
+  let user = null;
+  let readyResolve;
+  const ready = new Promise(resolve => readyResolve = resolve);
+  const rewards = [
+    {id:'tote',name:'Recycled tote bag',cost:50,desc:'Made from recovered PET bottles.'},
+    {id:'plant',name:'Seedling kit',cost:80,desc:'Grow a small indoor plant at home.'},
+    {id:'voucher',name:'₱50 local cafe voucher',cost:120,desc:'Partner cafe near major drop-off hubs.'},
+    {id:'powerbank',name:'Refurbished power bank',cost:250,desc:'Certified refurbished, 10,000 mAh.'}
   ];
-
-  function load(key, fallback) {
-    try {
-      var raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch (e) {
-      return fallback;
-    }
+  let auth, db;
+  if (configured) {
+    firebase.initializeApp(cfg);
+    auth = firebase.auth(); db = firebase.firestore();
+    auth.onAuthStateChanged(u => {user=u; readyResolve(u);}, e=>{console.error(e);readyResolve(null);});
+  } else {readyResolve(null);}
+  function requireConfig(){if(!configured)throw new Error('Configure firebase-config.js first.');}
+  function profileRef(){if(!user)throw new Error('Please sign in.');return db.collection('profiles').doc(user.uid);}
+  async function ensureProfile(u, displayName) {
+    const ref=db.collection('profiles').doc(u.uid);
+    const snap=await ref.get();
+    if(!snap.exists) await ref.set({name:displayName || u.displayName || u.email.split('@')[0], email:u.email || '', createdAt:firebase.firestore.FieldValue.serverTimestamp()});
   }
-
-  function save(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
-  }
-
-  function getUsers() {
-    return load(USERS_KEY, []);
-  }
-
-  function getSession() {
-    return load(SESSION_KEY, null);
-  }
-
-  function setSession(user) {
-    if (!user) {
-      localStorage.removeItem(SESSION_KEY);
-      return;
-    }
-    save(SESSION_KEY, { name: user.name, email: user.email || '' });
-  }
-
-  function getPoints(name) {
-    var map = load(POINTS_KEY, {});
-    return map[name] || 0;
-  }
-
-  function setPoints(name, pts) {
-    var map = load(POINTS_KEY, {});
-    map[name] = Math.max(0, pts);
-    save(POINTS_KEY, map);
-  }
-
-  function addPoints(name, amount) {
-    setPoints(name, getPoints(name) + amount);
-    return getPoints(name);
-  }
-
-  function getHistory(name) {
-    var all = load(HISTORY_KEY, {});
-    return all[name] || [];
-  }
-
-  function pushHistory(name, entry) {
-    var all = load(HISTORY_KEY, {});
-    if (!all[name]) all[name] = [];
-    all[name].unshift(entry);
-    save(HISTORY_KEY, all);
-  }
-
-  function signup(name, password, email) {
-    name = (name || '').trim();
-    if (!name || !password) return { ok: false, error: 'Name and password are required.' };
-    var users = getUsers();
-    if (users.some(function (u) { return u.name.toLowerCase() === name.toLowerCase(); })) {
-      return { ok: false, error: 'That name is already taken.' };
-    }
-    var user = { name: name, password: password, email: (email || '').trim() };
-    users.push(user);
-    save(USERS_KEY, users);
-    setPoints(name, 0);
-    setSession(user);
-    return { ok: true, user: user };
-  }
-
-  function login(name, password) {
-    name = (name || '').trim();
-    var users = getUsers();
-    // Seed default demo user if empty
-    if (users.length === 0) {
-      users.push({ name: 'Bernard', password: 'Bernardpassword', email: '' });
-      save(USERS_KEY, users);
-      setPoints('Bernard', 30);
-    }
-    var user = users.find(function (u) {
-      return u.name.toLowerCase() === name.toLowerCase() && u.password === password;
-    });
-    if (!user) return { ok: false, error: 'Incorrect name or password.' };
-    setSession(user);
-    return { ok: true, user: user };
-  }
-
-  function logout() {
-    setSession(null);
-  }
-
-  function currentUser() {
-    return getSession();
-  }
-
-  function redeem(name, rewardId) {
-    var reward = REWARDS.find(function (r) { return r.id === rewardId; });
-    if (!reward) return { ok: false, error: 'Unknown reward.' };
-    var pts = getPoints(name);
-    if (pts < reward.cost) return { ok: false, error: 'Not enough points.' };
-    setPoints(name, pts - reward.cost);
-    pushHistory(name, {
-      type: 'redeem',
-      label: reward.name,
-      points: -reward.cost,
-      at: new Date().toISOString()
-    });
-    return { ok: true, remaining: getPoints(name), reward: reward };
-  }
-
-  function recordDisposal(name, siteName, pointsEarned) {
-    pointsEarned = pointsEarned || 25;
-    addPoints(name, pointsEarned);
-    pushHistory(name, {
-      type: 'disposal',
-      label: siteName || 'E-waste drop-off',
-      points: pointsEarned,
-      at: new Date().toISOString()
-    });
-    return getPoints(name);
-  }
-
-  global.EcotekkAuth = {
-    signup: signup,
-    login: login,
-    logout: logout,
-    currentUser: currentUser,
-    getPoints: getPoints,
-    redeem: redeem,
-    recordDisposal: recordDisposal,
-    getHistory: getHistory,
-    REWARDS: REWARDS
+  async function signup(name,password,email){requireConfig();if(!name.trim())throw new Error('Enter your name.');const c=await auth.createUserWithEmailAndPassword(email.trim(),password);await c.user.updateProfile({displayName:name.trim()});await ensureProfile(c.user,name.trim());await c.user.sendEmailVerification();return c.user;}
+  async function login(email,password){requireConfig();const c=await auth.signInWithEmailAndPassword(email.trim(),password);await ensureProfile(c.user);return c.user;}
+  async function googleLogin(){requireConfig();const provider=new firebase.auth.GoogleAuthProvider();const c=await auth.signInWithPopup(provider);await ensureProfile(c.user);return c.user;}
+  async function resetPassword(email){requireConfig();await auth.sendPasswordResetEmail(email.trim());}
+  async function logout(){requireConfig();await auth.signOut();}
+  function currentUser(){return user ? {uid:user.uid,name:user.displayName || (user.email||'').split('@')[0],email:user.email,emailVerified:user.emailVerified} : null;}
+  // No client-controlled cloud points: a verified server-side award/redemption workflow is required.
+  global.EcotekkAuth={ready,currentUser,signup,login,googleLogin,resetPassword,logout,REWARDS:rewards,
+    watchProfile(callback){requireConfig();return profileRef().onSnapshot(s=>callback(s.exists?s.data():null));},
+    getPoints(){return 0;},getHistory(){return [];},
+    async recordDisposal(){throw new Error('Point awards are disabled until a verified server-side disposal workflow is installed.');},
+    async redeem(){throw new Error('Reward redemption is disabled until a secure server-side workflow is installed.');}
   };
 })(window);
