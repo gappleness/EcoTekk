@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ecotekk — nearest drop-offs</title>
+    <link rel="stylesheet" href="stylesheet.css">
+    <script src="theme.js"></script>
+    <script src="auth.js"></script>
+</head>
+<body>
+    <nav>
+        <a href="index.html" class="logo">ecotekk</a>
+        <ul>
+            <li><a href="home.html">Find drop-off</a></li>
+            <li id="nav-auth"><a href="login.html">Login</a></li>
+            <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
+        </ul>
+    </nav>
+
+    <section class="tracker-hero">
+        <h1>Nearest e-waste drop-offs</h1>
+        <p id="locLabel">Based on your current location. Open a site in Maps or mark a disposal to earn points.</p>
+    </section>
+
+    <div class="map-frame">
+        <iframe
+            id="mapFrame"
+            src="https://www.google.com/maps?q=e-waste+recycling+center+Calamba+Laguna+Philippines&output=embed"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Map of nearby e-waste disposal sites">
+        </iframe>
+    </div>
+
+    <section class="tracker-results">
+        <h2>Nearby sites</h2>
+        <div class="results-meta" id="resultsMeta">Sorted by estimated distance · call ahead to confirm accepted materials</div>
+        <div class="sites" id="sitesList">
+            <!-- filled by script -->
+        </div>
+    </section>
+
+    <p class="tracker-footnote">DISTANCES ARE ESTIMATES · LISTINGS INSPIRED BY PUBLIC GOOGLE MAPS DATA · ALWAYS CALL AHEAD TO CONFIRM HOURS AND ACCEPTED MATERIALS</p>
+
+    <script>
+        (function () {
+            var user = EcotekkAuth.currentUser();
+            var navAuth = document.getElementById('nav-auth');
+            if (user) {
+                navAuth.innerHTML = '<a href="profile.html">Profile</a>';
+            }
+
+            var params = new URLSearchParams(window.location.search);
+            var lat = parseFloat(params.get('lat'));
+            var lng = parseFloat(params.get('lng'));
+            var fallback = params.get('fallback') === '1' || isNaN(lat) || isNaN(lng);
+
+            // Demo sites around Calamba / Laguna area (approx coords)
+            var SITES = [
+                {
+                    name: 'Maritrans Recycler, Inc.',
+                    addr: 'Unit 3 D M, 763 National Highway, Ragasa Warehouse, Parian, Calamba, 4027 Laguna',
+                    lat: 14.2115, lng: 121.1651,
+                    phone: '+63 49 545 9055',
+                    hours: 'Open · closes 6:15 PM',
+                    open: true,
+                    maps: 'https://www.google.com/maps/search/?api=1&query=Maritrans+Recycler+Inc&query_place_id=ChIJHexikUtivTMR1stm1Y_BK-s'
+                },
+                {
+                    name: 'Integrated Recycling Industries Philippines, Inc.',
+                    addr: 'C4-5b, Carmelray Industrial Park 2, Calamba, 4027 Laguna',
+                    lat: 14.1890, lng: 121.1480,
+                    phone: '+63 49 545 9572',
+                    hours: 'Hours vary — call ahead',
+                    open: false,
+                    maps: 'https://www.google.com/maps/search/?api=1&query=Integrated+Recycling+Industries+Philippines&query_place_id=ChIJAQAAUKJjvTMRlZyzhXOUPj4'
+                },
+                {
+                    name: 'Envirocycle Philippines Inc.',
+                    addr: 'Silangan Industrial Park–Calamba, C. A. Yulo Ave, Canlubang, Calamba, 4028 Laguna',
+                    lat: 14.2050, lng: 121.1200,
+                    phone: '+63 917 834 9596',
+                    hours: 'Open · closes 4:00 PM',
+                    open: true,
+                    maps: 'https://www.google.com/maps/search/?api=1&query=Envirocycle+Philippines+Inc&query_place_id=ChIJPapStp9jvTMRPxScDV1wg9w'
+                }
+            ];
+
+            function haversineKm(aLat, aLng, bLat, bLng) {
+                var R = 6371;
+                var dLat = (bLat - aLat) * Math.PI / 180;
+                var dLng = (bLng - aLng) * Math.PI / 180;
+                var x =
+                    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(aLat * Math.PI / 180) * Math.cos(bLat * Math.PI / 180) *
+                    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+                return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+            }
+
+            var originLat = fallback ? 14.2110 : lat;
+            var originLng = fallback ? 121.1650 : lng;
+
+            if (!fallback) {
+                document.getElementById('locLabel').textContent =
+                    'Based on your live location (' + lat.toFixed(4) + ', ' + lng.toFixed(4) + '). Open a site in Maps or mark a disposal to earn points.';
+                document.getElementById('mapFrame').src =
+                    'https://www.google.com/maps?q=e-waste+recycling+center/@' + lat + ',' + lng + ',13z&output=embed';
+            } else {
+                document.getElementById('locLabel').textContent =
+                    'Showing sites near Calamba, Laguna (default area). Allow location next time for results near you.';
+            }
+
+            var ranked = SITES.map(function (s) {
+                return Object.assign({}, s, {
+                    dist: haversineKm(originLat, originLng, s.lat, s.lng)
+                });
+            }).sort(function (a, b) { return a.dist - b.dist; });
+
+            function barCount(km) {
+                if (km < 4) return 4;
+                if (km < 8) return 3;
+                if (km < 15) return 2;
+                return 1;
+            }
+
+            var list = document.getElementById('sitesList');
+            ranked.forEach(function (s) {
+                var bars = '';
+                var n = barCount(s.dist);
+                for (var i = 0; i < 4; i++) {
+                    bars += '<span' + (i < n ? ' class="on"' : '') + '></span>';
+                }
+                var card = document.createElement('div');
+                card.className = 'site-card';
+                card.innerHTML =
+                    '<div class="site-signal"><div class="bars">' + bars + '</div>' +
+                    s.dist.toFixed(1) + ' km</div>' +
+                    '<div class="site-body">' +
+                    '<h2>' + s.name + '</h2>' +
+                    '<p class="addr">' + s.addr + '</p>' +
+                    '<div class="meta">' +
+                    '<span' + (s.open ? ' class="open"' : '') + '>' + s.hours + '</span>' +
+                    '<span>' + s.phone + '</span>' +
+                    '</div>' +
+                    '<button type="button" class="btn-dispose" data-site="' + s.name.replace(/"/g, '&quot;') + '">I disposed here (+25 pts)</button>' +
+                    '</div>' +
+                    '<a href="' + s.maps + '" target="_blank" rel="noopener" class="visit">View on Maps</a>';
+                list.appendChild(card);
+            });
+
+            list.addEventListener('click', function (e) {
+                var btn = e.target.closest('.btn-dispose');
+                if (!btn) return;
+                var session = EcotekkAuth.currentUser();
+                if (!session) {
+                    alert('Please log in to earn points for disposals.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                if (btn.disabled) return;
+                var siteName = btn.getAttribute('data-site');
+                var total = EcotekkAuth.recordDisposal(session.name, siteName, 25);
+                btn.disabled = true;
+                btn.textContent = 'Logged · +25 pts';
+                alert('Thanks! You earned 25 points. Balance: ' + total + ' pts.');
+            });
+        })();
+    </script>
+</body>
+</html>

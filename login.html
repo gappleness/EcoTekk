@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ecotekk — login</title>
+    <link rel="stylesheet" href="stylesheet.css">
+    <script src="theme.js"></script>
+    <script src="auth.js"></script>
+</head>
+<body>
+    <nav>
+        <a href="index.html" class="logo">ecotekk</a>
+        <ul>
+            <li><a href="home.html">Find drop-off</a></li>
+            <li><a href="login.html">Login</a></li>
+            <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
+        </ul>
+    </nav>
+
+    <section class="login-section">
+        <div class="login-box">
+            <h1 id="formTitle">Welcome back</h1>
+            <p class="subtitle" id="formSubtitle">Sign in to track points and redeem rewards</p>
+
+            <form id="authForm">
+                <input type="text" id="nameInput" placeholder="Name" autocomplete="username" required />
+                <input type="email" id="emailInput" placeholder="Email (optional)" style="display:none;" autocomplete="email" />
+                <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password" required />
+                <button type="submit" class="btn-primary" id="submitBtn">Login</button>
+            </form>
+
+            <p id="message" class="message"></p>
+
+            <p class="auth-toggle">
+                <span id="toggleHint">New here?</span>
+                <button type="button" id="toggleMode">Create an account</button>
+            </p>
+        </div>
+    </section>
+
+    <script>
+        (function () {
+            // Already logged in?
+            if (EcotekkAuth.currentUser()) {
+                window.location.href = 'profile.html';
+                return;
+            }
+
+            var mode = 'login'; // or 'signup'
+            var form = document.getElementById('authForm');
+            var nameInput = document.getElementById('nameInput');
+            var emailInput = document.getElementById('emailInput');
+            var passwordInput = document.getElementById('passwordInput');
+            var message = document.getElementById('message');
+            var title = document.getElementById('formTitle');
+            var subtitle = document.getElementById('formSubtitle');
+            var submitBtn = document.getElementById('submitBtn');
+            var toggleBtn = document.getElementById('toggleMode');
+            var toggleHint = document.getElementById('toggleHint');
+
+            function setMode(m) {
+                mode = m;
+                message.textContent = '';
+                message.classList.remove('success');
+                if (mode === 'signup') {
+                    title.textContent = 'Join Ecotekk';
+                    subtitle.textContent = 'Create an account to earn points for proper disposal';
+                    submitBtn.textContent = 'Sign up';
+                    emailInput.style.display = 'block';
+                    toggleHint.textContent = 'Already have an account?';
+                    toggleBtn.textContent = 'Sign in';
+                    passwordInput.setAttribute('autocomplete', 'new-password');
+                } else {
+                    title.textContent = 'Welcome back';
+                    subtitle.textContent = 'Sign in to track points and redeem rewards';
+                    submitBtn.textContent = 'Login';
+                    emailInput.style.display = 'none';
+                    toggleHint.textContent = 'New here?';
+                    toggleBtn.textContent = 'Create an account';
+                    passwordInput.setAttribute('autocomplete', 'current-password');
+                }
+            }
+
+            toggleBtn.addEventListener('click', function () {
+                setMode(mode === 'login' ? 'signup' : 'login');
+            });
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var name = nameInput.value;
+                var pass = passwordInput.value;
+                var email = emailInput.value;
+
+                var result = mode === 'signup'
+                    ? EcotekkAuth.signup(name, pass, email)
+                    : EcotekkAuth.login(name, pass);
+
+                if (!result.ok) {
+                    message.textContent = result.error;
+                    message.classList.remove('success');
+                    return;
+                }
+
+                message.textContent = mode === 'signup'
+                    ? 'Account created! Taking you to your profile…'
+                    : 'Welcome back, ' + result.user.name + '!';
+                message.classList.add('success');
+
+                setTimeout(function () {
+                    window.location.href = 'profile.html';
+                }, 600);
+            });
+        })();
+    </script>
+</body>
+</html>

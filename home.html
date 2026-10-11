@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ecotekk — find drop-off</title>
+    <link rel="stylesheet" href="stylesheet.css">
+    <script src="theme.js"></script>
+    <script src="auth.js"></script>
+</head>
+<body>
+    <nav>
+        <a href="index.html" class="logo">ecotekk</a>
+        <ul>
+            <li><a href="home.html">Find drop-off</a></li>
+            <li id="nav-auth"><a href="login.html">Login</a></li>
+            <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
+        </ul>
+    </nav>
+
+    <section class="tracker-action">
+        <h1>Find the nearest e-waste drop-off</h1>
+        <p class="slogan">We'll use your current location to show certified handlers nearby. One tap is all it takes.</p>
+        <button type="button" id="locateBtn" class="getStarted big-locate">Locate nearest drop-off</button>
+        <p id="geoError" class="empty-note" style="margin-top:16px;display:none;"></p>
+    </section>
+
+    <div class="loading-screen" id="loadingScreen" aria-live="polite">
+        <div class="spinner" role="status"></div>
+        <h2>Tracking your location…</h2>
+        <p>Finding the nearest certified e-waste disposal sites near you.</p>
+    </div>
+
+    <script>
+        (function () {
+            var user = EcotekkAuth.currentUser();
+            var el = document.getElementById('nav-auth');
+            if (user) {
+                el.innerHTML = '<a href="profile.html">Profile</a>';
+            }
+
+            var btn = document.getElementById('locateBtn');
+            var loading = document.getElementById('loadingScreen');
+            var errEl = document.getElementById('geoError');
+
+            function showError(msg) {
+                loading.classList.remove('active');
+                btn.disabled = false;
+                errEl.style.display = 'block';
+                errEl.textContent = msg;
+            }
+
+            btn.addEventListener('click', function () {
+                errEl.style.display = 'none';
+                if (!navigator.geolocation) {
+                    showError('Geolocation is not supported by your browser. You can still browse sites near Calamba, Laguna.');
+                    setTimeout(function () {
+                        window.location.href = 'ewaste.html?fallback=1';
+                    }, 1800);
+                    return;
+                }
+
+                btn.disabled = true;
+                loading.classList.add('active');
+
+                var minShow = 1200; // slight loading screen so it feels intentional
+                var started = Date.now();
+
+                navigator.geolocation.getCurrentPosition(
+                    function (pos) {
+                        var lat = pos.coords.latitude;
+                        var lng = pos.coords.longitude;
+                        var wait = Math.max(0, minShow - (Date.now() - started));
+                        setTimeout(function () {
+                            window.location.href =
+                                'ewaste.html?lat=' + encodeURIComponent(lat) +
+                                '&lng=' + encodeURIComponent(lng);
+                        }, wait);
+                    },
+                    function (err) {
+                        var wait = Math.max(0, minShow - (Date.now() - started));
+                        setTimeout(function () {
+                            var msg = 'Could not get your location. ';
+                            if (err.code === 1) msg += 'Please allow location access and try again.';
+                            else if (err.code === 2) msg += 'Position unavailable. Showing default area.';
+                            else msg += 'Request timed out. Showing default area.';
+                            showError(msg);
+                            setTimeout(function () {
+                                window.location.href = 'ewaste.html?fallback=1';
+                            }, 2000);
+                        }, wait);
+                    },
+                    { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+                );
+            });
+        })();
+    </script>
+</body>
+</html>
