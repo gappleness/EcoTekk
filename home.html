@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ecotekk — find drop-off</title>
+    <title>EcoTekk | Find a Drop-Off</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
+    <meta name="theme-color" content="#166747">
     <link rel="stylesheet" href="stylesheet.css">
     <script src="theme.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -76,8 +78,7 @@
                         setTimeout(function () {
                             window.location.href =
                                 'ewaste.html?lat=' + encodeURIComponent(lat) +
-                                '&lng=' + encodeURIComponent(lng) +
-                                '&accuracy=' + encodeURIComponent(Math.round(pos.coords.accuracy));
+                                '&lng=' + encodeURIComponent(lng);
                         }, wait);
                     },
                     function (err) {
