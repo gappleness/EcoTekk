@@ -38,11 +38,13 @@
     </div>
 
     <div class="map-location-actions" id="locationActions" hidden></div>
-    <div class="map-location-actions" id="mapControls">
-      <button type="button" id="showNearest" class="visit">Show nearest drop-off</button>
-      <button type="button" id="showAll" class="visit">Search all nearby drop-offs</button>
-      <button type="button" id="showMe" class="visit" hidden>You are here</button>
-      <span id="mapStatus" role="status" aria-live="polite"></span>
+    <div class="map-location-actions ecotekk-toolbar" id="mapControls" aria-label="Map controls">
+      <button type="button" id="showNearest" class="visit">Nearest drop-off</button>
+      <button type="button" id="showAll" class="visit">Explore nearby</button>
+      <button type="button" id="showMe" class="visit" hidden>◎ You are here</button>
+      </div>
+    <div class="ecotekk-map-status" id="mapStatus" role="status" aria-live="polite"></div>
+    <div hidden>
     </div>
 
     <section class="tracker-results">
@@ -66,7 +68,19 @@
         #mapStatus {font-size:13px; opacity:.8;}
         .site-links { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
         .site-links .visit { display:inline-flex; align-items:center; justify-content:center; }
-        .site-links button { border:0; cursor:pointer; font:inherit; padding:10px 12px; border-radius:8px; }\n        .site-links .directions-link { background:var(--brand-dark); color:white; }
+        .site-links button { border:0; cursor:pointer; font:inherit; padding:10px 12px; border-radius:8px; }
+        .site-links .directions-link { background:var(--brand-dark); color:white; }
+        .ecotekk-toolbar { max-width:1100px; gap:8px; padding:16px 20px 6px; }
+        .ecotekk-toolbar button { transition:transform .15s ease,opacity .15s ease; }
+        .ecotekk-toolbar button:hover { transform:translateY(-1px); opacity:.9; }
+        .ecotekk-map-status {max-width:1100px;margin:0 auto;padding:6px 20px 16px;font-size:13px;opacity:.8;min-height:18px;}
+        .site-links { margin-top:12px; }
+        .site-links .visit { text-decoration:none; border-radius:8px; min-height:40px; box-sizing:border-box; padding:10px 14px; }
+        .site-links .map-site-btn { background:transparent; border:1px solid currentColor; color:inherit; }
+        .site-links .directions-link { background:var(--brand-dark); color:white; }
+        .site-links .visit:hover {opacity:.85;}
+        @media(max-width:600px) { .ecotekk-toolbar button {flex:1 1 140px;} .site-links .visit {flex:1 1 140px;} }
+        
     </style>
     <script>
         (function () {
@@ -87,7 +101,7 @@
                     addr: 'Unit 3 D M, 763 National Highway, Ragasa Warehouse, Parian, Calamba, 4027 Laguna',
                     lat: 14.2115, lng: 121.1651,
                     phone: '+63 49 545 9055',
-                    hours: 'Open · closes 6:15 PM',
+                    hours: 'Call to confirm hours',
                     open: true,
                     maps: 'https://www.google.com/maps/search/?api=1&query=Maritrans+Recycler+Inc&query_place_id=ChIJHexikUtivTMR1stm1Y_BK-s'
                 },
@@ -105,7 +119,7 @@
                     addr: 'Silangan Industrial Park–Calamba, C. A. Yulo Ave, Canlubang, Calamba, 4028 Laguna',
                     lat: 14.2050, lng: 121.1200,
                     phone: '+63 917 834 9596',
-                    hours: 'Open · closes 4:00 PM',
+                    hours: 'Call to confirm hours',
                     open: true,
                     maps: 'https://www.google.com/maps/search/?api=1&query=Envirocycle+Philippines+Inc&query_place_id=ChIJPapStp9jvTMRPxScDV1wg9w'
                 }
@@ -218,8 +232,8 @@
                     '</div>' +
                     '<div class="site-links"><a href="' + s.maps + '" target="_blank" rel="noopener" class="visit">View on Maps</a>' +
                     '<button type="button" class="visit directions-link map-site-btn" data-index="' + ranked.indexOf(s) + '">Show on map</button>' +
-                    '<button type="button" class="visit directions-link route-site-btn" data-index="' + ranked.indexOf(s) + '">Route on this page</button>' +
-                    '<a href="' + directionsUrl(s) + '" target="_blank" rel="noopener" class="visit directions-link">Open route in Google Maps ↗</a></div>';
+                    
+                    '<a href="' + directionsUrl(s) + '" target="_blank" rel="noopener" class="visit directions-link">Get directions ↗</a></div>';
                 list.appendChild(card);
             });
 
