@@ -37,13 +37,6 @@
         </iframe>
     </div>
 
-    <div id="youAreHere" class="map-frame" style="margin-top:0;display:none;">
-        <p style="font-weight:700;color:#1976d2;">● You are here (estimated)</p>
-        <p id="accuracyLabel" aria-live="polite"></p>
-        <a id="myLocationLink" target="_blank" rel="noopener noreferrer">Open your detected position in Google Maps</a>
-        <p style="font-size:13px;">The pin shows your browser’s estimated position, not guaranteed exact GPS coordinates.</p>
-    </div>
-
     <section class="tracker-results">
         <h2>Nearby sites</h2>
         <div class="results-meta" id="resultsMeta">Sorted by estimated distance · call ahead to confirm accepted materials</div>
@@ -63,8 +56,7 @@
             var params = new URLSearchParams(window.location.search);
             var lat = parseFloat(params.get('lat'));
             var lng = parseFloat(params.get('lng'));
-            var accuracy = parseFloat(params.get('accuracy'));
-            var fallback = params.get('fallback') === '1' || !Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat)>90 || Math.abs(lng)>180;
+            var fallback = params.get('fallback') === '1' || isNaN(lat) || isNaN(lng);
 
             // Demo sites around Calamba / Laguna area (approx coords)
             var SITES = [
@@ -115,14 +107,7 @@
                 document.getElementById('locLabel').textContent =
                     'Based on your live location (' + lat.toFixed(4) + ', ' + lng.toFixed(4) + '). Open a site in Maps or learn about disposal verification.';
                 document.getElementById('mapFrame').src =
-                    'https://www.openstreetmap.org/export/embed.html?bbox=' +
-                    encodeURIComponent((lng-0.012)+','+(lat-0.008)+','+(lng+0.012)+','+(lat+0.008)) +
-                    '&layer=mapnik&marker=' + encodeURIComponent(lat+','+lng);
-                document.getElementById('youAreHere').style.display = 'block';
-                document.getElementById('accuracyLabel').textContent = Number.isFinite(accuracy) && accuracy >= 0
-                    ? 'Browser-reported accuracy: approximately ±' + Math.round(accuracy) + ' metres.'
-                    : 'Accuracy estimate unavailable.';
-                document.getElementById('myLocationLink').href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lat+','+lng);
+                    'https://www.google.com/maps?q=e-waste+recycling+center/@' + lat + ',' + lng + ',13z&output=embed';
             } else {
                 document.getElementById('locLabel').textContent =
                     'Showing sites near Calamba, Laguna (default area). Allow location next time for results near you.';
