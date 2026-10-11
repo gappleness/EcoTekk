@@ -48,12 +48,10 @@
     <p class="tracker-footnote">DISTANCES ARE ESTIMATES · LISTINGS INSPIRED BY PUBLIC GOOGLE MAPS DATA · ALWAYS CALL AHEAD TO CONFIRM HOURS AND ACCEPTED MATERIALS</p>
 
     <script>
-        EcotekkAuth.ready.then(function () {
-            var user = EcotekkAuth.currentUser();
-            var navAuth = document.getElementById('nav-auth');
-            if (user) {
-                navAuth.innerHTML = '<a href="profile.html">Profile</a>';
-            }
+        (function () {
+            EcotekkAuth.ready.then(function () {
+                if (EcotekkAuth.currentUser()) document.getElementById('nav-auth').innerHTML = '<a href="profile.html">Profile</a>';
+            });
 
             var params = new URLSearchParams(window.location.search);
             var lat = parseFloat(params.get('lat'));
@@ -166,7 +164,7 @@
                 var siteName = btn.getAttribute('data-site');
                 alert('Disposal logging and points require verification by an authorized collection partner. This demo does not award real points yet.');
             });
-        });
+        })();
     </script>
 </body>
 </html>

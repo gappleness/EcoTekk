@@ -1,7 +1,7 @@
 /* Firebase compat SDK is loaded by the HTML before this file. */
 (function(global) {
   const cfg = global.ECOTEKK_FIREBASE_CONFIG;
-  const configured = cfg && cfg.apiKey !== 'REPLACE_ME' && cfg.projectId !== 'REPLACE_ME';
+  const configured = cfg && cfg.apiKey && cfg.projectId && cfg.appId && !Object.values(cfg).some(v => typeof v === 'string' && (v.includes('REPLACE_ME') || v.includes('YOUR_')));
   let user = null;
   let readyResolve;
   const ready = new Promise(resolve => readyResolve = resolve);
