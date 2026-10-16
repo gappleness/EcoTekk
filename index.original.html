@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoTekk | E-Waste Made Simple</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
+    <meta name="theme-color" content="#166747">
+    <link rel="stylesheet" href="stylesheet.css">
+    <script src="theme.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+</head>
+<body>
+    <nav>
+        <a href="index.html" class="logo">EcoTekk</a>
+        <ul>
+            <li id="nav-auth"><a href="login.html">Login</a></li>
+            <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
+        </ul>
+    </nav>
+
+    <section class="tuff">
+        <div class="Main">
+            <span class="eyebrow">ONE TAP · REAL-TIME · CERTIFIED</span>
+            <h1>Ecotekk</h1>
+            <div class="slogan">Find the nearest certified e-waste drop-off in seconds. Dispose properly, earn points, redeem rewards.</div>
+            <a href="home.html" class="getStarted">Find nearest drop-off</a>
+        </div>
+    </section>
+
+    <section class="bottom-ahh">
+        <p>How it works</p>
+        <div class="features">
+            <div class="feature">
+                <h3>Locate</h3>
+                <p>One tap uses your location to surface the closest certified e-waste handlers on a map.</p>
+            </div>
+            <div class="feature">
+                <h3>Dispose</h3>
+                <p>Drop off phones, batteries, cables, and more at a verified site — not the regular bin.</p>
+            </div>
+            <div class="feature">
+                <h3>Earn</h3>
+                <p>Log a proper disposal to earn points you can exchange for eco-friendly rewards.</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        EcotekkAuth.ready.then(function () {
+            var user = EcotekkAuth.currentUser();
+            var el = document.getElementById('nav-auth');
+            if (user) {
+                el.innerHTML = '<a href="profile.html">Profile</a>';
+            }
+        });
+    </script>
+</body>
+</html>

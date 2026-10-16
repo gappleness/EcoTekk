@@ -7,6 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
     <meta name="theme-color" content="#166747">
     <link rel="stylesheet" href="stylesheet.css">
+<link rel="stylesheet" href="experience.css">
     <script src="theme.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -15,9 +16,9 @@
     <script src="auth.js"></script>
 </head>
 <body>
-    <nav>
+    <nav class="et-nav">
         <a href="index.html" class="logo">EcoTekk</a>
-        <ul>
+        <ul><li><a href="explore.html">Explore a device</a></li><li><a href="library.html">Guides</a></li>
             <li id="nav-auth"><a href="login.html">Login</a></li>
             <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
         </ul>
@@ -25,7 +26,7 @@
 
     <section class="tracker-action">
         <h1>Find the nearest e-waste drop-off</h1>
-        <p class="slogan">We'll use your current location to show certified handlers nearby. One tap is all it takes.</p>
+        <p class="slogan">We'll use your current location to show drop-off options nearby. One tap is all it takes.</p>
         <button type="button" id="locateBtn" class="getStarted big-locate">Locate nearest drop-off</button>
         <p id="geoError" class="empty-note" role="alert" style="margin-top:16px;display:none;"></p>
         <p><a href="ewaste.html?fallback=1">Browse demonstration drop-offs without location</a></p>
@@ -34,7 +35,7 @@
     <div class="loading-screen" id="loadingScreen" aria-live="polite">
         <div class="spinner" role="status"></div>
         <h2>Tracking your location…</h2>
-        <p>Finding the nearest certified e-waste disposal sites near you.</p>
+        <p>Finding the nearby e-waste options near you.</p>
     </div>
 
     <script>
@@ -96,5 +97,6 @@
             });
         })();
     </script>
+<script src="experience.js" defer></script>
 </body>
 </html>

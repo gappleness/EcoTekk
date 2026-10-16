@@ -7,6 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
     <meta name="theme-color" content="#166747">
     <link rel="stylesheet" href="stylesheet.css">
+<link rel="stylesheet" href="experience.css">
     <script src="theme.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -15,9 +16,9 @@
     <script src="auth.js"></script>
 </head>
 <body>
-    <nav>
+    <nav class="et-nav">
         <a href="index.html" class="logo">EcoTekk</a>
-        <ul>
+        <ul><li><a href="explore.html">Explore a device</a></li><li><a href="library.html">Guides</a></li>
             <li><a href="login.html">Login</a></li>
             <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
         </ul>
@@ -70,5 +71,6 @@
       document.getElementById('resetBtn').onclick=async()=>{if(!email.value.trim()){msg.textContent='Enter your email first.';return;}try{await EcotekkAuth.resetPassword(email.value);msg.textContent='If an account exists for that email, check your inbox for a reset link.';}catch(e){msg.textContent=e.message;}};
     });
     </script>
+<script src="experience.js" defer></script>
 </body>
 </html>

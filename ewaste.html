@@ -7,6 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
     <meta name="theme-color" content="#166747">
     <link rel="stylesheet" href="stylesheet.css">
+<link rel="stylesheet" href="experience.css">
     <script src="theme.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -15,9 +16,9 @@
     <script src="auth.js"></script>
 </head>
 <body>
-    <nav>
+    <nav class="et-nav">
         <a href="index.html" class="logo">EcoTekk</a>
-        <ul>
+        <ul><li><a href="explore.html">Explore a device</a></li><li><a href="library.html">Guides</a></li>
             <li id="nav-auth"><a href="login.html">Login</a></li>
             <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
         </ul>
@@ -231,7 +232,7 @@
                     '<span' + (s.open ? ' class="open"' : '') + '>' + s.hours + '</span>' +
                     '<span>' + s.phone + '</span>' +
                     '</div>' +
-                    '<button type="button" class="btn-dispose" data-site="' + s.name.replace(/"/g, '&quot;') + '">Disposal verification coming soon</button>' +
+                    '<p class="empty-note">Confirm accepted materials directly with the facility before visiting.</p>' +
                     '</div>' +
                     '<div class="site-links"><a href="' + s.maps + '" target="_blank" rel="noopener" class="visit">View on Maps</a>' +
                     '<button type="button" class="visit directions-link map-site-btn" data-index="' + ranked.indexOf(s) + '">Show on map</button>' +
@@ -245,19 +246,10 @@
                 if (mapBtn) { showSite(ranked[Number(mapBtn.getAttribute('data-index'))]); return; }
                 var routeBtn = e.target.closest('.route-site-btn');
                 if (routeBtn) { showDirections(ranked[Number(routeBtn.getAttribute('data-index'))]); return; }
-                var btn = e.target.closest('.btn-dispose');
-                if (!btn) return;
-                var session = EcotekkAuth.currentUser();
-                if (!session) {
-                    alert('Please log in to earn points for disposals.');
-                    window.location.href = 'login.html';
-                    return;
-                }
-                if (btn.disabled) return;
-                var siteName = btn.getAttribute('data-site');
-                alert('Disposal logging and points require verification by an authorized collection partner. This demo does not award real points yet.');
+
             });
         })();
     </script>
+<script src="experience.js" defer></script>
 </body>
 </html>

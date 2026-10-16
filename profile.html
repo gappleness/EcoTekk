@@ -8,6 +8,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
     <meta name="theme-color" content="#166747">
     <link rel="stylesheet" href="stylesheet.css">
+<link rel="stylesheet" href="experience.css">
     <script src="theme.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -220,8 +221,8 @@
 </head>
 
 <body>
-    <nav><a href="index.html" class="logo">EcoTekk</a>
-        <ul>
+    <nav class="et-nav"><a href="index.html" class="logo">EcoTekk</a>
+        <ul><li><a href="explore.html">Explore a device</a></li><li><a href="library.html">Guides</a></li>
             <li><a href="profile.html" aria-current="page">Profile</a></li>
             <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
         </ul>
@@ -240,15 +241,15 @@
                 if (!u) {root.replaceChildren(node('div', 'p-eyebrow', 'YOUR ECOTEKK ACCOUNT'), node('h1', 'p-heading', 'Your space for greener choices'), node('p', 'p-sub', 'Sign in to view your account and keep exploring drop-off locations.')); const a = link('Log in / Sign up', 'login.html'); a.style.marginTop = '24px'; root.append(a); return;}
                 const title = node('div', 'p-eyebrow', 'MY ECOTEKK / DASHBOARD');
                 const heading = node('h1', 'p-heading', 'Welcome back.');
-                const intro = node('p', 'p-sub', 'Your account, your next drop-off, and your EcoTekk journey in one place.');
+                const intro = node('p', 'p-sub', 'Your account and practical technology options in one place.');
                 const hero = node('section', 'p-hero'); hero.setAttribute('aria-label', 'Account overview');
                 const identity = node('div', 'p-identity'); const avatar = node('div', 'p-avatar', (u.name || 'E').trim().slice(0, 1).toUpperCase()); avatar.setAttribute('aria-hidden', 'true');
                 const who = node('div'); const name = node('h2', '', u.name || 'EcoTekk member'); const email = node('p', '', u.email || ''); who.append(name, email); identity.append(avatar, who);
                 const badge = node('span', 'p-pill', u.emailVerified ? '✓ Email verified' : 'Email verification pending'); hero.append(identity, badge);
                 const grid = node('div', 'p-grid');
-                const left = node('section', 'p-panel'); left.append(node('div', 'p-eyebrow', 'START HERE'), node('h3', '', 'Ready for your next drop-off?'), node('p', 'p-muted', 'Explore nearby e-waste drop-off options and open directions when you find a suitable location.'));
-                const actions = node('div', 'p-actions'); actions.append(link('Find a drop-off →', 'home.html'), link('Browse locations', 'ewaste.html?fallback=1', true)); left.append(actions);
-                const note = node('p', 'p-note', 'Points, disposal awards, and reward redemption are currently paused until a secure verification process is available. No unverified points will be displayed.'); note.style.marginTop = '24px'; left.append(note);
+                const left = node('section', 'p-panel'); left.append(node('div', 'p-eyebrow', 'START HERE'), node('h3', '', 'Find your next step.'), node('p', 'p-muted', 'Find options for a device, get relevant support, or access the existing drop-off finder.'));
+                const actions = node('div', 'p-actions'); actions.append(link('Explore a device →', 'explore.html'), link('Find a drop-off', 'home.html', true)); left.append(actions);
+                const note = node('p', 'p-note', 'Device recommendations are educational. Confirm availability and acceptance directly with a provider before visiting.'); note.style.marginTop = '24px'; left.append(note);
                 const right = node('section', 'p-panel'); right.append(node('div', 'p-eyebrow', 'ACCOUNT DETAILS'), node('h3', '', 'Your information'));
                 const nameValue = row(right, 'Display name', u.name || '—'); row(right, 'Email', u.email || '—'); row(right, 'Verification', u.emailVerified ? 'Verified' : 'Not verified'); const cloud = row(right, 'Cloud profile', 'Loading…');
                 const signout = node('button', 'p-action secondary', 'Log out'); signout.type = 'button'; signout.style.marginTop = '20px'; signout.addEventListener('click', async function () {signout.disabled = true; signout.textContent = 'Logging out…'; try {await EcotekkAuth.logout(); location.href = 'index.html';} catch (e) {signout.disabled = false; signout.textContent = 'Log out'; cloud.textContent = 'Logout failed: ' + (e.message || 'Please retry');} }); right.append(signout);
@@ -257,6 +258,7 @@
             }).catch(function (e) {root.replaceChildren(node('p', 'p-muted', 'Unable to load account: ' + (e.message || 'Please refresh.')));});
         })();
     </script>
+<script src="experience.js" defer></script>
 </body>
 
 </html>
