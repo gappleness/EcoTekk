@@ -73,16 +73,23 @@
                 msg.classList.remove('success'); msg.textContent = 'Please wait…';
                 try { await action(); msg.classList.add('success'); msg.textContent = 'Success! Opening profile…'; location.href = 'profile.html'; }
                 catch (e) {
-                    const messages = {
-                        'auth/invalid-credential': 'Incorrect email or password. Please try again.',
-                        'auth/user-not-found': 'No account found with this email address.',
-                        'auth/wrong-password': 'Incorrect password. Please try again.',
-                        'auth/too-many-requests': 'Too many attempts. Please try again later.',
-                        'auth/network-request-failed': 'Network error. Check your internet connection.',
-                        'auth/user-disabled': 'This account has been disabled.'
-                    };
+                    console.error("Login error:", e.code, e.message);
 
-                    msg.textContent = messages[e.code] || 'Something went wrong. Please try again.';
+                    if (
+                        e.code === 'auth/invalid-credential' ||
+                        e.message?.includes('INVALID_LOGIN_CREDENTIALS') ||
+                        e.message?.includes('auth/invalid-credential')
+                    ) {
+                        msg.textContent = 'Incorrect email or password. Please try again.';
+                    } else {
+                        const messages = {
+                            'auth/too-many-requests': 'Too many attempts. Please try again later.',
+                            'auth/network-request-failed': 'Network error. Check your internet connection.',
+                            'auth/user-disabled': 'This account has been disabled.'
+                        };
+
+                        msg.textContent = messages[e.code] || 'Unable to sign in. Please try again.';
+                    }
                 }
             }
             form.onsubmit = e => { e.preventDefault(); run(() => signup ? EcotekkAuth.signup(name.value, pass.value, email.value) : EcotekkAuth.login(email.value, pass.value)); };
