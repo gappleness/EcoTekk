@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
     <meta name="theme-color" content="#166747">
     <link rel="stylesheet" href="stylesheet.css">
-<link rel="stylesheet" href="experience.css">
+    <link rel="stylesheet" href="experience.css">
     <script src="theme.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -15,10 +16,13 @@
     <script src="firebase-config.js"></script>
     <script src="auth.js"></script>
 </head>
+
 <body>
     <nav class="et-nav">
         <a href="index.html" class="logo">EcoTekk</a>
-        <ul><li><a href="explore.html">Explore a device</a></li><li><a href="library.html">Guides</a></li>
+        <ul>
+            <li><a href="explore.html">Explore a device</a></li>
+            <li><a href="library.html">Guides</a></li>
             <li><a href="login.html">Login</a></li>
             <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
         </ul>
@@ -31,12 +35,15 @@
 
             <form id="authForm">
                 <input type="text" id="nameInput" placeholder="Name" autocomplete="username" required />
-                <input type="email" id="emailInput" placeholder="Email (optional)" style="display:none;" autocomplete="email" />
-                <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password" required />
+                <input type="email" id="emailInput" placeholder="Email (optional)" style="display:none;"
+                    autocomplete="email" />
+                <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password"
+                    required />
                 <button type="submit" class="btn-primary" id="submitBtn">Login</button>
             </form>
 
-            <button type="button" class="btn-secondary" id="googleBtn" style="width:100%;margin-top:12px;">Continue with Google</button>
+            <button type="button" class="btn-secondary" id="googleBtn" style="width:100%;margin-top:12px;">Continue with
+                Google</button>
             <button type="button" id="resetBtn" style="margin-top:12px;">Forgot password?</button>
             <p id="message" class="message"></p>
 
@@ -48,29 +55,42 @@
     </section>
 
     <script>
-    EcotekkAuth.ready.then(function(){
-      if(EcotekkAuth.currentUser()){location.href='profile.html';return;}
-      const form=document.getElementById('authForm'), name=document.getElementById('nameInput'), email=document.getElementById('emailInput'), pass=document.getElementById('passwordInput'), msg=document.getElementById('message');
-      let signup=false;
-      name.style.display='none';name.required=false;
-      email.style.display='block';email.required=true;email.placeholder='Email address';
-      document.getElementById('toggleMode').onclick=function(){
-        signup=!signup;name.style.display=signup?'block':'none';name.required=signup;
-        document.getElementById('formTitle').textContent=signup?'Join Ecotekk':'Welcome back';
-        document.getElementById('submitBtn').textContent=signup?'Sign up':'Login';
-        document.getElementById('toggleHint').textContent=signup?'Already have an account?':'New here?';
-        this.textContent=signup?'Sign in':'Create an account';msg.textContent='';
-        pass.autocomplete=signup?'new-password':'current-password';
-      };
-      async function run(action){msg.classList.remove('success');msg.textContent='Please wait…';
-        try {await action();msg.classList.add('success');msg.textContent='Success! Opening profile…';location.href='profile.html';}
-        catch(e){msg.textContent=e.message || 'Something went wrong. Try again.';}
-      }
-      form.onsubmit=e=>{e.preventDefault();run(()=>signup?EcotekkAuth.signup(name.value,pass.value,email.value):EcotekkAuth.login(email.value,pass.value));};
-      document.getElementById('googleBtn').onclick=()=>run(()=>EcotekkAuth.googleLogin());
-      document.getElementById('resetBtn').onclick=async()=>{if(!email.value.trim()){msg.textContent='Enter your email first.';return;}try{await EcotekkAuth.resetPassword(email.value);msg.textContent='If an account exists for that email, check your inbox for a reset link.';}catch(e){msg.textContent=e.message;}};
-    });
+        EcotekkAuth.ready.then(function () {
+            if (EcotekkAuth.currentUser()) { location.href = 'profile.html'; return; }
+            const form = document.getElementById('authForm'), name = document.getElementById('nameInput'), email = document.getElementById('emailInput'), pass = document.getElementById('passwordInput'), msg = document.getElementById('message');
+            let signup = false;
+            name.style.display = 'none'; name.required = false;
+            email.style.display = 'block'; email.required = true; email.placeholder = 'Email address';
+            document.getElementById('toggleMode').onclick = function () {
+                signup = !signup; name.style.display = signup ? 'block' : 'none'; name.required = signup;
+                document.getElementById('formTitle').textContent = signup ? 'Join Ecotekk' : 'Welcome back';
+                document.getElementById('submitBtn').textContent = signup ? 'Sign up' : 'Login';
+                document.getElementById('toggleHint').textContent = signup ? 'Already have an account?' : 'New here?';
+                this.textContent = signup ? 'Sign in' : 'Create an account'; msg.textContent = '';
+                pass.autocomplete = signup ? 'new-password' : 'current-password';
+            };
+            async function run(action) {
+                msg.classList.remove('success'); msg.textContent = 'Please wait…';
+                try { await action(); msg.classList.add('success'); msg.textContent = 'Success! Opening profile…'; location.href = 'profile.html'; }
+                catch (e) {
+                    const messages = {
+                        'auth/invalid-credential': 'Incorrect email or password. Please try again.',
+                        'auth/user-not-found': 'No account found with this email address.',
+                        'auth/wrong-password': 'Incorrect password. Please try again.',
+                        'auth/too-many-requests': 'Too many attempts. Please try again later.',
+                        'auth/network-request-failed': 'Network error. Check your internet connection.',
+                        'auth/user-disabled': 'This account has been disabled.'
+                    };
+
+                    msg.textContent = messages[e.code] || 'Something went wrong. Please try again.';
+                }
+            }
+            form.onsubmit = e => { e.preventDefault(); run(() => signup ? EcotekkAuth.signup(name.value, pass.value, email.value) : EcotekkAuth.login(email.value, pass.value)); };
+            document.getElementById('googleBtn').onclick = () => run(() => EcotekkAuth.googleLogin());
+            document.getElementById('resetBtn').onclick = async () => { if (!email.value.trim()) { msg.textContent = 'Enter your email first.'; return; } try { await EcotekkAuth.resetPassword(email.value); msg.textContent = 'If an account exists for that email, check your inbox for a reset link.'; } catch (e) { msg.textContent = e.message; } };
+        });
     </script>
-<script src="experience.js" defer></script>
+    <script src="experience.js" defer></script>
 </body>
+
 </html>
