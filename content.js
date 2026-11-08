@@ -1,5 +1,6 @@
 window.EcoTekkContent = {
   "phone-charge": {
+    "category": "charging",
     "device": "Phone",
     "problem": "It will not charge",
     "headline": "Work out whether the charging setup or phone needs attention.",
@@ -21,6 +22,7 @@ window.EcoTekkContent = {
     ]
   },
   "phone-old": {
+    "category": "reuse",
     "device": "Phone",
     "problem": "It works but I no longer use it",
     "headline": "Give a working phone a useful second life.",
@@ -42,6 +44,7 @@ window.EcoTekkContent = {
     ]
   },
   "phone-dead": {
+    "category": "power",
     "device": "Phone",
     "problem": "It no longer turns on",
     "headline": "Check recovery options, then prepare a responsible handover.",
@@ -63,6 +66,7 @@ window.EcoTekkContent = {
     ]
   },
   "laptop-slow": {
+    "category": "performance",
     "device": "Laptop / computer",
     "problem": "It is very slow",
     "headline": "Find the bottleneck before replacing the computer.",
@@ -84,6 +88,7 @@ window.EcoTekkContent = {
     ]
   },
   "laptop-dead": {
+    "category": "power",
     "device": "Laptop / computer",
     "problem": "It will not start",
     "headline": "Protect your files and get a qualified diagnosis.",
@@ -105,6 +110,7 @@ window.EcoTekkContent = {
     ]
   },
   "laptop-old": {
+    "category": "reuse",
     "device": "Laptop / computer",
     "problem": "It works but is no longer needed",
     "headline": "Consider reuse before disposal.",
@@ -126,6 +132,7 @@ window.EcoTekkContent = {
     ]
   },
   "cables": {
+    "category": "accessories",
     "device": "Cables / chargers",
     "problem": "I have spare or unused accessories",
     "headline": "Sort working accessories from items needing collection.",
@@ -147,6 +154,7 @@ window.EcoTekkContent = {
     ]
   },
   "battery": {
+    "category": "charging",
     "device": "Batteries",
     "problem": "I need to handle an old or damaged battery",
     "headline": "Use dedicated battery collection—not ordinary disposal.",
@@ -166,5 +174,66 @@ window.EcoTekkContent = {
       "What safe-handling instructions apply before drop-off?",
       "Is an appointment required?"
     ]
+  }
+  ,
+  "phone-screen": {
+    "category": "screen", "device": "Phone", "problem": "The screen is black, flickering or unresponsive",
+    "headline": "Separate a display problem from a frozen phone.",
+    "summary": "Screen symptoms can come from software, display settings, physical damage or internal hardware. Start with non-destructive checks.",
+    "checks": ["If the phone is responsive, restart it normally and check whether the issue returns.", "Check for cracks, pressure marks, liquid exposure or unusual heat; stop using it if the battery is swollen or the device is unsafe.", "For flickering, test whether the issue changes in Safe mode using the exact steps published for your phone model."],
+    "who": "The phone manufacturer’s authorized service center or a qualified mobile-device technician", "query": "authorized phone screen repair service",
+    "reuse": "If repaired and supported, continue using it or pass it on after backing up and securely erasing personal data.", "recover": "If it cannot be repaired or reused, ask an e-waste collector about its phone and battery acceptance rules.",
+    "when": "Seek assessment if the display is physically damaged, remains black after a documented restart, or shows signs of liquid or battery damage.",
+    "ask": ["Can you diagnose the display without erasing my data?", "Is the replacement part original or compatible?", "What warranty covers the repair?"]
+  },
+  "phone-software": {
+    "category": "software", "device": "Phone", "problem": "Apps crash or the system behaves unexpectedly",
+    "headline": "Check software causes before considering a reset.",
+    "summary": "App conflicts, outdated software and low storage can cause instability. Preserve your data before any major change.",
+    "checks": ["Install available app and system updates from the device’s official update screen.", "Check free storage and remove only apps or files you recognize and no longer need.", "Use the manufacturer’s Safe mode instructions to check whether a downloaded app is responsible.", "Back up important data before considering a factory reset; a reset erases local data."],
+    "who": "The manufacturer’s support channel or an authorized service center", "query": "official phone software support",
+    "reuse": "A stable, supported phone can remain useful as a primary or backup device.", "recover": "If the phone is no longer repairable, use a collector that confirms phone and battery acceptance.",
+    "when": "If crashes continue after updates and Safe mode checks, request a model-specific diagnosis before resetting.",
+    "ask": ["Does this model have a known software issue?", "Can you inspect it without wiping data?", "What is the official recovery procedure for this model?"]
+  },
+  "laptop-screen": {
+    "category": "screen", "device": "Laptop / computer", "problem": "The laptop screen is black or flickering",
+    "headline": "Check whether the laptop is running before assuming the display failed.",
+    "summary": "A black display can involve brightness, display output, sleep state, graphics software or hardware. Exact key combinations differ by model.",
+    "checks": ["Check power and charging indicators, then raise brightness using the laptop’s documented controls.", "If the laptop appears to run, try an external display only if you have a suitable cable and display.", "Check the exact model’s official support page for display, graphics and BIOS guidance; do not install firmware intended for another model."],
+    "who": "The laptop manufacturer’s support service or a qualified computer technician", "query": "laptop display diagnostics repair",
+    "reuse": "If the display is repaired, the laptop may remain suitable for study or work.", "recover": "If repair is not practical, ask a qualified e-waste collector about whole-laptop acceptance.",
+    "when": "Seek service if there is physical damage, liquid exposure, repeated black screens or abnormal heat.",
+    "ask": ["Can you test the display and graphics output separately?", "Will diagnosis affect stored files?", "Can I receive a quotation before parts are replaced?"]
+  },
+  "laptop-software": {
+    "category": "software", "device": "Laptop / computer", "problem": "Windows or software has errors",
+    "headline": "Use reversible software checks first.",
+    "summary": "Updates, drivers and startup applications can affect stability. Driver and firmware packages must match the exact laptop model.",
+    "checks": ["Back up important files before troubleshooting.", "Install Windows updates and drivers only through Windows Update or the laptop maker’s official support page.", "Note the exact error message and when it appears; avoid random driver-updater utilities.", "Do not flash BIOS or use recovery media unless the manufacturer’s instructions match your exact model and condition."],
+    "who": "The laptop manufacturer’s official support or a qualified computer technician", "query": "official laptop software support",
+    "reuse": "If software stability is restored and the device remains supported, continue using it.", "recover": "If it cannot be repaired economically, consider refurbishment or an appropriate e-waste collection service.",
+    "when": "Get model-specific help before firmware changes, reinstalling the operating system or resetting the device.",
+    "ask": ["Is this driver or BIOS file for my exact model and hardware revision?", "Will this procedure erase files?", "Can you explain the recovery option before proceeding?"]
+  },
+  "laptop-connectivity": {
+    "category": "connectivity", "device": "Laptop / computer", "problem": "Wi-Fi or Bluetooth will not connect",
+    "headline": "Narrow down whether the issue is the network or laptop.",
+    "summary": "A connection problem may come from the router, settings, driver or wireless hardware.",
+    "checks": ["Check whether another device can connect to the same network.", "Restart the router only if you manage it, then toggle the laptop’s Wi-Fi off and on.", "Use the laptop maker’s official support page for wireless drivers matching the exact model.", "Avoid network resets until you know the saved network details and any required VPN settings."],
+    "who": "Your internet provider for network-wide faults, or the laptop manufacturer for device-specific faults", "query": "laptop Wi-Fi repair support",
+    "reuse": "A working laptop can continue to be used once the network or adapter issue is resolved.", "recover": "If wireless hardware is faulty, ask a technician whether repair or replacement is practical.",
+    "when": "If multiple networks fail only on this laptop after official driver checks, seek model-specific diagnosis.",
+    "ask": ["Can you test the wireless adapter separately?", "Is the replacement compatible with this exact model?", "Will repair affect my files?"]
+  },
+  "laptop-power": {
+    "category": "power", "device": "Laptop / computer", "problem": "It has no power or will not start",
+    "headline": "Check the power path without opening the laptop.",
+    "summary": "Power faults can involve the outlet, adapter, battery or internal hardware. Do not open a laptop or handle a swollen battery yourself.",
+    "checks": ["Test a known-working outlet and inspect the charger and cable for damage.", "Use only a compatible charger that meets the manufacturer’s requirements.", "Disconnect accessories and follow the exact model’s official power-reset procedure, if one is published.", "Stop if there is swelling, burning smell, liquid damage or unusual heat."],
+    "who": "The manufacturer’s authorized service center or a qualified laptop technician", "query": "laptop power repair service",
+    "reuse": "A repairable laptop may be refurbished after a qualified inspection.", "recover": "If it cannot be repaired, use a collector that accepts complete laptops and batteries.",
+    "when": "Stop using damaged equipment immediately and arrange professional assessment.",
+    "ask": ["Can you test the adapter, battery and charging circuit separately?", "Will diagnosis affect my files?", "Do you handle swollen or damaged batteries safely?"]
   }
 };
