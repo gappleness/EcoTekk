@@ -19,6 +19,7 @@
     <nav class="et-nav">
         <a href="index.html" class="logo">EcoTekk</a>
         <ul><li><a href="explore.html">Explore a device</a></li><li><a href="library.html">Guides</a></li>
+            <li><a href="home.html">E-waste finder</a></li>
             <li id="nav-auth"><a href="login.html">Login</a></li>
             <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
         </ul>
@@ -46,8 +47,6 @@
       <button type="button" id="showMe" class="visit" hidden>◎ You are here</button>
       </div>
     <div class="ecotekk-map-status" id="mapStatus" role="status" aria-live="polite"></div>
-    <div hidden>
-    </div>
 
     <section class="tracker-results">
         <h2>Find a suitable drop-off</h2>
@@ -88,13 +87,12 @@
         .map-location-actions[hidden] { display:none; }
         .map-location-actions a { margin-left:auto; color:var(--brand-dark); font-weight:700; }
         .location-dot { width:12px; height:12px; background:#2684ff; border:2px solid white; box-shadow:0 0 0 2px #2684ff; border-radius:50%; flex:none; }
-        #mapControls button { cursor:pointer; border:0; padding:10px 13px; border-radius:8px; background:var(--brand-dark); color:white; font:inherit; font-weight:650; }
+        #mapControls button { cursor:pointer; border:0; padding:10px 13px; border-radius:8px; background:var(--brand-strong); color:white; font:inherit; font-weight:650; }
         #mapControls button[hidden] {display:none;}
-        #mapStatus {font-size:13px; opacity:.8;}
         .site-links { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
         .site-links .visit { display:inline-flex; align-items:center; justify-content:center; }
         .site-links button { border:0; cursor:pointer; font:inherit; padding:10px 12px; border-radius:8px; }
-        .site-links .directions-link { background:var(--brand-dark); color:white; }
+        .site-links .directions-link { background:var(--brand-strong); color:white; }
         .ecotekk-toolbar { max-width:1100px; gap:8px; padding:16px 20px 6px; }
         .ecotekk-toolbar button { transition:transform .15s ease,opacity .15s ease; }
         .ecotekk-toolbar button:hover { transform:translateY(-1px); opacity:.9; }
@@ -102,7 +100,6 @@
         .site-links { margin-top:12px; }
         .site-links .visit { text-decoration:none; border-radius:8px; min-height:40px; box-sizing:border-box; padding:10px 14px; }
         .site-links .map-site-btn { background:transparent; border:1px solid currentColor; color:inherit; }
-        .site-links .directions-link { background:var(--brand-dark); color:white; }
         .site-links .visit:hover {opacity:.85;}
         @media(max-width:600px) { .ecotekk-toolbar button {flex:1 1 140px;} .site-links .visit {flex:1 1 140px;} }
         
