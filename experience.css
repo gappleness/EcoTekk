@@ -10,54 +10,9 @@ body{font-family:'Plus Jakarta Sans',Arial,sans-serif} .et-container{max-width:1
 .et-filter-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
 @media(max-width:800px){.et-filter-grid{grid-template-columns:1fr}}
 
-/* ---------- Visual polish ---------- */
-/* Darker green for surfaces/text that carry white or small green text (WCAG AA >= 4.5:1). */
-:root{--brand-strong:#117a35}
-nav,.et-btn:not(.ghost),.login-box .btn-primary,.getStarted{background-color:var(--brand-strong)}
-.et-btn:not(.ghost){border-color:var(--brand-strong)}
-.et-eyebrow,.et-tag,.et-step,.et-saved,.et-linkcard span{color:var(--brand-strong)}
-.et-hero .et-eyebrow{color:#a6edb7}
-[data-theme="dark"] .et-eyebrow,[data-theme="dark"] .et-tag,[data-theme="dark"] .et-step,[data-theme="dark"] .et-saved,[data-theme="dark"] .et-linkcard span{color:#6fe39a}
-[data-theme="dark"] .et-hero .et-eyebrow{color:#a6edb7}
-
-/* Link cards: separate category label, title and call-to-action. */
-.et-linkcard>span:first-child{display:block;font:700 11px 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase}
-.et-linkcard>span:last-child{display:inline-block;margin-top:6px}
-.et-linkcard{height:100%}
-
-/* Hero headline: keep it upright and readable on top of the photo. */
-.et-hero h1{font-style:normal}
-
-/* Nav: tidy wrapping on narrow phones. */
-.et-nav{justify-content:space-between}
-@media(max-width:550px){
-  .et-nav{justify-content:center;row-gap:8px}
-  .et-nav ul{width:100%;justify-content:center;gap:12px 14px}
-}
-
-/* Map frame: drop the doubled border/padding that clipped the rounded corners. */
-.map-frame{padding:0 24px}
-.map-frame iframe{border:1px solid var(--line)}
-
-/* ---------- Site-wide fixes (round 2) ---------- */
-/* Login page fills the viewport below the 74px nav (was 67px, causing a stray scrollbar). */
-.login-section{min-height:calc(100vh - 74px)}
-
-/* "Forgot password?" was an unstyled browser button. */
-#resetBtn{background:none;border:0;padding:4px 6px;font:inherit;font-size:13px;font-weight:700;color:var(--brand-strong);text-decoration:underline;cursor:pointer}
-
-/* White text on hover needs the darker green, not the bright brand green. */
-.visit:hover,.btn-dispose:hover,.reward-card button:hover:not(:disabled){background:var(--brand-strong);border-color:var(--brand-strong);color:#fff}
-#mapControls button{background:var(--brand-strong)}
-
-/* Dark mode: small green text on near-black needs a lighter green. */
-[data-theme="dark"] .auth-toggle button,[data-theme="dark"] #resetBtn,[data-theme="dark"] .visit,
-[data-theme="dark"] .site-body .meta .open,[data-theme="dark"] .points-badge .value,
-[data-theme="dark"] .reward-card .cost,[data-theme="dark"] .reward-card button,
-[data-theme="dark"] .history-list .hist-pts.pos,[data-theme="dark"] .p-eyebrow,
-[data-theme="dark"] .map-location-actions a{color:#6fe39a}
-[data-theme="dark"] .visit:hover,[data-theme="dark"] .btn-dispose:hover,[data-theme="dark"] .reward-card button:hover:not(:disabled){color:#fff}
-
-/* Optional browser-based device detection controls */
-.et-detect-row{display:block;margin:10px 0 14px}
-.et-detect-row .et-small{display:block;min-width:0}
+/* Device details sit inside the existing result card and reuse the current visual theme. */
+.et-spec-list{display:grid;gap:0;margin-top:10px;border-top:1px solid var(--et-stroke)}
+.et-spec-row{display:grid;grid-template-columns:minmax(115px,175px) 1fr;gap:12px;padding:9px 0;border-bottom:1px solid var(--et-stroke);font:13px/1.55 Arial,sans-serif}
+.et-spec-row strong{color:var(--et-ink);font-weight:700}
+.et-spec-row span{color:var(--et-sub);overflow-wrap:anywhere}
+@media(max-width:520px){.et-spec-row{grid-template-columns:1fr;gap:3px}}
