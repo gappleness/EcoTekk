@@ -11,10 +11,20 @@
     if (!form || !data || !categorySelect || !deviceSelect || !brandSelect || !modelSelect || !caseSelect || !output) return;
 
     const models = {
-        Samsung: [{ value: 'Galaxy A15 5G', device: 'Phone' }],
-        Xiaomi: [{ value: 'Redmi Note 13 5G', device: 'Phone' }],
-        Acer: [{ value: 'Aspire Lite AL14-51M', device: 'Laptop / computer' }],
-        Lenovo: [{ value: 'IdeaPad Slim 3 15IAH8', device: 'Laptop / computer' }]
+        Samsung: [
+            { value: 'Galaxy A15 5G', device: 'Phone', specs: '5G smartphone · 6.5-inch display · 50MP main camera · model variants differ', source: 'https://www.samsung.com/ph/smartphones/galaxy-a/galaxy-a15-5g/' },
+            { value: 'Galaxy A25 5G', device: 'Phone', specs: 'Exynos octa-core · 6.5-inch FHD+ Super AMOLED 120Hz · 50MP OIS main camera · 8GB RAM / 256GB storage variant', source: 'https://www.samsung.com/ph/smartphones/galaxy-a/galaxy-a25-5g-blue-256gb-sm-a256ezbhphl/' }
+        ],
+        Xiaomi: [{ value: 'Redmi Note 13 5G', device: 'Phone', specs: '5G smartphone · 6.67-inch AMOLED 120Hz · 108MP main camera · configurations vary', source: 'https://www.mi.com/global/product/redmi-note-13-5g/specs/' }],
+        Apple: [{ value: 'iPhone 15', device: 'Phone', specs: '6.1-inch Super Retina XDR OLED · A16 Bionic · dual 48MP/12MP rear camera · USB-C', source: 'https://www.apple.com/ph/iphone-15/specs/' }],
+        Google: [{ value: 'Pixel 8', device: 'Phone', specs: '6.2-inch OLED 120Hz · Google Tensor G3 · 50MP + 12MP rear cameras · USB-C', source: 'https://store.google.com/product/pixel_8_specs' }],
+        OPPO: [
+            { value: 'A78', device: 'Phone', specs: 'Snapdragon 680 · 6.43-inch FHD+ AMOLED 90Hz · 8GB + 256GB · 5000mAh typical battery · 67W SUPERVOOC', source: 'https://www.oppo.com/ph/smartphones/series-a/a78/specs/' },
+            { value: 'A78 5G', device: 'Phone', specs: 'Dimensity 700 · 6.56-inch HD+ LCD 90Hz · 8GB + 128GB variant · 5000mAh typical battery · 33W SUPERVOOC', source: 'https://www.oppo.com/ph/smartphones/series-a/a78-5g/specs/' }
+        ],
+        Acer: [{ value: 'Aspire Lite AL14-51M', device: 'Laptop / computer', specs: '14-inch Aspire Lite family · Intel platform; exact CPU, memory and display vary by SKU', source: 'https://www.acer.com/ph-en/support/product-support/Aspire_AL14-51M' }],
+        Lenovo: [{ value: 'IdeaPad Slim 3 15IAH8', device: 'Laptop / computer', specs: '15-inch IdeaPad Slim 3 family · Intel platform; exact CPU, memory and display vary by machine type', source: 'https://pcsupport.lenovo.com/ph/en/products/laptops-and-netbooks/ideapad-s-series-netbooks/ideapad-slim-3-15iah8' }],
+        Dell: [{ value: 'Inspiron 15 3530', device: 'Laptop / computer', specs: '15.6-inch Inspiron laptop family · Intel processor options; RAM, display and storage vary by configuration', source: 'https://www.dell.com/support/product-details/en-us/product/inspiron-15-3530-laptop/' }]
     };
 
     // Only add model-specific steps when an official support source documents them.
@@ -54,6 +64,42 @@
             steps: ['Lenovo documents F2 or Fn+F2 as the BIOS key for IdeaPad systems; press it immediately after powering on. The exact key and recovery options can vary by model.', 'Check the full machine type on Lenovo Support before changing BIOS settings or applying firmware. Do not change boot or security settings unless you know what they do.'],
             source: 'Lenovo Support: How to select boot device / access BIOS on IdeaPad',
             url: 'https://pcsupport.lenovo.com/ph/en/products/laptops-and-netbooks/ideapad-s-series-netbooks/ideapad-slim-3-15iah8/solutions/ht104668-how-to-select-boot-device-from-bios-boot-menu-ideapad-thinkpad-thinkstation-thinkcentre-ideacentre'
+        },
+        'Apple|iPhone 15|power': {
+            title: 'iPhone 15 — force restart and charging checks',
+            steps: ['Quickly press and release Volume Up, then quickly press and release Volume Down.', 'Press and hold the Side button until the Apple logo appears. This does not erase personal data.', 'If it still will not start, follow Apple’s black-screen guidance and charge using an undamaged compatible USB-C cable and adapter. Seek service if the problem continues.'],
+            source: 'Apple Support: If your iPhone will not turn on or the screen is black',
+            url: 'https://support.apple.com/en-ph/116940'
+        },
+        'Google|Pixel 8|power': {
+            title: 'Google Pixel 8 — blank screen or no power',
+            steps: ['Press and hold the Power button for 5–7 seconds to try to turn it on.', 'If the battery may be fully drained, connect a compatible USB-C PD charger. Google notes that a deeply drained Pixel may show no response for up to 25 minutes.', 'If there is still no display, follow Google’s screen/no-power checks or arrange an authorized repair. Do not use a manual reset as an initial test because it erases data.'],
+            source: 'Google Pixel Help: Fix a Pixel phone that will not charge or turn on',
+            url: 'https://support.google.com/pixelphone/answer/7167687'
+        },
+        'Google|Pixel 8|screen': {
+            title: 'Google Pixel 8 — frozen or unresponsive screen',
+            steps: ['If the screen is frozen, hold the Power button for about 60 seconds to restart the phone.', 'If the issue returns, check Android and app updates, available storage, and whether the problem disappears in Safe Mode.', 'A factory reset removes device data; back up first and use it only after less destructive checks or with support guidance.'],
+            source: 'Google Pixel Help: Fix a Pixel phone that freezes',
+            url: 'https://support.google.com/pixelphone/answer/6377386'
+        },
+        'OPPO|A78|power': {
+            title: 'OPPO A78 — stuck on logo or will not turn on',
+            steps: ['Remove a case if it may be pressing the Power or Volume buttons, and check for signs of liquid exposure. If liquid exposure is suspected, stop and contact an OPPO service centre.', 'If there is no liquid exposure or visible damage, OPPO advises charging for at least 15 minutes before trying its force-restart method: hold Power and Volume Up for about 10 seconds.', 'If the phone remains stuck or repeatedly restarts, use OPPO support rather than selecting a wipe/reset option.'],
+            source: 'OPPO Support: What to do if your OPPO phone is stuck on the OPPO logo',
+            url: 'https://support.oppo.com/en/answer/?aid=neu10940'
+        },
+        'OPPO|A78 5G|power': {
+            title: 'OPPO A78 5G — stuck on logo or will not turn on',
+            steps: ['Remove a case if it may be pressing the Power or Volume buttons, and check for signs of liquid exposure. If liquid exposure is suspected, stop and contact an OPPO service centre.', 'If there is no liquid exposure or visible damage, OPPO advises charging for at least 15 minutes before trying its force-restart method: hold Power and Volume Up for about 10 seconds.', 'If the phone remains stuck or repeatedly restarts, use OPPO support rather than selecting a wipe/reset option.'],
+            source: 'OPPO Support: What to do if your OPPO phone is stuck on the OPPO logo',
+            url: 'https://support.oppo.com/en/answer/?aid=neu10940'
+        },
+        'Dell|Inspiron 15 3530|power': {
+            title: 'Dell Inspiron 15 3530 — power diagnostics',
+            steps: ['Check the outlet, AC adapter and charging indicator for obvious damage or unusual heat. Do not continue using damaged power equipment.', 'Use Dell SupportAssist or the Dell preboot diagnostics available for the exact service tag to check for hardware errors.', 'Dell documents model-dependent diagnostics such as LCD-BIST and M-BIST; use the Inspiron 15 3530 manual/support page to confirm which tests apply. Do not open the laptop or disconnect its internal battery unless qualified.'],
+            source: 'Dell Support: Inspiron 15 3530 support and diagnostics',
+            url: 'https://www.dell.com/support/product-details/en-us/product/inspiron-15-3530-laptop/'
         }
     };
 
@@ -151,6 +197,19 @@
             output.append(specific);
         } else if (brand || model) {
             output.append(el('p', 'et-note', 'No verified brand/model-specific procedure is available for this category yet. The general checks below are shared guidance; use the manufacturer’s official support page before model-dependent repairs or firmware changes.'));
+        }
+
+        const selectedModel = (models[brand] || []).find(entry => entry.value === model);
+        if (selectedModel) {
+            const specs = el('section', 'et-result');
+            specs.append(el('h3', '', 'Selected model specifications'));
+            specs.append(el('p', '', selectedModel.specs));
+            const specSource = el('a', 'et-small', 'View manufacturer specifications / support page');
+            specSource.href = selectedModel.source;
+            specSource.target = '_blank';
+            specSource.rel = 'noopener noreferrer';
+            specs.append(specSource);
+            output.append(specs);
         }
 
         output.append(block('1 / General checks that apply to this issue', item.checks));
