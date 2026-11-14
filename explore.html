@@ -39,7 +39,7 @@
   <a href="index.html" class="logo">EcoTekk</a>
   <ul>
     <li><a href="explore.html">Explore a device</a></li>
-    <li><a href="library.html">Guides</a></li>
+    <li><a href="techhelp.html">Tech help</a></li>
     <li><a href="home.html">E-waste finder</a></li>
     <li id="nav-auth"><a href="login.html">Login</a></li>
     <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
@@ -172,16 +172,8 @@
 </footer>
 
 <script>
-EcotekkAuth.ready.then(function(){
-  if(EcotekkAuth.currentUser()){
-    document.getElementById('nav-auth').innerHTML='<a href="profile.html">Profile</a>';
-  }
-}).catch(function(){});
-</script>
-
-<script>
 /* Community pulse: live "how many people have this issue" counter (Firestore).
-   Reads are public; adding yours requires login, one time per account per topic. */
+   Reads are public; adding yours needs an account or a guest session, one time per user per topic. */
 (function () {
   var root = document.getElementById('et-issue');
   var caseSel = document.getElementById('case');
@@ -245,7 +237,7 @@ EcotekkAuth.ready.then(function(){
     if (reported) {
       btn.disabled = true; btn.classList.add('is-done'); btn.textContent = '✓ Counted. Thanks!'; return;
     }
-    if (!user) { btn.disabled = false; btn.textContent = 'Log in to add yours'; return; }
+    if (!user) { btn.disabled = false; btn.textContent = 'Sign in or use guest to add yours'; return; }
     btn.disabled = busy;
     btn.textContent = 'I have this issue too';
   }
@@ -277,7 +269,7 @@ EcotekkAuth.ready.then(function(){
       updateMeter(count);
       setStatus(count === 0
         ? 'No one has added this yet. Be the first.'
-        : 'Live count from EcoTekk users. Each account can add one report per topic.');
+        : 'Live count from EcoTekk users. Each account or guest session can add one report per topic.');
     }, function () {
       numEl.textContent = '–';
       barEl.style.width = '0';
@@ -306,7 +298,7 @@ EcotekkAuth.ready.then(function(){
 
   btn.addEventListener('click', function () {
     if (!db || !currentId) return;
-    if (!user) { location.href = 'login.html'; return; }
+    if (!user) { location.href = 'login.html?next=' + encodeURIComponent('explore.html' + location.search); return; }
     if (reported || busy) return;
     busy = true; refreshButton(); setStatus('Adding yours…');
     var id = currentId;

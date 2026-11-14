@@ -41,6 +41,35 @@ service cloud.firestore {
       }
     }
 
+    // "I went here" counter on techhelp.html. Same pattern as issueReports:
+    // anyone can read the count; a signed-in user (member OR guest/anonymous) can add 1, once per shop.
+    // The count only displays a tally. It is never used to rank or alter the shop listings.
+    match /shopVisits/{shopId} {
+      allow read: if shopId.matches('[a-z0-9_-]{1,60}');
+
+      allow create: if request.auth != null
+        && shopId.matches('[a-z0-9_-]{1,60}')
+        && request.resource.data.keys().hasOnly(['count'])
+        && request.resource.data.count == 1
+        && existsAfter(/databases/$(database)/documents/shopVisits/$(shopId)/reporters/$(request.auth.uid));
+
+      allow update: if request.auth != null
+        && request.resource.data.keys().hasOnly(['count'])
+        && request.resource.data.count == resource.data.count + 1
+        && existsAfter(/databases/$(database)/documents/shopVisits/$(shopId)/reporters/$(request.auth.uid))
+        && !exists(/databases/$(database)/documents/shopVisits/$(shopId)/reporters/$(request.auth.uid));
+
+      allow delete: if false;
+
+      match /reporters/{uid} {
+        allow get: if request.auth != null && request.auth.uid == uid;
+        allow create: if request.auth != null && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['createdAt'])
+          && request.resource.data.createdAt == request.time;
+        allow list, update, delete: if false;
+      }
+    }
+
     match /{document=**} { allow read, write: if false; }
   }
 }

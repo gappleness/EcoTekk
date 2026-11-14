@@ -222,7 +222,7 @@
 
 <body>
     <nav class="et-nav"><a href="index.html" class="logo">EcoTekk</a>
-        <ul><li><a href="explore.html">Explore a device</a></li><li><a href="library.html">Guides</a></li><li><a href="home.html">E-waste finder</a></li>
+        <ul><li><a href="explore.html">Explore a device</a></li><li><a href="techhelp.html">Tech help</a></li><li><a href="home.html">E-waste finder</a></li>
             <li><a href="profile.html" aria-current="page">Profile</a></li>
             <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
         </ul>
@@ -239,6 +239,29 @@
             EcotekkAuth.ready.then(function () {
                 const u = EcotekkAuth.currentUser();
                 if (!u) {root.replaceChildren(node('div', 'p-eyebrow', 'YOUR ECOTEKK ACCOUNT'), node('h1', 'p-heading', 'Your space for greener choices'), node('p', 'p-sub', 'Sign in to view your account and keep exploring drop-off locations.')); const a = link('Log in / Sign up', 'login.html'); a.style.marginTop = '24px'; root.append(a); return;}
+
+                if (u.isGuest) {
+                    // Limited, display-only view: no name/email, no cloud profile, nothing to edit.
+                    const navLink = document.querySelector('nav a[aria-current]'); if (navLink) navLink.textContent = 'Guest';
+                    const gHero = node('section', 'p-hero'); gHero.setAttribute('aria-label', 'Guest session');
+                    const gId = node('div', 'p-identity'); const gAvatar = node('div', 'p-avatar', 'G'); gAvatar.setAttribute('aria-hidden', 'true');
+                    const gWho = node('div'); gWho.append(node('h2', '', 'Guest'), node('p', '', 'Browsing without an account')); gId.append(gAvatar, gWho);
+                    gHero.append(gId, node('span', 'p-pill', 'Guest mode'));
+                    const gGrid = node('div', 'p-grid');
+                    const gLeft = node('section', 'p-panel'); gLeft.append(node('div', 'p-eyebrow', 'START HERE'), node('h3', '', 'Everything you need is still open.'), node('p', 'p-muted', 'Guests can use the device explorer, the drop-off finder, tech help and the community counters. A free account adds a saved profile.'));
+                    const gActions = node('div', 'p-actions'); gActions.append(link('Explore a device →', 'explore.html'), link('Find a drop-off', 'home.html', true), link('Tech help', 'techhelp.html', true)); gLeft.append(gActions);
+                    const gNote = node('p', 'p-note', 'Guest sessions are tied to this browser. Clearing site data or exiting guest mode ends the session.'); gNote.style.marginTop = '24px'; gLeft.append(gNote);
+                    const gRight = node('section', 'p-panel'); gRight.append(node('div', 'p-eyebrow', 'SESSION'), node('h3', '', 'Basic display'));
+                    row(gRight, 'Account type', 'Guest'); row(gRight, 'Saved profile', 'Not available'); row(gRight, 'Customization', 'Not available');
+                    const gActs = node('div', 'p-actions');
+                    const gJoin = link('Log in / Sign up', 'login.html');
+                    const gExit = node('button', 'p-action secondary', 'Exit guest mode'); gExit.type = 'button';
+                    gExit.addEventListener('click', async function () { gExit.disabled = true; gExit.textContent = 'Exiting…'; try { await EcotekkAuth.logout(); location.href = 'index.html'; } catch (e) { gExit.disabled = false; gExit.textContent = 'Exit guest mode'; } });
+                    gActs.append(gJoin, gExit); gRight.append(gActs);
+                    gGrid.append(gLeft, gRight);
+                    root.replaceChildren(node('div', 'p-eyebrow', 'MY ECOTEKK / GUEST'), node('h1', 'p-heading', 'You are browsing as a guest.'), node('p', 'p-sub', 'A limited view of the account area. Sign in any time for a saved profile.'), gHero, gGrid);
+                    return;
+                }
                 const title = node('div', 'p-eyebrow', 'MY ECOTEKK / DASHBOARD');
                 const heading = node('h1', 'p-heading', 'Welcome back.');
                 const intro = node('p', 'p-sub', 'Your account and practical technology options in one place.');
@@ -248,7 +271,7 @@
                 const badge = node('span', 'p-pill', u.emailVerified ? '✓ Email verified' : 'Email verification pending'); hero.append(identity, badge);
                 const grid = node('div', 'p-grid');
                 const left = node('section', 'p-panel'); left.append(node('div', 'p-eyebrow', 'START HERE'), node('h3', '', 'Find your next step.'), node('p', 'p-muted', 'Find options for a device, get relevant support, or access the existing drop-off finder.'));
-                const actions = node('div', 'p-actions'); actions.append(link('Explore a device →', 'explore.html'), link('Find a drop-off', 'home.html', true)); left.append(actions);
+                const actions = node('div', 'p-actions'); actions.append(link('Explore a device →', 'explore.html'), link('Find a drop-off', 'home.html', true), link('Tech help', 'techhelp.html', true)); left.append(actions);
                 const note = node('p', 'p-note', 'Device recommendations are educational. Confirm availability and acceptance directly with a provider before visiting.'); note.style.marginTop = '24px'; left.append(note);
                 const right = node('section', 'p-panel'); right.append(node('div', 'p-eyebrow', 'ACCOUNT DETAILS'), node('h3', '', 'Your information'));
                 const nameValue = row(right, 'Display name', u.name || '—'); row(right, 'Email', u.email || '—'); row(right, 'Verification', u.emailVerified ? 'Verified' : 'Not verified'); const cloud = row(right, 'Cloud profile', 'Loading…');

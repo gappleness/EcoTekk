@@ -22,7 +22,7 @@
         <a href="index.html" class="logo">EcoTekk</a>
         <ul>
             <li><a href="explore.html">Explore a device</a></li>
-            <li><a href="library.html">Guides</a></li>
+            <li><a href="techhelp.html">Tech help</a></li>
             <li><a href="home.html">E-waste finder</a></li>
             <li><a href="login.html">Login</a></li>
             <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
@@ -32,7 +32,7 @@
     <section class="login-section">
         <div class="login-box">
             <h1 id="formTitle">Welcome back</h1>
-            <p class="subtitle" id="formSubtitle">Sign in to track points and redeem rewards</p>
+            <p class="subtitle" id="formSubtitle">Sign in for a saved profile, or continue as a guest</p>
 
             <form id="authForm">
                 <input type="text" id="nameInput" placeholder="Name" autocomplete="username" style="display:none;" />
@@ -44,6 +44,8 @@
 
             <button type="button" class="btn-secondary" id="googleBtn" style="width:100%;margin-top:12px;">Continue with
                 Google</button>
+            <button type="button" class="btn-secondary" id="guestBtn" style="width:100%;margin-top:10px;">Continue as guest</button>
+            <p class="empty-note" style="margin:8px 0 0;font-size:12px;">Guests can use every tool with a basic display. No profile or customization.</p>
             <button type="button" id="resetBtn" style="margin-top:12px;">Forgot password?</button>
             <p id="message" class="message"></p>
 
@@ -56,7 +58,12 @@
 
     <script>
         EcotekkAuth.ready.then(function () {
-            if (EcotekkAuth.currentUser()) { location.href = 'profile.html'; return; }
+            // Only same-site page names are accepted as a return path (e.g. techhelp.html or explore.html?case=x).
+            const nextParam = new URLSearchParams(location.search).get('next') || '';
+            const dest = /^[a-z0-9_-]+\.html(\?[a-z0-9_=&%.-]*)?$/i.test(nextParam) ? nextParam : 'profile.html';
+            const current = EcotekkAuth.currentUser();
+            // Members are sent on. Guests stay so they can sign in or create an account.
+            if (current && !current.isGuest) { location.href = dest; return; }
             const form = document.getElementById('authForm'), name = document.getElementById('nameInput'), email = document.getElementById('emailInput'), pass = document.getElementById('passwordInput'), msg = document.getElementById('message');
             let signup = false;
             name.style.display = 'none'; name.required = false;
@@ -71,7 +78,7 @@
             };
             async function run(action) {
                 msg.classList.remove('success'); msg.textContent = 'Please wait…';
-                try { await action(); msg.classList.add('success'); msg.textContent = 'Success! Opening profile…'; location.href = 'profile.html'; }
+                try { await action(); msg.classList.add('success'); msg.textContent = 'Success! Redirecting…'; location.href = dest; }
                 catch (e) {
                     console.error("Login error:", e.code, e.message);
 
@@ -85,7 +92,9 @@
                         const messages = {
                             'auth/too-many-requests': 'Too many attempts. Please try again later.',
                             'auth/network-request-failed': 'Network error. Check your internet connection.',
-                            'auth/user-disabled': 'This account has been disabled.'
+                            'auth/user-disabled': 'This account has been disabled.',
+                            'auth/operation-not-allowed': 'Guest access is not switched on yet. Enable Anonymous sign-in in Firebase Authentication.',
+                            'auth/admin-restricted-operation': 'Guest access is not switched on yet. Enable Anonymous sign-in in Firebase Authentication.'
                         };
 
                         msg.textContent = messages[e.code] || 'Unable to sign in. Please try again.';
@@ -94,6 +103,7 @@
             }
             form.onsubmit = e => { e.preventDefault(); run(() => signup ? EcotekkAuth.signup(name.value, pass.value, email.value) : EcotekkAuth.login(email.value, pass.value)); };
             document.getElementById('googleBtn').onclick = () => run(() => EcotekkAuth.googleLogin());
+            document.getElementById('guestBtn').onclick = () => run(() => EcotekkAuth.guestLogin());
             document.getElementById('resetBtn').onclick = async () => { if (!email.value.trim()) { msg.textContent = 'Enter your email first.'; return; } try { await EcotekkAuth.resetPassword(email.value); msg.textContent = 'If an account exists for that email, check your inbox for a reset link.'; } catch (e) { msg.textContent = e.message; } };
         });
     </script>

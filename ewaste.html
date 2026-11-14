@@ -18,7 +18,7 @@
 <body>
     <nav class="et-nav">
         <a href="index.html" class="logo">EcoTekk</a>
-        <ul><li><a href="explore.html">Explore a device</a></li><li><a href="library.html">Guides</a></li>
+        <ul><li><a href="explore.html">Explore a device</a></li><li><a href="techhelp.html">Tech help</a></li>
             <li><a href="home.html">E-waste finder</a></li>
             <li id="nav-auth"><a href="login.html">Login</a></li>
             <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
@@ -93,10 +93,6 @@
     </style>
     <script>
         (function () {
-            EcotekkAuth.ready.then(function () {
-                if (EcotekkAuth.currentUser()) document.getElementById('nav-auth').innerHTML = '<a href="profile.html">Profile</a>';
-            });
-
             var params = new URLSearchParams(window.location.search);
             var lat = parseFloat(params.get('lat'));
             var lng = parseFloat(params.get('lng'));

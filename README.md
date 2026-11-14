@@ -4,6 +4,8 @@
 
 ### Features
 - Find nearby e-waste drop-off locations
+- Tech Help: nearby repair shops and service centers, with a community "I went here" tally
+- Guest mode: use every tool with a basic display (no saved profile or customization)
 - View locations on Google Maps and get directions
 - Sign in with Google or email using Firebase
 - Personal profile and dark mode

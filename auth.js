@@ -32,11 +32,18 @@
   async function login(email,password){await ensurePersistence();const c=await auth.signInWithEmailAndPassword(email.trim(),password);await ensureProfile(c.user);return c.user;}
   async function googleLogin(){await ensurePersistence();const provider=new firebase.auth.GoogleAuthProvider();const c=await auth.signInWithPopup(provider);await ensureProfile(c.user);return c.user;}
   async function resetPassword(email){requireConfig();await auth.sendPasswordResetEmail(email.trim());}
+  // Guest access uses Firebase Anonymous Auth: a real, device-bound session with no email or profile document.
+  // Guests can use the tools and add to community counters (the existing rules only require request.auth != null).
+  async function guestLogin(){await ensurePersistence();if(auth.currentUser)return auth.currentUser;const c=await auth.signInAnonymously();return c.user;}
   async function logout(){requireConfig();await auth.signOut();}
-  function currentUser(){const active = auth ? auth.currentUser : user; return active ? {uid:active.uid,name:active.displayName || (active.email||'').split('@')[0],email:active.email,emailVerified:active.emailVerified} : null;}
+  function currentUser(){const active = auth ? auth.currentUser : user; if(!active)return null; const guest=!!active.isAnonymous; return {uid:active.uid,isGuest:guest,name:guest?'Guest':(active.displayName || (active.email||'').split('@')[0]),email:guest?'':active.email,emailVerified:guest?false:active.emailVerified};}
+  function isGuest(){const u=currentUser();return !!(u&&u.isGuest);}
+  // Fills the #nav-auth item on every page: Profile for members, Guest for guests, Login otherwise.
+  function renderNav(){ready.then(function(){const el=document.getElementById('nav-auth'),u=currentUser();if(el&&u)el.innerHTML='<a href="profile.html">'+(u.isGuest?'Guest':'Profile')+'</a>';}).catch(function(){});}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',renderNav);else renderNav();
   // No client-controlled cloud points: a verified server-side award/redemption workflow is required.
-  global.EcotekkAuth={ready,currentUser,signup,login,googleLogin,resetPassword,logout,REWARDS:rewards,
-    watchProfile(callback){requireConfig();return profileRef().onSnapshot(s=>callback(s.exists?s.data():null));},
+  global.EcotekkAuth={ready,currentUser,isGuest,signup,login,googleLogin,guestLogin,resetPassword,logout,REWARDS:rewards,
+    watchProfile(callback){requireConfig();if(isGuest()){callback(null);return function(){};}return profileRef().onSnapshot(s=>callback(s.exists?s.data():null));},
     getPoints(){return 0;},getHistory(){return [];},
     async recordDisposal(){throw new Error('Point awards are disabled until a verified server-side disposal workflow is installed.');},
     async redeem(){throw new Error('Reward redemption is disabled until a secure server-side workflow is installed.');}

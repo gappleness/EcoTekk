@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoTekk | Tech Help</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
+    <meta name="theme-color" content="#166747">
+    <link rel="stylesheet" href="stylesheet.css">
+    <link rel="stylesheet" href="experience.css">
+    <script src="theme.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+    <script src="techhelp.js" defer></script>
+    <script src="experience.js" defer></script>
+</head>
+<body>
+    <nav class="et-nav">
+        <a href="index.html" class="logo">EcoTekk</a>
+        <ul>
+            <li><a href="explore.html">Explore a device</a></li>
+            <li><a href="techhelp.html" aria-current="page">Tech help</a></li>
+            <li><a href="home.html">E-waste finder</a></li>
+            <li id="nav-auth"><a href="login.html">Login</a></li>
+            <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
+        </ul>
+    </nav>
+
+    <section class="tracker-hero">
+        <h1>Repair shops &amp; service centers</h1>
+        <p id="locLabel">Showing shops near Calamba, Laguna (default area). Use your location for distances from where you are.</p>
+    </section>
+
+    <div class="map-frame">
+        <iframe
+            id="mapFrame"
+            src="https://www.google.com/maps?q=phone+laptop+repair+Calamba+Laguna+Philippines&output=embed"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Map of nearby tech repair shops">
+        </iframe>
+    </div>
+
+    <div class="map-location-actions" id="locationActions" hidden></div>
+    <div class="map-location-actions ecotekk-toolbar" id="mapControls" aria-label="Map controls">
+        <button type="button" id="showNearest" class="visit">Nearest shop</button>
+        <button type="button" id="showAll" class="visit">Explore nearby</button>
+        <button type="button" id="useLocation" class="visit">Use my location</button>
+    </div>
+    <div class="ecotekk-map-status" id="mapStatus" role="status" aria-live="polite"></div>
+
+    <section class="tracker-results">
+        <h2>Find the right kind of help</h2>
+        <div class="et-card" style="margin:14px 0">
+            <div class="et-filter-grid et-filter-grid-2">
+                <div>
+                    <label class="et-field" for="deviceFilter">Device</label>
+                    <select class="et-input" id="deviceFilter">
+                        <option value="">Any device</option>
+                        <option value="phones">Phones and tablets</option>
+                        <option value="laptops">Laptops and computers</option>
+                        <option value="electronics">Other electronics</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="et-field" for="kindFilter">Type of shop</label>
+                    <select class="et-input" id="kindFilter">
+                        <option value="">Any type</option>
+                        <option value="authorized">Brand service center</option>
+                        <option value="independent">Independent repair shop / kiosk</option>
+                    </select>
+                </div>
+            </div>
+            <p class="et-note" id="filterNotice">A brand service center usually only handles its own brand (and may be the right call for warranty work). Independent shops and kiosks take a wider range of devices. Confirm what they accept before you go.</p>
+        </div>
+
+        <h2>Nearby shops</h2>
+        <div class="results-meta" id="resultsMeta">Sorted by estimated distance · call ahead to confirm hours, prices and your device</div>
+        <div class="sites" id="sitesList"><!-- filled by techhelp.js --></div>
+        <p class="et-note" style="margin-top:16px">“I went here” is a simple community tally. It does not rate a shop, and it never changes the order or contents of the list above.</p>
+    </section>
+
+    <p class="tracker-footnote">DISTANCES ARE ESTIMATES · LISTINGS COMPILED FROM PUBLIC PAGES, NOT VERIFIED BY ECOTEKK · ALWAYS CALL AHEAD TO CONFIRM HOURS, PRICES AND WHETHER THEY CAN SERVICE YOUR DEVICE</p>
+
+    <footer class="et-footer">
+        <div class="et-container">EcoTekk · Understand it. Fix it. Reuse it. Recycle it. · Early functional prototype. Shop details and operating hours must be confirmed directly.</div>
+    </footer>
+
+    <style>
+        .map-location-actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding-top:12px; padding-bottom:12px; margin:0 auto; font-size:14px; }
+        .map-location-actions[hidden] { display:none; }
+        .map-location-actions a { margin-left:auto; color:var(--brand-dark); font-weight:700; }
+        .location-dot { width:12px; height:12px; background:#2684ff; border:2px solid white; box-shadow:0 0 0 2px #2684ff; border-radius:50%; flex:none; }
+        #mapControls button { cursor:pointer; border:0; padding:10px 13px; border-radius:8px; background:var(--brand-strong); color:white; font:inherit; font-weight:650; }
+        #mapControls button:disabled { opacity:.6; cursor:wait; }
+        .site-links { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+        .site-links .visit { display:inline-flex; align-items:center; justify-content:center; text-decoration:none; border-radius:8px; min-height:40px; box-sizing:border-box; padding:10px 14px; font-size:13px; font-weight:700; }
+        .site-links button { border:0; cursor:pointer; font:inherit; padding:10px 12px; border-radius:8px; }
+        .site-links .directions-link { background:var(--brand-strong); color:white; }
+        .site-links .map-site-btn { background:transparent; border:1px solid currentColor; color:inherit; }
+        .site-links .visit:hover { opacity:.85; }
+        /* Line the map buttons and status text up with the map frame (900px, 24px side padding). */
+        .map-location-actions, .ecotekk-toolbar, .ecotekk-map-status { max-width:900px; padding-left:24px; padding-right:24px; }
+        .ecotekk-toolbar { gap:8px; padding-top:16px; padding-bottom:6px; }
+        .ecotekk-toolbar button { transition:transform .15s ease,opacity .15s ease; }
+        .ecotekk-toolbar button:hover:not(:disabled) { transform:translateY(-1px); opacity:.9; }
+        .ecotekk-map-status { margin:0 auto; padding-top:6px; padding-bottom:16px; font-size:13px; opacity:.8; min-height:18px; }
+        .tracker-results > .et-card + h2 { margin-top:32px; }
+        .et-filter-grid-2 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        @media(max-width:800px) { .et-filter-grid-2 { grid-template-columns:1fr; } }
+
+        /* Shop cards: tags + the "I went here" tally */
+        .site-card { flex-wrap:wrap; }
+        .site-body h2 { font-style:normal; }
+        .shop-tags { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 8px; }
+        .shop-tag { font:700 10px 'IBM Plex Mono',monospace; letter-spacing:.07em; text-transform:uppercase; color:var(--brand-dark); border:1px solid var(--line); border-radius:99px; padding:3px 8px; }
+        .shop-src { margin:6px 0 0; font-size:11px; color:var(--muted); font-family:'IBM Plex Mono',monospace; }
+        .went-row { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:12px; padding-top:12px; border-top:1px dashed var(--line); }
+        .went-count { display:flex; align-items:baseline; gap:8px; font-size:13px; color:var(--muted); }
+        .went-num { font-size:1.7rem; font-weight:800; line-height:1; color:var(--brand); font-variant-numeric:tabular-nums; font-family:'Plus Jakarta Sans',Arial,sans-serif; }
+        .went-btn { font:inherit; font-size:13px; font-weight:700; cursor:pointer; padding:9px 14px; border-radius:10px; border:2px solid var(--brand); background:transparent; color:inherit; transition:background .15s,color .15s,transform .15s; }
+        .went-btn:hover:not(:disabled) { background:var(--brand-strong); border-color:var(--brand-strong); color:#fff; }
+        .went-btn:active:not(:disabled) { transform:scale(.97); }
+        .went-btn:disabled { opacity:.55; cursor:not-allowed; }
+        .went-btn.is-done { background:var(--brand-strong); border-color:var(--brand-strong); color:#fff; opacity:1; }
+        .went-msg { flex-basis:100%; margin:0; font-size:12px; color:var(--muted); min-height:0; }
+        @media(max-width:600px) { .ecotekk-toolbar button { flex:1 1 140px; } .site-links .visit { flex:1 1 140px; } }
+        @media (prefers-reduced-motion:reduce) { .went-btn, .ecotekk-toolbar button { transition:none; } }
+    </style>
+</body>
+</html>
