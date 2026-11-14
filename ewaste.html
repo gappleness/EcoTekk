@@ -44,7 +44,6 @@
     <div class="map-location-actions ecotekk-toolbar" id="mapControls" aria-label="Map controls">
       <button type="button" id="showNearest" class="visit">Nearest drop-off</button>
       <button type="button" id="showAll" class="visit">Explore nearby</button>
-      <button type="button" id="showMe" class="visit" hidden>◎ You are here</button>
       </div>
     <div class="ecotekk-map-status" id="mapStatus" role="status" aria-live="polite"></div>
 
@@ -65,22 +64,10 @@
         </div>
     </section>
 
-    <section class="tracker-results">
-        <h2>Classify your e-waste</h2>
-        <p class="et-note">Choose the amount of waste and the geographic level where it is generated or collected.</p>
-        <div class="et-card">
-            <label class="et-field" for="quantityClass">Quantity scale</label>
-            <select class="et-input" id="quantityClass"><option value="">Select quantity scale</option><option>Individual</option><option>Household</option><option>Community</option><option>Industrial</option></select>
-            <label class="et-field" for="locationClass">Location scale</label>
-            <select class="et-input" id="locationClass"><option value="">Select location scale</option><option>Barangay</option><option>City/Municipality</option><option>Province</option><option>Region</option></select>
-            <p class="et-note" id="classificationResult" aria-live="polite">Select both fields to view your classification.</p>
-        </div>
-    </section>
-
     <p class="tracker-footnote">DISTANCES ARE ESTIMATES · LISTINGS INSPIRED BY PUBLIC GOOGLE MAPS DATA · ALWAYS CALL AHEAD TO CONFIRM HOURS AND ACCEPTED MATERIALS</p>
 
     <style>
-        .map-location-actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:12px 20px; margin:0 auto; max-width:1100px; font-size:14px; }
+        .map-location-actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding-top:12px; padding-bottom:12px; margin:0 auto; font-size:14px; }
         .map-location-actions[hidden] { display:none; }
         .map-location-actions a { margin-left:auto; color:var(--brand-dark); font-weight:700; }
         .location-dot { width:12px; height:12px; background:#2684ff; border:2px solid white; box-shadow:0 0 0 2px #2684ff; border-radius:50%; flex:none; }
@@ -90,10 +77,15 @@
         .site-links .visit { display:inline-flex; align-items:center; justify-content:center; text-decoration:none; border-radius:8px; min-height:40px; box-sizing:border-box; padding:10px 14px; }
         .site-links button { border:0; cursor:pointer; font:inherit; padding:10px 12px; border-radius:8px; }
         .site-links .directions-link { background:var(--brand-strong); color:white; }
-        .ecotekk-toolbar { max-width:1100px; gap:8px; padding:16px 20px 6px; }
+        /* Line the map buttons and status text up with the map frame (900px, 24px side padding). */
+        .map-location-actions, .ecotekk-toolbar, .ecotekk-map-status { max-width:900px; padding-left:24px; padding-right:24px; }
+        .ecotekk-toolbar { gap:8px; padding-top:16px; padding-bottom:6px; }
+        /* All three card buttons should match: .site-links button used font:inherit and made "Show on map" larger. */
+        .site-links .visit { font-size:13px; font-weight:700; }
+        .tracker-results > .et-card + h2 { margin-top:32px; }
         .ecotekk-toolbar button { transition:transform .15s ease,opacity .15s ease; }
         .ecotekk-toolbar button:hover { transform:translateY(-1px); opacity:.9; }
-        .ecotekk-map-status {max-width:1100px;margin:0 auto;padding:6px 20px 16px;font-size:13px;opacity:.8;min-height:18px;}
+        .ecotekk-map-status {margin:0 auto;padding-top:6px;padding-bottom:16px;font-size:13px;opacity:.8;min-height:18px;}
         .site-links .map-site-btn { background:transparent; border:1px solid currentColor; color:inherit; }
         .site-links .visit:hover {opacity:.85;}
         @media(max-width:600px) { .ecotekk-toolbar button {flex:1 1 140px;} .site-links .visit {flex:1 1 140px;} }
@@ -176,11 +168,6 @@
                     encodeURIComponent(s.name + ', ' + s.addr) + '&z=15&output=embed';
                 status.textContent = 'Showing: ' + s.name;
             }
-            document.getElementById('showMe').hidden = fallback;
-            document.getElementById('showMe').onclick = function () {
-                mapFrame.src = 'https://www.google.com/maps?q=' + encodeURIComponent(lat + ',' + lng) + '&z=14&output=embed';
-                status.textContent = 'Showing your browser-detected position';
-            };
             document.getElementById('showAll').onclick = function () {
                 mapFrame.src = 'https://www.google.com/maps?q=' +
                     encodeURIComponent('e-waste recycling near ' + (fallback ? 'Calamba Laguna' : lat + ',' + lng)) + '&output=embed';
@@ -243,8 +230,6 @@
             }
             renderSites();
             ['wasteTypeFilter','wasteScaleFilter','locationScaleFilter'].forEach(function(id){document.getElementById(id).addEventListener('change',renderSites);});
-            function updateClassification(){var q=document.getElementById('quantityClass').value,l=document.getElementById('locationClass').value;document.getElementById('classificationResult').textContent=q&&l?'Classification: '+q+' e-waste · '+l+' level.':'Select both fields to view your classification.';}
-            document.getElementById('quantityClass').addEventListener('change',updateClassification);document.getElementById('locationClass').addEventListener('change',updateClassification);
 
             list.addEventListener('click', function (e) {
                 var mapBtn = e.target.closest('.map-site-btn');
