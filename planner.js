@@ -7,6 +7,10 @@
     const modelSelect = document.getElementById('model');
     const caseSelect = document.getElementById('case');
     const output = document.getElementById('et-output');
+    const pageParams = new URLSearchParams(location.search);
+    let userTouchedDevice = false;
+    let userTouchedBrand = false;
+    let userTouchedModel = false;
 
     if (!form || !data || !categorySelect || !deviceSelect || !brandSelect || !modelSelect || !caseSelect || !output) return;
 
@@ -359,22 +363,67 @@
         } catch (_) {}
     }
 
-    const detectButton = document.getElementById('detect-device');
     const detectStatus = document.getElementById('detect-status');
 
-    function applyDetectedDevice(info) {
-        if (info.device) deviceSelect.value = info.device;
-        if (info.brand && [...brandSelect.options].some(o => o.value === info.brand || o.textContent === info.brand)) {
-            brandSelect.value = info.brand;
-            updateModels();
+    // Android browsers that support User-Agent Client Hints may expose the exact
+    // hardware model. iOS browsers deliberately do not expose an exact iPhone/iPad
+    // model, and desktop browsers generally do not expose a computer model.
+    const androidModelCodes = {
+        'SM-A155F': ['Samsung', 'Galaxy A15'],
+        'SM-A155M': ['Samsung', 'Galaxy A15'],
+        'SM-A156E': ['Samsung', 'Galaxy A15 5G'],
+        'SM-A156B': ['Samsung', 'Galaxy A15 5G'],
+        'SM-A256E': ['Samsung', 'Galaxy A25 5G'],
+        'SM-A256B': ['Samsung', 'Galaxy A25 5G'],
+        'SM-A546E': ['Samsung', 'Galaxy A54 5G'],
+        'SM-A556E': ['Samsung', 'Galaxy A55 5G'],
+        'SM-S921B': ['Samsung', 'Galaxy S24'],
+        'SM-S926B': ['Samsung', 'Galaxy S24+'],
+        'SM-S928B': ['Samsung', 'Galaxy S24 Ultra'],
+        'SM-S931B': ['Samsung', 'Galaxy S25'],
+        'SM-S936B': ['Samsung', 'Galaxy S25+'],
+        'SM-S938B': ['Samsung', 'Galaxy S25 Ultra'],
+        'SM-X510': ['Samsung', 'Galaxy Tab S9 FE'],
+        'SM-X516B': ['Samsung', 'Galaxy Tab S9 FE 5G'],
+        'SM-X210': ['Samsung', 'Galaxy Tab A9+'],
+        'Pixel 8': ['Google', 'Pixel 8'],
+        'Pixel 8 Pro': ['Google', 'Pixel 8 Pro'],
+        'Pixel 9': ['Google', 'Pixel 9'],
+        'Pixel 9 Pro': ['Google', 'Pixel 9 Pro'],
+        'Pixel 9 Pro XL': ['Google', 'Pixel 9 Pro XL']
+    };
+
+    function addDetectedModelOption(brand, model, device) {
+        if (!brand || !model) return;
+        if (!models[brand]) models[brand] = [];
+        let entry = models[brand].find(item => item.value.toLowerCase() === model.toLowerCase());
+        if (!entry) {
+            entry = {
+                value: model,
+                device: device || deviceSelect.value || 'Phone',
+                specs: 'The browser identified this model name or hardware model code. Check the manufacturer page for the exact regional specifications and hardware variant.',
+                source: brand === 'Apple' ? 'https://support.apple.com/' :
+                    brand === 'Samsung' ? 'https://www.samsung.com/ph/support/' :
+                    brand === 'Google' ? 'https://support.google.com/pixelphone/' :
+                    'https://www.google.com/search?q=' + encodeURIComponent(brand + ' official support ' + model)
+            };
+            models[brand].push(entry);
         }
-        if (info.model) {
-            const match = [...modelSelect.options].find(o => o.value.toLowerCase() === info.model.toLowerCase());
-            if (match) modelSelect.value = match.value;
+    }
+
+    function applyDetectedDevice(info) {
+        if (info.device && !pageParams.has('device') && !userTouchedDevice) {
+            deviceSelect.value = info.device;
+        }
+        if (info.brand && !pageParams.has('brand') && !userTouchedBrand &&
+            [...brandSelect.options].some(option => option.value === info.brand || option.textContent === info.brand)) {
+            brandSelect.value = info.brand;
         }
         updateModels();
-        if (info.model) {
-            const match = [...modelSelect.options].find(o => o.value.toLowerCase() === info.model.toLowerCase());
+        if (info.model && !pageParams.has('model') && !userTouchedModel) {
+            addDetectedModelOption(info.brand, info.model, info.device);
+            updateModels();
+            const match = [...modelSelect.options].find(option => option.value.toLowerCase() === info.model.toLowerCase());
             if (match) modelSelect.value = match.value;
         }
         updateTopics();
@@ -383,71 +432,77 @@
 
     async function detectDevice() {
         const ua = navigator.userAgent || '';
-        const platform = navigator.userAgentData && navigator.userAgentData.platform
-            ? navigator.userAgentData.platform : (navigator.platform || '');
-        let info = { device: '', brand: '', model: '', message: 'Detected device family only. Please confirm the model manually.' };
+        const platform = navigator.userAgentData?.platform || navigator.platform || '';
+        let rawModel = '';
+        let info = { device: '', brand: '', model: '', message: 'This browser does not provide enough information to identify the device model.' };
 
-        const knownCodes = {
-            'SM-A155F': ['Samsung', 'Galaxy A15 5G'],
-            'SM-A155M': ['Samsung', 'Galaxy A15 5G'],
-            'SM-A256E': ['Samsung', 'Galaxy A25 5G'],
-            'SM-A256B': ['Samsung', 'Galaxy A25 5G'],
-            'Pixel 8': ['Google', 'Pixel 8'],
-            'Pixel 9': ['Google', 'Pixel 9'],
-            'iPhone': ['Apple', '']
-        };
-
-        let highEntropyModel = '';
-        if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+        if (navigator.userAgentData?.getHighEntropyValues) {
             try {
                 const hints = await navigator.userAgentData.getHighEntropyValues(['model']);
-                highEntropyModel = hints.model || '';
-            } catch (_) {}
+                rawModel = (hints.model || '').trim();
+            } catch (_) {
+                // Browser denied or does not support high-entropy model hints.
+            }
         }
 
         if (/iPhone|iPod/i.test(ua)) {
-            info.device = 'Phone'; info.brand = 'Apple';
-            info.message = 'Detected an Apple iPhone. Browsers do not normally expose the exact iPhone model; choose it manually.';
+            info = {
+                device: 'Phone', brand: 'Apple', model: '',
+                message: 'Detected: Apple iPhone. iOS/Safari hides the exact iPhone model from websites, so EcoTekk cannot reliably tell which iPhone you have.'
+            };
         } else if (/iPad/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1)) {
-            info.device = 'Tablet'; info.brand = 'Apple';
-            info.message = 'Detected an Apple tablet. Exact iPad model is not exposed by the browser.';
-        } else if (/Android/i.test(ua)) {
+            info = {
+                device: 'Tablet', brand: 'Apple', model: '',
+                message: 'Detected: Apple iPad. Apple does not expose the exact iPad model to websites.'
+            };
+        } else if (/Android/i.test(ua) || /Android/i.test(platform)) {
+            const uaModel = ua.match(/;\s*([^;)]+?)\s*(?:Build\/|\))/i);
+            rawModel = rawModel || (uaModel ? uaModel[1].trim() : '');
             info.device = /Mobile/i.test(ua) ? 'Phone' : 'Tablet';
-            const m = ua.match(/;\s*([^;)]+)\s*Build\//i);
-            const rawModel = highEntropyModel || (m ? m[1].trim() : '');
-            const code = Object.keys(knownCodes).find(k => rawModel.toLowerCase().includes(k.toLowerCase()));
-            if (code && knownCodes[code][0] !== 'Apple') {
-                info.brand = knownCodes[code][0]; info.model = knownCodes[code][1];
-                info.message = 'Detected ' + info.model + ' from browser model information. Please verify it in Settings.';
+
+            const code = Object.keys(androidModelCodes).find(key => rawModel.toLowerCase().includes(key.toLowerCase()));
+            if (code) {
+                [info.brand, info.model] = androidModelCodes[code];
+                info.message = 'Automatically detected: ' + info.brand + ' ' + info.model + '. Check Settings → About phone/tablet to confirm the regional variant.';
             } else {
-                const prefix = rawModel.match(/^(SM-|SAMSUNG)/i) ? 'Samsung' :
-                    (/^(Redmi|Xiaomi|POCO)/i.test(rawModel) ? 'Xiaomi' :
-                    (/^CPH/i.test(rawModel) ? 'OPPO' : (/^V/i.test(rawModel) ? 'vivo' : '')));
-                if (prefix) info.brand = prefix;
-                info.message = rawModel
-                    ? 'Android device detected (' + rawModel + '). Exact model matching may be unavailable; please confirm the brand and model.'
-                    : 'Android device detected. Your browser hides the exact model; choose the brand and model manually.';
+                const catalogMatch = Object.entries(models).flatMap(([brand, entries]) => entries.map(entry => ({ brand, entry })))
+                    .find(({ brand, entry }) => rawModel && (rawModel.toLowerCase().includes(entry.value.toLowerCase()) || entry.value.toLowerCase().includes(rawModel.toLowerCase())));
+                if (catalogMatch) {
+                    info.brand = catalogMatch.brand;
+                    info.model = catalogMatch.entry.value;
+                    info.device = catalogMatch.entry.device;
+                    info.message = 'Automatically detected: ' + info.brand + ' ' + info.model + '.';
+                } else {
+                    const upper = rawModel.toUpperCase();
+                    if (/^(SM-|SAMSUNG)/.test(upper)) info.brand = 'Samsung';
+                    else if (/^(REDMI|XIAOMI|POCO)/i.test(rawModel)) info.brand = 'Xiaomi';
+                    else if (/^CPH/i.test(rawModel)) info.brand = 'OPPO';
+                    else if (/^V[0-9A-Z]/i.test(rawModel)) info.brand = 'vivo';
+                    else if (/^RMX/i.test(rawModel)) info.brand = 'realme';
+                    else if (/^M[0-9A-Z]{3,}/i.test(rawModel)) info.brand = 'Xiaomi';
+                    else if (/PIXEL/i.test(rawModel)) info.brand = 'Google';
+                    info.model = rawModel || '';
+                    info.message = rawModel
+                        ? 'Android hardware identifier detected: ' + rawModel + (info.brand ? ' (' + info.brand + ').' : '.') + ' This identifier may be a manufacturer code rather than the retail model name.'
+                        : 'Detected: Android device. This browser hides the exact model identifier, so the model cannot be auto-filled.';
+                }
             }
-        } else if (/Windows|Win/i.test(platform + ' ' + ua)) {
-            info.device = 'Laptop / computer';
-            info.message = 'Windows computer detected. The browser cannot reliably identify its manufacturer or exact model.';
-        } else if (/macOS|Macintosh|MacIntel/i.test(platform + ' ' + ua)) {
-            info.device = 'Laptop / computer'; info.brand = 'Apple';
-            info.message = 'Mac detected. The browser cannot reliably distinguish MacBook, iMac or Mac mini; choose the model manually.';
         } else if (/CrOS/i.test(ua)) {
-            info.device = 'Laptop / computer'; info.brand = 'Google';
-            info.message = 'ChromeOS device detected. Exact Chromebook model is not reliably exposed.';
-        } else {
-            info.message = 'Could not identify the device family. Select the device type and model manually.';
+            info = { device: 'Laptop / computer', brand: 'Google', model: '', message: 'Detected: Chromebook. ChromeOS does not reliably expose the exact Chromebook model to websites.' };
+        } else if (/Windows|Win/i.test(platform + ' ' + ua)) {
+            info = { device: 'Laptop / computer', brand: '', model: '', message: 'Detected: Windows computer. Browsers do not provide the PC manufacturer or exact model.' };
+        } else if (/macOS|Macintosh|MacIntel/i.test(platform + ' ' + ua)) {
+            info = { device: 'Laptop / computer', brand: 'Apple', model: '', message: 'Detected: Mac computer. The browser does not reveal whether it is a MacBook, iMac or Mac mini, or its exact model.' };
+        } else if (/Linux/i.test(platform + ' ' + ua)) {
+            info = { device: 'Laptop / computer', brand: '', model: '', message: 'Detected: Linux computer. The browser does not expose the manufacturer or exact model.' };
         }
 
         applyDetectedDevice(info);
     }
 
-    if (detectButton) detectButton.addEventListener('click', detectDevice);
-
-    brandSelect.addEventListener('change', function () { updateModels(); });
-    deviceSelect.addEventListener('change', function () { updateModels(); updateTopics(); });
+    brandSelect.addEventListener('change', function () { userTouchedBrand = true; updateModels(); });
+    modelSelect.addEventListener('change', function () { userTouchedModel = true; });
+    deviceSelect.addEventListener('change', function () { userTouchedDevice = true; updateModels(); updateTopics(); });
     categorySelect.addEventListener('change', updateTopics);
 
     // Category-first: topics remain filtered as the user changes any selection.
@@ -467,7 +522,7 @@
         output.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
     });
 
-    const params = new URLSearchParams(location.search);
+    const params = pageParams;
     if (params.has('device')) deviceSelect.value = params.get('device');
     if (params.has('category')) categorySelect.value = params.get('category');
     if (params.has('brand')) brandSelect.value = params.get('brand');
@@ -478,4 +533,9 @@
         caseSelect.value = params.get('case');
         render(caseSelect.value, safeArea(document.getElementById('area').value));
     }
+
+    // Run automatically when Explore opens; no detection button is required.
+    detectDevice().catch(function () {
+        if (detectStatus) detectStatus.textContent = 'Automatic detection is unavailable in this browser. Please choose the device and model manually.';
+    });
 })();
