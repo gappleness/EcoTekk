@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
     <meta name="theme-color" content="#166747">
     <link rel="stylesheet" href="stylesheet.css">
+    <link rel="stylesheet" href="experience.css">
     <script src="theme.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -14,10 +16,14 @@
     <script src="firebase-config.js"></script>
     <script src="auth.js"></script>
 </head>
+
 <body>
-    <nav>
+    <nav class="et-nav">
         <a href="index.html" class="logo">EcoTekk</a>
         <ul>
+            <li><a href="explore.html">Explore a device</a></li>
+            <li><a href="techhelp.html">Tech help</a></li>
+            <li><a href="home.html">E-waste finder</a></li>
             <li><a href="login.html">Login</a></li>
             <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
         </ul>
@@ -26,16 +32,20 @@
     <section class="login-section">
         <div class="login-box">
             <h1 id="formTitle">Welcome back</h1>
-            <p class="subtitle" id="formSubtitle">Sign in to track points and redeem rewards</p>
+            <p class="subtitle" id="formSubtitle">Sign in for a saved profile, or continue as a guest</p>
 
             <form id="authForm">
-                <input type="text" id="nameInput" placeholder="Name" autocomplete="username" required />
-                <input type="email" id="emailInput" placeholder="Email (optional)" style="display:none;" autocomplete="email" />
-                <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password" required />
+                <input type="text" id="nameInput" placeholder="Name" autocomplete="username" style="display:none;" />
+                <input type="email" id="emailInput" placeholder="Email address" autocomplete="email" required />
+                <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password"
+                    required />
                 <button type="submit" class="btn-primary" id="submitBtn">Login</button>
             </form>
 
-            <button type="button" class="btn-secondary" id="googleBtn" style="width:100%;margin-top:12px;">Continue with Google</button>
+            <button type="button" class="btn-secondary" id="googleBtn" style="width:100%;margin-top:12px;">Continue with
+                Google</button>
+            <button type="button" class="btn-secondary" id="guestBtn" style="width:100%;margin-top:10px;">Continue as guest</button>
+            <p class="empty-note" style="margin:8px 0 0;font-size:12px;">Guests can use every tool with a basic display. No profile or customization.</p>
             <button type="button" id="resetBtn" style="margin-top:12px;">Forgot password?</button>
             <p id="message" class="message"></p>
 
@@ -47,28 +57,57 @@
     </section>
 
     <script>
-    EcotekkAuth.ready.then(function(){
-      if(EcotekkAuth.currentUser()){location.href='profile.html';return;}
-      const form=document.getElementById('authForm'), name=document.getElementById('nameInput'), email=document.getElementById('emailInput'), pass=document.getElementById('passwordInput'), msg=document.getElementById('message');
-      let signup=false;
-      name.style.display='none';name.required=false;
-      email.style.display='block';email.required=true;email.placeholder='Email address';
-      document.getElementById('toggleMode').onclick=function(){
-        signup=!signup;name.style.display=signup?'block':'none';name.required=signup;
-        document.getElementById('formTitle').textContent=signup?'Join Ecotekk':'Welcome back';
-        document.getElementById('submitBtn').textContent=signup?'Sign up':'Login';
-        document.getElementById('toggleHint').textContent=signup?'Already have an account?':'New here?';
-        this.textContent=signup?'Sign in':'Create an account';msg.textContent='';
-        pass.autocomplete=signup?'new-password':'current-password';
-      };
-      async function run(action){msg.classList.remove('success');msg.textContent='Please wait…';
-        try {await action();msg.classList.add('success');msg.textContent='Success! Opening profile…';location.href='profile.html';}
-        catch(e){msg.textContent=e.message || 'Something went wrong. Try again.';}
-      }
-      form.onsubmit=e=>{e.preventDefault();run(()=>signup?EcotekkAuth.signup(name.value,pass.value,email.value):EcotekkAuth.login(email.value,pass.value));};
-      document.getElementById('googleBtn').onclick=()=>run(()=>EcotekkAuth.googleLogin());
-      document.getElementById('resetBtn').onclick=async()=>{if(!email.value.trim()){msg.textContent='Enter your email first.';return;}try{await EcotekkAuth.resetPassword(email.value);msg.textContent='If an account exists for that email, check your inbox for a reset link.';}catch(e){msg.textContent=e.message;}};
-    });
+        EcotekkAuth.ready.then(function () {
+            // Only same-site page names are accepted as a return path (e.g. techhelp.html or explore.html?case=x).
+            const nextParam = new URLSearchParams(location.search).get('next') || '';
+            const dest = /^[a-z0-9_-]+\.html(\?[a-z0-9_=&%.-]*)?$/i.test(nextParam) ? nextParam : 'profile.html';
+            const current = EcotekkAuth.currentUser();
+            // Members are sent on. Guests stay so they can sign in or create an account.
+            if (current && !current.isGuest) { location.href = dest; return; }
+            const form = document.getElementById('authForm'), name = document.getElementById('nameInput'), email = document.getElementById('emailInput'), pass = document.getElementById('passwordInput'), msg = document.getElementById('message');
+            let signup = false;
+            name.style.display = 'none'; name.required = false;
+            email.style.display = 'block'; email.required = true; email.placeholder = 'Email address';
+            document.getElementById('toggleMode').onclick = function () {
+                signup = !signup; name.style.display = signup ? 'block' : 'none'; name.required = signup;
+                document.getElementById('formTitle').textContent = signup ? 'Join Ecotekk' : 'Welcome back';
+                document.getElementById('submitBtn').textContent = signup ? 'Sign up' : 'Login';
+                document.getElementById('toggleHint').textContent = signup ? 'Already have an account?' : 'New here?';
+                this.textContent = signup ? 'Sign in' : 'Create an account'; msg.textContent = '';
+                pass.autocomplete = signup ? 'new-password' : 'current-password';
+            };
+            async function run(action) {
+                msg.classList.remove('success'); msg.textContent = 'Please wait…';
+                try { await action(); msg.classList.add('success'); msg.textContent = 'Success! Redirecting…'; location.href = dest; }
+                catch (e) {
+                    console.error("Login error:", e.code, e.message);
+
+                    if (
+                        e.code === 'auth/invalid-credential' ||
+                        e.message?.includes('INVALID_LOGIN_CREDENTIALS') ||
+                        e.message?.includes('auth/invalid-credential')
+                    ) {
+                        msg.textContent = 'Incorrect email or password. Please try again.';
+                    } else {
+                        const messages = {
+                            'auth/too-many-requests': 'Too many attempts. Please try again later.',
+                            'auth/network-request-failed': 'Network error. Check your internet connection.',
+                            'auth/user-disabled': 'This account has been disabled.',
+                            'auth/operation-not-allowed': 'Guest access is not switched on yet. Enable Anonymous sign-in in Firebase Authentication.',
+                            'auth/admin-restricted-operation': 'Guest access is not switched on yet. Enable Anonymous sign-in in Firebase Authentication.'
+                        };
+
+                        msg.textContent = messages[e.code] || 'Unable to sign in. Please try again.';
+                    }
+                }
+            }
+            form.onsubmit = e => { e.preventDefault(); run(() => signup ? EcotekkAuth.signup(name.value, pass.value, email.value) : EcotekkAuth.login(email.value, pass.value)); };
+            document.getElementById('googleBtn').onclick = () => run(() => EcotekkAuth.googleLogin());
+            document.getElementById('guestBtn').onclick = () => run(() => EcotekkAuth.guestLogin());
+            document.getElementById('resetBtn').onclick = async () => { if (!email.value.trim()) { msg.textContent = 'Enter your email first.'; return; } try { await EcotekkAuth.resetPassword(email.value); msg.textContent = 'If an account exists for that email, check your inbox for a reset link.'; } catch (e) { msg.textContent = e.message; } };
+        });
     </script>
+    <script src="experience.js" defer></script>
 </body>
+
 </html>

@@ -7,6 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
     <meta name="theme-color" content="#166747">
     <link rel="stylesheet" href="stylesheet.css">
+<link rel="stylesheet" href="experience.css">
     <script src="theme.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -15,9 +16,10 @@
     <script src="auth.js"></script>
 </head>
 <body>
-    <nav>
+    <nav class="et-nav">
         <a href="index.html" class="logo">EcoTekk</a>
-        <ul>
+        <ul><li><a href="explore.html">Explore a device</a></li><li><a href="techhelp.html">Tech help</a></li>
+            <li><a href="home.html">E-waste finder</a></li>
             <li id="nav-auth"><a href="login.html">Login</a></li>
             <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
         </ul>
@@ -42,13 +44,19 @@
     <div class="map-location-actions ecotekk-toolbar" id="mapControls" aria-label="Map controls">
       <button type="button" id="showNearest" class="visit">Nearest drop-off</button>
       <button type="button" id="showAll" class="visit">Explore nearby</button>
-      <button type="button" id="showMe" class="visit" hidden>◎ You are here</button>
       </div>
     <div class="ecotekk-map-status" id="mapStatus" role="status" aria-live="polite"></div>
-    <div hidden>
-    </div>
 
     <section class="tracker-results">
+        <h2>Find a suitable drop-off</h2>
+        <div class="et-card" style="margin:14px 0">
+            <div class="et-filter-grid">
+                <div><label class="et-field" for="wasteTypeFilter">Accepted waste type</label><select class="et-input" id="wasteTypeFilter"><option value="">Any type</option><option value="small-electronics">Small electronics</option><option value="computers">Computers and laptops</option><option value="phones">Phones and tablets</option><option value="batteries">Batteries</option><option value="cables">Cables and accessories</option><option value="appliances">Large appliances</option></select></div>
+                <div><label class="et-field" for="wasteScaleFilter">Waste quantity scale</label><select class="et-input" id="wasteScaleFilter"><option value="">Any quantity</option><option value="Individual">Individual</option><option value="Household">Household</option><option value="Community">Community</option><option value="Industrial">Industrial</option></select></div>
+                <div><label class="et-field" for="locationScaleFilter">Location scale</label><select class="et-input" id="locationScaleFilter"><option value="">Any location scale</option><option value="Barangay">Barangay</option><option value="City/Municipality">City/Municipality</option><option value="Province">Province</option><option value="Region">Region</option></select></div>
+            </div>
+            <p class="et-note" id="filterNotice">Facility acceptance, capacity, and service coverage have not been verified for these demonstration listings. Filters will only match facilities with confirmed details.</p>
+        </div>
         <h2>Nearby sites</h2>
         <div class="results-meta" id="resultsMeta">Sorted by estimated distance · call ahead to confirm accepted materials</div>
         <div class="sites" id="sitesList">
@@ -59,38 +67,32 @@
     <p class="tracker-footnote">DISTANCES ARE ESTIMATES · LISTINGS INSPIRED BY PUBLIC GOOGLE MAPS DATA · ALWAYS CALL AHEAD TO CONFIRM HOURS AND ACCEPTED MATERIALS</p>
 
     <style>
-        /* Keep Google Maps in its original light appearance in both site themes. */
-        .map-frame #mapFrame,
-        [data-theme="dark"] .map-frame #mapFrame { filter: none !important; }
-        .map-location-actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:12px 20px; margin:0 auto; max-width:1100px; font-size:14px; }
+        .map-location-actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding-top:12px; padding-bottom:12px; margin:0 auto; font-size:14px; }
         .map-location-actions[hidden] { display:none; }
         .map-location-actions a { margin-left:auto; color:var(--brand-dark); font-weight:700; }
         .location-dot { width:12px; height:12px; background:#2684ff; border:2px solid white; box-shadow:0 0 0 2px #2684ff; border-radius:50%; flex:none; }
-        #mapControls button { cursor:pointer; border:0; padding:10px 13px; border-radius:8px; background:var(--brand-dark); color:white; font:inherit; font-weight:650; }
+        #mapControls button { cursor:pointer; border:0; padding:10px 13px; border-radius:8px; background:var(--brand-strong); color:white; font:inherit; font-weight:650; }
         #mapControls button[hidden] {display:none;}
-        #mapStatus {font-size:13px; opacity:.8;}
-        .site-links { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
-        .site-links .visit { display:inline-flex; align-items:center; justify-content:center; }
+        .site-links { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px; }
+        .site-links .visit { display:inline-flex; align-items:center; justify-content:center; text-decoration:none; border-radius:8px; min-height:40px; box-sizing:border-box; padding:10px 14px; }
         .site-links button { border:0; cursor:pointer; font:inherit; padding:10px 12px; border-radius:8px; }
-        .site-links .directions-link { background:var(--brand-dark); color:white; }
-        .ecotekk-toolbar { max-width:1100px; gap:8px; padding:16px 20px 6px; }
+        .site-links .directions-link { background:var(--brand-strong); color:white; }
+        /* Line the map buttons and status text up with the map frame (900px, 24px side padding). */
+        .map-location-actions, .ecotekk-toolbar, .ecotekk-map-status { max-width:900px; padding-left:24px; padding-right:24px; }
+        .ecotekk-toolbar { gap:8px; padding-top:16px; padding-bottom:6px; }
+        /* All three card buttons should match: .site-links button used font:inherit and made "Show on map" larger. */
+        .site-links .visit { font-size:13px; font-weight:700; }
+        .tracker-results > .et-card + h2 { margin-top:32px; }
         .ecotekk-toolbar button { transition:transform .15s ease,opacity .15s ease; }
         .ecotekk-toolbar button:hover { transform:translateY(-1px); opacity:.9; }
-        .ecotekk-map-status {max-width:1100px;margin:0 auto;padding:6px 20px 16px;font-size:13px;opacity:.8;min-height:18px;}
-        .site-links { margin-top:12px; }
-        .site-links .visit { text-decoration:none; border-radius:8px; min-height:40px; box-sizing:border-box; padding:10px 14px; }
+        .ecotekk-map-status {margin:0 auto;padding-top:6px;padding-bottom:16px;font-size:13px;opacity:.8;min-height:18px;}
         .site-links .map-site-btn { background:transparent; border:1px solid currentColor; color:inherit; }
-        .site-links .directions-link { background:var(--brand-dark); color:white; }
         .site-links .visit:hover {opacity:.85;}
         @media(max-width:600px) { .ecotekk-toolbar button {flex:1 1 140px;} .site-links .visit {flex:1 1 140px;} }
         
     </style>
     <script>
         (function () {
-            EcotekkAuth.ready.then(function () {
-                if (EcotekkAuth.currentUser()) document.getElementById('nav-auth').innerHTML = '<a href="profile.html">Profile</a>';
-            });
-
             var params = new URLSearchParams(window.location.search);
             var lat = parseFloat(params.get('lat'));
             var lng = parseFloat(params.get('lng'));
@@ -145,10 +147,6 @@
             if (!fallback) {
                 document.getElementById('locLabel').textContent =
                     'Based on your live location (' + lat.toFixed(4) + ', ' + lng.toFixed(4) + '). Open a site in Maps or learn about disposal verification.';
-                // A Google Maps search embed cannot simultaneously guarantee a personal marker.
-                // A coordinate query reliably pins the browser-reported position instead.
-                document.getElementById('mapFrame').src =
-                    'https://www.google.com/maps?q=' + encodeURIComponent(lat + ',' + lng) + '&z=14&output=embed';
                 var actions = document.getElementById('locationActions');
                 actions.hidden = false;
                 var accuracyText = Number.isFinite(accuracy) && accuracy >= 0 ? ' · estimated accuracy ±' + Math.round(accuracy) + ' m' : ' · approximate browser location';
@@ -161,31 +159,11 @@
 
             var mapFrame = document.getElementById('mapFrame');
             var status = document.getElementById('mapStatus');
-            // OPTIONAL: Use a dedicated Google Maps Embed API key, not the Firebase apiKey.
-            // Enable Maps Embed API and configure billing/restrictions in Google Cloud first.
-            var MAPS_EMBED_API_KEY = '';
             function showSite(s) {
                 mapFrame.src = 'https://www.google.com/maps?q=' +
                     encodeURIComponent(s.name + ', ' + s.addr) + '&z=15&output=embed';
                 status.textContent = 'Showing: ' + s.name;
             }
-            function showDirections(s) {
-                if (!MAPS_EMBED_API_KEY) {
-                    showSite(s);
-                    status.textContent = 'Site shown. For a road route, use Open route in Google Maps. In-site routes require a Maps Embed API key.';
-                    return;
-                }
-                var origin = fallback ? 'Calamba, Laguna, Philippines' : lat + ',' + lng;
-                mapFrame.src = 'https://www.google.com/maps/embed/v1/directions?key=' +
-                    encodeURIComponent(MAPS_EMBED_API_KEY) + '&origin=' + encodeURIComponent(origin) +
-                    '&destination=' + encodeURIComponent(s.name + ', ' + s.addr) + '&mode=driving';
-                status.textContent = 'Driving route to ' + s.name;
-            }
-            document.getElementById('showMe').hidden = fallback;
-            document.getElementById('showMe').onclick = function () {
-                mapFrame.src = 'https://www.google.com/maps?q=' + encodeURIComponent(lat + ',' + lng) + '&z=14&output=embed';
-                status.textContent = 'Showing your browser-detected position';
-            };
             document.getElementById('showAll').onclick = function () {
                 mapFrame.src = 'https://www.google.com/maps?q=' +
                     encodeURIComponent('e-waste recycling near ' + (fallback ? 'Calamba Laguna' : lat + ',' + lng)) + '&output=embed';
@@ -213,7 +191,14 @@
             }
 
             var list = document.getElementById('sitesList');
-            ranked.forEach(function (s) {
+            function filteredSites(){
+                var type=document.getElementById('wasteTypeFilter').value, scale=document.getElementById('wasteScaleFilter').value, loc=document.getElementById('locationScaleFilter').value;
+                return ranked.filter(function(s){return (!type||(Array.isArray(s.acceptedTypes)&&s.acceptedTypes.indexOf(type)!==-1))&&(!scale||(Array.isArray(s.wasteScales)&&s.wasteScales.indexOf(scale)!==-1))&&(!loc||(Array.isArray(s.locationScales)&&s.locationScales.indexOf(loc)!==-1));});
+            }
+            function renderSites(){
+                list.replaceChildren();var chosen=filteredSites();
+                if(!chosen.length){var empty=document.createElement('p');empty.className='empty-note';empty.textContent='No demonstration listing has verified details matching these filters. Contact facilities directly before bringing your e-waste.';list.appendChild(empty);}
+                chosen.forEach(function (s) {
                 var bars = '';
                 var n = barCount(s.dist);
                 for (var i = 0; i < 4; i++) {
@@ -231,33 +216,23 @@
                     '<span' + (s.open ? ' class="open"' : '') + '>' + s.hours + '</span>' +
                     '<span>' + s.phone + '</span>' +
                     '</div>' +
-                    '<button type="button" class="btn-dispose" data-site="' + s.name.replace(/"/g, '&quot;') + '">Disposal verification coming soon</button>' +
                     '</div>' +
                     '<div class="site-links"><a href="' + s.maps + '" target="_blank" rel="noopener" class="visit">View on Maps</a>' +
-                    '<button type="button" class="visit directions-link map-site-btn" data-index="' + ranked.indexOf(s) + '">Show on map</button>' +
-                    
+                    '<button type="button" class="visit map-site-btn" data-index="' + ranked.indexOf(s) + '">Show on map</button>' +
                     '<a href="' + directionsUrl(s) + '" target="_blank" rel="noopener" class="visit directions-link">Get directions ↗</a></div>';
                 list.appendChild(card);
             });
+            document.getElementById('filterNotice').textContent='The current demonstration facilities do not have verified accepted-material, quantity-capacity, or coverage metadata. A filter only returns a facility when its matching details are confirmed.';
+            }
+            renderSites();
+            ['wasteTypeFilter','wasteScaleFilter','locationScaleFilter'].forEach(function(id){document.getElementById(id).addEventListener('change',renderSites);});
 
             list.addEventListener('click', function (e) {
                 var mapBtn = e.target.closest('.map-site-btn');
                 if (mapBtn) { showSite(ranked[Number(mapBtn.getAttribute('data-index'))]); return; }
-                var routeBtn = e.target.closest('.route-site-btn');
-                if (routeBtn) { showDirections(ranked[Number(routeBtn.getAttribute('data-index'))]); return; }
-                var btn = e.target.closest('.btn-dispose');
-                if (!btn) return;
-                var session = EcotekkAuth.currentUser();
-                if (!session) {
-                    alert('Please log in to earn points for disposals.');
-                    window.location.href = 'login.html';
-                    return;
-                }
-                if (btn.disabled) return;
-                var siteName = btn.getAttribute('data-site');
-                alert('Disposal logging and points require verification by an authorized collection partner. This demo does not award real points yet.');
             });
         })();
     </script>
+<script src="experience.js" defer></script>
 </body>
 </html>
