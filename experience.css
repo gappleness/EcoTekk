@@ -57,3 +57,7 @@ nav,.et-btn:not(.ghost),.login-box .btn-primary,.getStarted{background-color:var
 [data-theme="dark"] .history-list .hist-pts.pos,[data-theme="dark"] .p-eyebrow,
 [data-theme="dark"] .map-location-actions a{color:#6fe39a}
 [data-theme="dark"] .visit:hover,[data-theme="dark"] .btn-dispose:hover,[data-theme="dark"] .reward-card button:hover:not(:disabled){color:#fff}
+
+/* Optional browser-based device detection controls */
+.et-detect-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 14px}
+.et-detect-row .et-small{flex:1;min-width:180px}

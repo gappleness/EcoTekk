@@ -13,18 +13,115 @@
     const models = {
         Samsung: [
             { value: 'Galaxy A15 5G', device: 'Phone', specs: '5G smartphone · 6.5-inch display · 50MP main camera · model variants differ', source: 'https://www.samsung.com/ph/smartphones/galaxy-a/galaxy-a15-5g/' },
-            { value: 'Galaxy A25 5G', device: 'Phone', specs: 'Exynos octa-core · 6.5-inch FHD+ Super AMOLED 120Hz · 50MP OIS main camera · 8GB RAM / 256GB storage variant', source: 'https://www.samsung.com/ph/smartphones/galaxy-a/galaxy-a25-5g-blue-256gb-sm-a256ezbhphl/' }
+            { value: 'Galaxy A25 5G', device: 'Phone', specs: 'Exynos platform · 6.5-inch FHD+ Super AMOLED 120Hz · 50MP OIS main camera · configurations vary', source: 'https://www.samsung.com/ph/smartphones/galaxy-a/galaxy-a25-5g-blue-256gb-sm-a256ezbhphl/' },
+            { value: 'Galaxy S24 FE', device: 'Phone', specs: 'Galaxy S series phone · Exynos platform · AMOLED display · camera and memory vary by region', source: 'https://www.samsung.com/ph/smartphones/galaxy-s24-fe/' },
+            { value: 'Galaxy Tab S9 FE', device: 'Tablet', specs: 'Android tablet · 10.9-inch display family · S Pen support · configuration varies', source: 'https://www.samsung.com/ph/tablets/galaxy-tab-s/galaxy-tab-s9-fe/' },
+            { value: 'Galaxy Watch7', device: 'Smartwatch', specs: 'Wear OS smartwatch · 40mm and 44mm sizes · sensors and battery vary by size', source: 'https://www.samsung.com/ph/watches/galaxy-watch/galaxy-watch7/' },
+            { value: 'Crystal UHD DU7000', device: 'TV / monitor', specs: '4K UHD smart TV family · screen sizes and regional features vary', source: 'https://www.samsung.com/ph/tvs/uhd-4k-tv/du7000-ua55du7000gxxp/' }
         ],
-        Xiaomi: [{ value: 'Redmi Note 13 5G', device: 'Phone', specs: '5G smartphone · 6.67-inch AMOLED 120Hz · 108MP main camera · configurations vary', source: 'https://www.mi.com/global/product/redmi-note-13-5g/specs/' }],
-        Apple: [{ value: 'iPhone 15', device: 'Phone', specs: '6.1-inch Super Retina XDR OLED · A16 Bionic · dual 48MP/12MP rear camera · USB-C', source: 'https://www.apple.com/ph/iphone-15/specs/' }],
-        Google: [{ value: 'Pixel 8', device: 'Phone', specs: '6.2-inch OLED 120Hz · Google Tensor G3 · 50MP + 12MP rear cameras · USB-C', source: 'https://store.google.com/product/pixel_8_specs' }],
+        Xiaomi: [
+            { value: 'Redmi Note 13 5G', device: 'Phone', specs: '5G smartphone · 6.67-inch AMOLED 120Hz · 108MP main camera · configurations vary', source: 'https://www.mi.com/global/product/redmi-note-13-5g/specs/' },
+            { value: 'Redmi Note 13 Pro 5G', device: 'Phone', specs: '5G smartphone · 200MP main camera with OIS · AMOLED display · configurations vary', source: 'https://www.mi.com/global/product/redmi-note-13-pro-5g/specs/' },
+            { value: 'Redmi Pad SE', device: 'Tablet', specs: 'Android tablet family · 11-inch display · Snapdragon platform · memory varies', source: 'https://www.mi.com/global/product/redmi-pad-se/specs/' },
+            { value: 'Xiaomi Smart Band 9', device: 'Smartwatch', specs: 'Fitness band · AMOLED display · battery and sensors depend on use', source: 'https://www.mi.com/global/product/xiaomi-smart-band-9/' }
+        ],
+        Apple: [
+            { value: 'iPhone 15', device: 'Phone', specs: '6.1-inch Super Retina XDR OLED · A16 Bionic · dual 48MP/12MP rear camera · USB-C', source: 'https://www.apple.com/ph/iphone-15/specs/' },
+            { value: 'iPhone 16', device: 'Phone', specs: '6.1-inch Super Retina XDR OLED · A18 chip · dual camera system · USB-C', source: 'https://www.apple.com/ph/iphone-16/specs/' },
+            { value: 'iPad 10th generation', device: 'Tablet', specs: '10.9-inch Liquid Retina display · A14 Bionic · USB-C · storage varies', source: 'https://support.apple.com/en-ph/111840' },
+            { value: 'Apple Watch Series 10', device: 'Smartwatch', specs: 'Apple Watch family · 42mm and 46mm cases · health and connectivity features vary', source: 'https://www.apple.com/ph/apple-watch-series-10/specs/' },
+            { value: 'MacBook Air 13-inch M3', device: 'Laptop / computer', specs: '13.6-inch Liquid Retina display · Apple M3 · unified memory and storage configurable', source: 'https://support.apple.com/en-ph/118551' },
+            { value: 'Mac mini M4', device: 'Laptop / computer', specs: 'Compact desktop computer · Apple M4 family · memory and storage configurable', source: 'https://www.apple.com/mac-mini/specs/' }
+        ],
+        Google: [
+            { value: 'Pixel 8', device: 'Phone', specs: '6.2-inch OLED 120Hz · Google Tensor G3 · 50MP + 12MP rear cameras · USB-C', source: 'https://store.google.com/product/pixel_8_specs' },
+            { value: 'Pixel 9', device: 'Phone', specs: 'Google Tensor G4 phone · 6.3-inch Actua display · camera and memory details vary by configuration', source: 'https://store.google.com/product/pixel_9_specs' },
+            { value: 'Pixel Tablet', device: 'Tablet', specs: 'Android tablet · 11-inch display · Google Tensor G2 · charging speaker dock compatibility', source: 'https://store.google.com/product/pixel_tablet_specs' }
+        ],
         OPPO: [
-            { value: 'A78', device: 'Phone', specs: 'Snapdragon 680 · 6.43-inch FHD+ AMOLED 90Hz · 8GB + 256GB · 5000mAh typical battery · 67W SUPERVOOC', source: 'https://www.oppo.com/ph/smartphones/series-a/a78/specs/' },
-            { value: 'A78 5G', device: 'Phone', specs: 'Dimensity 700 · 6.56-inch HD+ LCD 90Hz · 8GB + 128GB variant · 5000mAh typical battery · 33W SUPERVOOC', source: 'https://www.oppo.com/ph/smartphones/series-a/a78-5g/specs/' }
+            { value: 'A78', device: 'Phone', specs: 'Snapdragon 680 · 6.43-inch FHD+ AMOLED 90Hz · 5000mAh typical battery · 67W SUPERVOOC', source: 'https://www.oppo.com/ph/smartphones/series-a/a78/specs/' },
+            { value: 'A78 5G', device: 'Phone', specs: 'Dimensity 700 · 6.56-inch HD+ LCD 90Hz · 5000mAh typical battery · 33W SUPERVOOC', source: 'https://www.oppo.com/ph/smartphones/series-a/a78-5g/specs/' },
+            { value: 'Reno11 5G', device: 'Phone', specs: '5G smartphone · MediaTek Dimensity platform · AMOLED display · regional configurations vary', source: 'https://www.oppo.com/ph/smartphones/series-reno/reno11-5g/specs/' },
+            { value: 'Pad Air', device: 'Tablet', specs: 'Android tablet family · 11-inch display · Snapdragon platform · configuration varies', source: 'https://www.oppo.com/en/accessories/oppo-pad-air/specs/' }
         ],
-        Acer: [{ value: 'Aspire Lite AL14-51M', device: 'Laptop / computer', specs: '14-inch Aspire Lite family · Intel platform; exact CPU, memory and display vary by SKU', source: 'https://www.acer.com/ph-en/support/product-support/Aspire_AL14-51M' }],
-        Lenovo: [{ value: 'IdeaPad Slim 3 15IAH8', device: 'Laptop / computer', specs: '15-inch IdeaPad Slim 3 family · Intel platform; exact CPU, memory and display vary by machine type', source: 'https://pcsupport.lenovo.com/ph/en/products/laptops-and-netbooks/ideapad-s-series-netbooks/ideapad-slim-3-15iah8' }],
-        Dell: [{ value: 'Inspiron 15 3530', device: 'Laptop / computer', specs: '15.6-inch Inspiron laptop family · Intel processor options; RAM, display and storage vary by configuration', source: 'https://www.dell.com/support/product-details/en-us/product/inspiron-15-3530-laptop/' }]
+        vivo: [
+            { value: 'V30 5G', device: 'Phone', specs: '5G smartphone · Snapdragon 7 Gen 3 · AMOLED display · memory varies by region', source: 'https://www.vivo.com/ph/products/param/v30' },
+            { value: 'Y28', device: 'Phone', specs: 'Android smartphone · large-capacity battery family · exact chipset and display depend on regional variant', source: 'https://www.vivo.com/ph/products' },
+            { value: 'Pad3', device: 'Tablet', specs: 'Android tablet family · specifications and availability vary by market', source: 'https://www.vivo.com/en/products' }
+        ],
+        realme: [
+            { value: '12 Pro+ 5G', device: 'Phone', specs: '5G smartphone · Snapdragon 7s Gen 2 · periscope portrait camera · configurations vary', source: 'https://www.realme.com/ph/realme-12-pro-plus/specs' },
+            { value: 'C67', device: 'Phone', specs: 'Android smartphone · 108MP camera family · regional 4G/5G variants differ', source: 'https://www.realme.com/ph/' },
+            { value: 'Pad 2', device: 'Tablet', specs: 'Android tablet family · 11.5-inch display class · configurations vary', source: 'https://www.realme.com/in/realme-pad-2/specs' }
+        ],
+        Motorola: [
+            { value: 'moto g84 5G', device: 'Phone', specs: '5G smartphone · Snapdragon 695 · pOLED display · regional configurations vary', source: 'https://www.motorola.com/ph/smartphones-moto-g-84-5g/p' },
+            { value: 'motorola edge 50 fusion', device: 'Phone', specs: '5G smartphone · Snapdragon platform · pOLED display · configuration varies', source: 'https://www.motorola.com/ph/' }
+        ],
+        Huawei: [
+            { value: 'nova 12i', device: 'Phone', specs: 'Android-based Huawei phone · 108MP main camera · regional software and network support vary', source: 'https://consumer.huawei.com/ph/phones/nova-12i/specs/' },
+            { value: 'MatePad 11.5', device: 'Tablet', specs: 'Tablet family · 11.5-inch display · regional editions and configurations vary', source: 'https://consumer.huawei.com/ph/tablets/matepad-11-5/specs/' },
+            { value: 'WATCH FIT 3', device: 'Smartwatch', specs: 'Smartwatch · rectangular AMOLED display · health and battery features vary by use', source: 'https://consumer.huawei.com/ph/wearables/watch-fit3/specs/' }
+        ],
+        Acer: [
+            { value: 'Aspire Lite AL14-51M', device: 'Laptop / computer', specs: '14-inch Aspire Lite family · Intel platform; exact CPU, memory and display vary by SKU', source: 'https://www.acer.com/ph-en/support/product-support/Aspire_AL14-51M' },
+            { value: 'Nitro V 15', device: 'Laptop / computer', specs: '15.6-inch gaming laptop family · CPU/GPU, display and memory vary by SKU', source: 'https://www.acer.com/ph-en/laptops/nitro/nitro-v-15' },
+            { value: 'Aspire TC desktop', device: 'Laptop / computer', specs: 'Desktop PC family · processor, graphics, memory and storage vary by configuration', source: 'https://www.acer.com/ph-en/desktops-and-all-in-ones/aspire-tc' }
+        ],
+        Lenovo: [
+            { value: 'IdeaPad Slim 3 15IAH8', device: 'Laptop / computer', specs: '15-inch IdeaPad Slim 3 family · Intel platform · exact CPU, memory and display vary by machine type', source: 'https://pcsupport.lenovo.com/ph/en/products/laptops-and-netbooks/ideapad-s-series-netbooks/ideapad-slim-3-15iah8' },
+            { value: 'LOQ 15', device: 'Laptop / computer', specs: '15-inch gaming laptop family · CPU/GPU and panel vary by machine type', source: 'https://www.lenovo.com/ph/en/c/laptops/loq/' },
+            { value: 'Tab M11', device: 'Tablet', specs: 'Android tablet · 11-inch display family · configuration varies by region', source: 'https://www.lenovo.com/ph/en/p/tablets/android-tablets/lenovo-tab-series/' }
+        ],
+        Dell: [
+            { value: 'Inspiron 15 3530', device: 'Laptop / computer', specs: '15.6-inch laptop family · Intel processor options; RAM, display and storage vary by configuration', source: 'https://www.dell.com/support/product-details/en-us/product/inspiron-15-3530-laptop/' },
+            { value: 'XPS 13', device: 'Laptop / computer', specs: '13-inch premium laptop family · processor, display and memory vary by generation', source: 'https://www.dell.com/en-us/shop/dell-laptops/xps-13-laptop/spd/xps-13-9340-laptop' }
+        ],
+        ASUS: [
+            { value: 'Vivobook 15', device: 'Laptop / computer', specs: '15.6-inch laptop family · processor, display, memory and storage vary by exact SKU', source: 'https://www.asus.com/ph/laptops/for-home/vivobook/' },
+            { value: 'ROG Zephyrus G14', device: 'Laptop / computer', specs: 'Compact gaming laptop family · CPU/GPU and display vary by generation', source: 'https://rog.asus.com/ph/laptops/rog-zephyrus/rog-zephyrus-g14-series/' },
+            { value: 'ROG Ally', device: 'Game console', specs: 'Windows handheld gaming device · AMD Ryzen Z1 family · screen and storage vary by version', source: 'https://rog.asus.com/ph/gaming-handhelds/rog-ally/rog-ally-2023/' }
+        ],
+        HP: [
+            { value: 'Pavilion 15', device: 'Laptop / computer', specs: '15-inch laptop family · processor, memory, display and storage vary by product number', source: 'https://support.hp.com/ph-en' },
+            { value: 'Victus 15', device: 'Laptop / computer', specs: 'Gaming laptop family · CPU/GPU and display vary by product number', source: 'https://www.hp.com/ph-en/shop/victus-laptops' },
+            { value: 'DeskJet 2776', device: 'Printer', specs: 'All-in-one inkjet printer · print/scan/copy · wireless features depend on setup', source: 'https://support.hp.com/ph-en/product/details/hp-deskjet-2700-all-in-one-printer-series/ của' }
+        ],
+        MSI: [
+            { value: 'Katana 15', device: 'Laptop / computer', specs: 'Gaming laptop family · processor, graphics and display vary by SKU', source: 'https://www.msi.com/Laptop/Katana-15-HX-B14WX' },
+            { value: 'Modern 14', device: 'Laptop / computer', specs: '14-inch laptop family · processor, memory and display vary by SKU', source: 'https://www.msi.com/Business-Productivity/Modern-14-H-DX' }
+        ],
+        Microsoft: [
+            { value: 'Surface Laptop 6', device: 'Laptop / computer', specs: 'Surface laptop · Intel Core Ultra platform · display and configuration vary by size', source: 'https://www.microsoft.com/en-ph/surface' },
+            { value: 'Surface Pro 10', device: 'Tablet', specs: 'Windows detachable tablet · Intel Core Ultra platform · keyboard sold separately', source: 'https://www.microsoft.com/en-ph/surface' }
+        ],
+        Nintendo: [
+            { value: 'Switch OLED', device: 'Game console', specs: 'Hybrid game console · 7-inch OLED screen · docked and handheld play modes', source: 'https://www.nintendo.com/us/gaming-systems/switch/oled-model/' },
+            { value: 'Switch Lite', device: 'Game console', specs: 'Handheld-only Nintendo Switch system · integrated controls · handheld-compatible games', source: 'https://www.nintendo.com/us/gaming-systems/switch/lite/' }
+        ],
+        Sony: [
+            { value: 'PlayStation 5 Slim', device: 'Game console', specs: 'PlayStation 5 console family · disc and digital editions · storage and accessories vary', source: 'https://www.playstation.com/en-ph/ps5/' },
+            { value: 'BRAVIA X80L', device: 'TV / monitor', specs: '4K Google TV family · screen sizes and regional features vary', source: 'https://www.sony.com.ph/electronics/televisions/x80l-series' },
+            { value: 'WH-1000XM5', device: 'Audio device', specs: 'Wireless noise-cancelling headphones · Bluetooth audio · battery and features depend on settings', source: 'https://www.sony.com.ph/electronics/headband-headphones/wh-1000xm5' },
+            { value: 'Alpha 6400', device: 'Camera', specs: 'APS-C mirrorless camera · interchangeable E-mount lenses · kit configuration varies', source: 'https://www.sony.com.ph/electronics/interchangeable-lens-cameras/ilce-6400-body-kit' }
+        ],
+        Canon: [
+            { value: 'EOS R50', device: 'Camera', specs: 'APS-C mirrorless camera · RF/RF-S lens mount · kit lens varies', source: 'https://www.canon.com.ph/cameras/eos-r50' },
+            { value: 'PIXMA G3010', device: 'Printer', specs: 'Wireless refillable ink-tank all-in-one printer · print/scan/copy', source: 'https://ph.canon/en/support' }
+        ],
+        Epson: [
+            { value: 'EcoTank L3250', device: 'Printer', specs: 'Wireless all-in-one ink-tank printer · print/scan/copy', source: 'https://www.epson.com.ph/For-Home/Printers/Ink-Tank-Printers/Epson-EcoTank-L3250/p/C11CJ67503' }
+        ],
+        'TP-Link': [
+            { value: 'Archer AX23', device: 'Router', specs: 'Wi-Fi 6 router · dual-band AX1800 class · regional hardware versions may differ', source: 'https://www.tp-link.com/ph/home-networking/wifi-router/archer-ax23/' },
+            { value: 'Deco X20', device: 'Router', specs: 'Wi-Fi 6 mesh system · multi-unit kits available · hardware version varies', source: 'https://www.tp-link.com/ph/home-networking/deco/deco-x20/' }
+        ],
+        Garmin: [
+            { value: 'Forerunner 265', device: 'Smartwatch', specs: 'GPS running smartwatch · AMOLED display · 42mm and 46mm variants', source: 'https://www.garmin.com/en-PH/p/886785' }
+        ],
+        JBL: [
+            { value: 'Flip 6', device: 'Audio device', specs: 'Portable Bluetooth speaker · IP67-rated design · battery and audio settings affect runtime', source: 'https://www.jbl.com/bluetooth-speakers/FLIP-6-.html' }
+        ]
     };
 
     // Only add model-specific steps when an official support source documents them.
@@ -162,13 +259,39 @@
         const first = el('option', '', 'Choose a topic');
         first.value = '';
         caseSelect.append(first);
+        let matches = 0;
         Object.entries(data).forEach(([id, item]) => {
             if (category && item.category !== category) return;
             if (device && item.device !== device) return;
             const option = el('option', '', item.problem);
             option.value = id;
             caseSelect.append(option);
+            matches++;
         });
+        if (matches === 0 && category && device) {
+            const id = 'generic-' + device.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + category;
+            data[id] = {
+                category, device,
+                problem: category === 'reuse' ? 'It works but is no longer needed' : 'I need help troubleshooting it',
+                headline: 'Start with safe, device-appropriate checks.',
+                summary: 'This device category does not yet have a dedicated EcoTekk guide. Use the manufacturer’s exact model support page for device-specific steps.',
+                checks: [
+                    'Record the exact model number and operating-system or firmware version before looking up instructions.',
+                    'Check the manufacturer’s official support page and try only reversible, user-level checks for this exact model.',
+                    'Back up important data where possible. Stop using the device if it is unusually hot, physically damaged, wet, or has a swollen battery.',
+                    'Do not open the device, install unofficial firmware, or perform a factory reset as an initial troubleshooting step.'
+                ],
+                who: 'The device manufacturer’s support team or a qualified repair technician',
+                query: device.toLowerCase() + ' repair service',
+                reuse: 'If it is working, consider continued use, repair, donation or refurbishment before recycling.',
+                recover: 'Use an authorized e-waste collection or recycling service that accepts this device category.',
+                when: 'Seek qualified help if basic checks fail or there are signs of physical or electrical damage.',
+                ask: ['Do you support this exact model?', 'Will diagnosis or repair affect stored data or settings?', 'What are the assessment fee, repair estimate and warranty?']
+            };
+            const option = el('option', '', data[id].problem);
+            option.value = id;
+            caseSelect.append(option);
+        }
         if ([...caseSelect.options].some(option => option.value === previous)) caseSelect.value = previous;
     }
 
@@ -235,6 +358,93 @@
             sessionStorage.setItem('ecotekk-last-area', area);
         } catch (_) {}
     }
+
+    const detectButton = document.getElementById('detect-device');
+    const detectStatus = document.getElementById('detect-status');
+
+    function applyDetectedDevice(info) {
+        if (info.device) deviceSelect.value = info.device;
+        if (info.brand && [...brandSelect.options].some(o => o.value === info.brand || o.textContent === info.brand)) {
+            brandSelect.value = info.brand;
+            updateModels();
+        }
+        if (info.model) {
+            const match = [...modelSelect.options].find(o => o.value.toLowerCase() === info.model.toLowerCase());
+            if (match) modelSelect.value = match.value;
+        }
+        updateModels();
+        if (info.model) {
+            const match = [...modelSelect.options].find(o => o.value.toLowerCase() === info.model.toLowerCase());
+            if (match) modelSelect.value = match.value;
+        }
+        updateTopics();
+        if (detectStatus) detectStatus.textContent = info.message;
+    }
+
+    async function detectDevice() {
+        const ua = navigator.userAgent || '';
+        const platform = navigator.userAgentData && navigator.userAgentData.platform
+            ? navigator.userAgentData.platform : (navigator.platform || '');
+        let info = { device: '', brand: '', model: '', message: 'Detected device family only. Please confirm the model manually.' };
+
+        const knownCodes = {
+            'SM-A155F': ['Samsung', 'Galaxy A15 5G'],
+            'SM-A155M': ['Samsung', 'Galaxy A15 5G'],
+            'SM-A256E': ['Samsung', 'Galaxy A25 5G'],
+            'SM-A256B': ['Samsung', 'Galaxy A25 5G'],
+            'Pixel 8': ['Google', 'Pixel 8'],
+            'Pixel 9': ['Google', 'Pixel 9'],
+            'iPhone': ['Apple', '']
+        };
+
+        let highEntropyModel = '';
+        if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+            try {
+                const hints = await navigator.userAgentData.getHighEntropyValues(['model']);
+                highEntropyModel = hints.model || '';
+            } catch (_) {}
+        }
+
+        if (/iPhone|iPod/i.test(ua)) {
+            info.device = 'Phone'; info.brand = 'Apple';
+            info.message = 'Detected an Apple iPhone. Browsers do not normally expose the exact iPhone model; choose it manually.';
+        } else if (/iPad/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1)) {
+            info.device = 'Tablet'; info.brand = 'Apple';
+            info.message = 'Detected an Apple tablet. Exact iPad model is not exposed by the browser.';
+        } else if (/Android/i.test(ua)) {
+            info.device = /Mobile/i.test(ua) ? 'Phone' : 'Tablet';
+            const m = ua.match(/;\s*([^;)]+)\s*Build\//i);
+            const rawModel = highEntropyModel || (m ? m[1].trim() : '');
+            const code = Object.keys(knownCodes).find(k => rawModel.toLowerCase().includes(k.toLowerCase()));
+            if (code && knownCodes[code][0] !== 'Apple') {
+                info.brand = knownCodes[code][0]; info.model = knownCodes[code][1];
+                info.message = 'Detected ' + info.model + ' from browser model information. Please verify it in Settings.';
+            } else {
+                const prefix = rawModel.match(/^(SM-|SAMSUNG)/i) ? 'Samsung' :
+                    (/^(Redmi|Xiaomi|POCO)/i.test(rawModel) ? 'Xiaomi' :
+                    (/^CPH/i.test(rawModel) ? 'OPPO' : (/^V/i.test(rawModel) ? 'vivo' : '')));
+                if (prefix) info.brand = prefix;
+                info.message = rawModel
+                    ? 'Android device detected (' + rawModel + '). Exact model matching may be unavailable; please confirm the brand and model.'
+                    : 'Android device detected. Your browser hides the exact model; choose the brand and model manually.';
+            }
+        } else if (/Windows|Win/i.test(platform + ' ' + ua)) {
+            info.device = 'Laptop / computer';
+            info.message = 'Windows computer detected. The browser cannot reliably identify its manufacturer or exact model.';
+        } else if (/macOS|Macintosh|MacIntel/i.test(platform + ' ' + ua)) {
+            info.device = 'Laptop / computer'; info.brand = 'Apple';
+            info.message = 'Mac detected. The browser cannot reliably distinguish MacBook, iMac or Mac mini; choose the model manually.';
+        } else if (/CrOS/i.test(ua)) {
+            info.device = 'Laptop / computer'; info.brand = 'Google';
+            info.message = 'ChromeOS device detected. Exact Chromebook model is not reliably exposed.';
+        } else {
+            info.message = 'Could not identify the device family. Select the device type and model manually.';
+        }
+
+        applyDetectedDevice(info);
+    }
+
+    if (detectButton) detectButton.addEventListener('click', detectDevice);
 
     brandSelect.addEventListener('change', function () { updateModels(); });
     deviceSelect.addEventListener('change', function () { updateModels(); updateTopics(); });
