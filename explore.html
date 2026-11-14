@@ -348,6 +348,37 @@ EcotekkAuth.ready.then(function(){
 })();
 </script>
 
+<script>
+/* Temporary diagnostic: shows a visible notice only if the planner is really not running.
+   Safe to delete once Model / Matching topics work. */
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    var cs = document.getElementById('case'), form = document.getElementById('et-form');
+    var cat = document.getElementById('category'), dev = document.getElementById('device');
+    if (!cs || !form || !cat || !dev || cs.options.length > 1) return;   // topics present: planner is alive
+
+    // Probe: ask for the "power" topics. If nothing reacts, the planner has no listeners.
+    var sc = cat.value, sd = dev.value;
+    function fire(el) { el.dispatchEvent(new Event('change', { bubbles: true })); }
+    cat.value = 'power'; dev.value = ''; fire(cat); fire(dev);
+    var alive = cs.options.length > 1;
+    cat.value = sc; dev.value = sd; fire(cat); fire(dev);
+    if (alive) return;
+
+    var missing = [];
+    if (!window.EcoTekkContent) missing.push('EcoTekkContent (from content.js)');
+    if (!window.EcoTekkDevices || !window.EcoTekkDevices.brands) missing.push('EcoTekkDevices (the device/brand/model catalog)');
+    var box = document.createElement('div');
+    box.setAttribute('role', 'alert');
+    box.style.cssText = 'border:2px solid #ef4444;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:.9rem;line-height:1.45';
+    box.textContent = missing.length
+      ? 'Setup problem: planner.js did not start. This page could not find ' + missing.join(' and ') + '. Check that the matching <script src="..."> line points to a file that exists in the repo.'
+      : 'Setup problem: planner.js did not start. Open the browser console (F12) and look for a red error.';
+    form.insertBefore(box, form.firstChild);
+  }, 600);
+});
+</script>
+
 <script src="planner.js" defer></script>
 </body>
 </html>
