@@ -15,6 +15,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="auth.js"></script>
+    <script src="activity.js"></script>
     <style>
         .profile-wrap {
             max-width: 1060px;
@@ -197,6 +198,79 @@
             color: var(--muted)
         }
 
+
+        .p-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin: 16px 0
+        }
+
+        .p-stat {
+            border: 1px solid var(--line);
+            background: var(--mist);
+            border-radius: 14px;
+            padding: 14px 16px
+        }
+
+        .p-stat strong {
+            display: block;
+            font: 800 30px 'Plus Jakarta Sans', sans-serif;
+            color: var(--brand);
+            line-height: 1.1
+        }
+
+        .p-stat span {
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        .p-act {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px 16px;
+            border-top: 1px solid var(--line);
+            padding: 13px 0;
+            font-size: 14px
+        }
+
+        .p-act a {
+            color: inherit;
+            font-weight: 700;
+            overflow-wrap: anywhere
+        }
+
+        .p-act small {
+            display: block;
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 3px
+        }
+
+        .p-tag {
+            font: 700 10px 'IBM Plex Mono', monospace;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            color: var(--brand-dark);
+            border: 1px solid var(--line);
+            border-radius: 99px;
+            padding: 3px 8px;
+            margin-right: 8px
+        }
+
+        .p-msg {
+            font-size: 13px;
+            color: var(--muted);
+            margin: 10px 0 0;
+            min-height: 18px
+        }
+
+        .p-wide {
+            margin-top: 18px
+        }
+
         @media(max-width:750px) {
             .p-grid {
                 grid-template-columns: 1fr
@@ -236,6 +310,45 @@
             function node(tag, cls, text) {const el = document.createElement(tag); if (cls) el.className = cls; if (text !== undefined) el.textContent = text; return el;}
             function row(parent, label, value) {const el = node('div', 'p-row'); el.append(node('span', '', label), node('strong', '', value)); parent.append(el); return el.lastChild;}
             function link(text, href, secondary) {const a = node('a', 'p-action' + (secondary ? ' secondary' : ''), text); a.href = href; return a;}
+
+            const KIND = {issue: 'Problem', dropoff: 'Drop-off', shop: 'Repair shop'};
+            function safeHref(h) {return /^[a-z-]+\.html(\?[^\s"'<>]*)?$/i.test(h || '') ? h : null;}
+            // "My activity": every community count this user added on this device, re-checked against Firestore
+            // (reports that were undone elsewhere drop off the list) with the live count beside each one.
+            function activityPanel(uid) {
+                const panel = node('section', 'p-panel p-wide'); panel.setAttribute('aria-label', 'My activity');
+                panel.append(node('div', 'p-eyebrow', 'MY ACTIVITY'), node('h3', '', 'Where you added your voice'), node('p', 'p-muted', 'Problems you reported and places you visited. This list is kept on this device, and the counts are live.'));
+                const stats = node('div', 'p-stats'); const sIssues = node('div', 'p-stat'); const nIssues = node('strong', '', '–'); sIssues.append(nIssues, node('span', '', 'problems I share'));
+                const sPlaces = node('div', 'p-stat'); const nPlaces = node('strong', '', '–'); sPlaces.append(nPlaces, node('span', '', 'places I have been')); stats.append(sIssues, sPlaces);
+                const list = node('div'); list.append(node('p', 'p-msg', 'Loading…')); panel.append(stats, list);
+                let db = null; try {db = window.firebase && firebase.apps.length ? firebase.firestore() : null;} catch (e) {db = null;}
+                function paint(rows) {
+                    nIssues.textContent = rows.filter(r => r.e.kind === 'issue').length; nPlaces.textContent = rows.filter(r => r.e.kind !== 'issue').length;
+                    list.replaceChildren();
+                    if (!rows.length) {
+                        list.append(node('p', 'p-muted', 'Nothing here yet. Tap “I have this issue too” on a topic in the device explorer, or “I went here” on a drop-off or repair shop, and it will show up here.'));
+                        const acts = node('div', 'p-actions'); acts.append(link('Explore a device →', 'explore.html'), link('Find a drop-off', 'home.html', true), link('Tech help', 'techhelp.html', true)); list.append(acts); return;
+                    }
+                    rows.forEach(function (r) {
+                        const item = node('div', 'p-act'); const left = node('div'); const href = safeHref(r.e.href);
+                        const title = href ? link(r.e.label, href, true) : node('span', '', r.e.label); title.className = ''; if (href) title.style.cssText = 'font-weight:700;color:inherit';
+                        const top = node('div'); top.append(node('span', 'p-tag', KIND[r.e.kind] || 'Activity'), title);
+                        left.append(top, node('small', '', 'Added ' + new Date(r.e.ts).toLocaleDateString('en-PH', {dateStyle: 'medium'})));
+                        const count = node('span', '', r.count === null ? '' : r.count.toLocaleString() + (r.count === 1 ? ' person' : ' people') + (r.e.kind === 'issue' ? (r.count === 1 ? ' shares this' : ' share this') : ' went here'));
+                        item.append(left, count); list.append(item);
+                    });
+                }
+                const entries = EcoActivity.list(uid);
+                if (!db || !entries.length) {paint(entries.map(e => ({e, count: null}))); return panel;}
+                Promise.all(entries.map(function (e) {
+                    const ref = db.collection('issueReports').doc(e.id);
+                    return ref.collection('reporters').doc(uid).get().then(function (mine) {
+                        if (!mine.exists) {EcoActivity.remove(uid, e.id); return null;}
+                        return ref.get().then(s => ({e, count: s.exists ? (Number(s.data().count) || 0) : 0})).catch(() => ({e, count: null}));
+                    }).catch(() => ({e, count: null}));
+                })).then(rows => paint(rows.filter(Boolean)));
+                return panel;
+            }
             EcotekkAuth.ready.then(function () {
                 const u = EcotekkAuth.currentUser();
                 if (!u) {root.replaceChildren(node('div', 'p-eyebrow', 'YOUR ECOTEKK ACCOUNT'), node('h1', 'p-heading', 'Your space for greener choices'), node('p', 'p-sub', 'Sign in to view your account and keep exploring drop-off locations.')); const a = link('Log in / Sign up', 'login.html'); a.style.marginTop = '24px'; root.append(a); return;}
@@ -259,7 +372,8 @@
                     gExit.addEventListener('click', async function () { gExit.disabled = true; gExit.textContent = 'Exiting…'; try { await EcotekkAuth.logout(); location.href = 'index.html'; } catch (e) { gExit.disabled = false; gExit.textContent = 'Exit guest mode'; } });
                     gActs.append(gJoin, gExit); gRight.append(gActs);
                     gGrid.append(gLeft, gRight);
-                    root.replaceChildren(node('div', 'p-eyebrow', 'MY ECOTEKK / GUEST'), node('h1', 'p-heading', 'You are browsing as a guest.'), node('p', 'p-sub', 'A limited view of the account area. Sign in any time for a saved profile.'), gHero, gGrid);
+                    const gAct = activityPanel(u.uid);
+                    root.replaceChildren(node('div', 'p-eyebrow', 'MY ECOTEKK / GUEST'), node('h1', 'p-heading', 'You are browsing as a guest.'), node('p', 'p-sub', 'A limited view of the account area. Sign in any time for a saved profile.'), gHero, gGrid, gAct);
                     return;
                 }
                 const title = node('div', 'p-eyebrow', 'MY ECOTEKK / DASHBOARD');
@@ -274,10 +388,19 @@
                 const actions = node('div', 'p-actions'); actions.append(link('Explore a device →', 'explore.html'), link('Find a drop-off', 'home.html', true), link('Tech help', 'techhelp.html', true)); left.append(actions);
                 const note = node('p', 'p-note', 'Device recommendations are educational. Confirm availability and acceptance directly with a provider before visiting.'); note.style.marginTop = '24px'; left.append(note);
                 const right = node('section', 'p-panel'); right.append(node('div', 'p-eyebrow', 'ACCOUNT DETAILS'), node('h3', '', 'Your information'));
-                const nameValue = row(right, 'Display name', u.name || '—'); row(right, 'Email', u.email || '—'); row(right, 'Verification', u.emailVerified ? 'Verified' : 'Not verified'); const cloud = row(right, 'Cloud profile', 'Loading…');
+                const nameValue = row(right, 'Display name', u.name || '—'); row(right, 'Email', u.email || '—'); row(right, 'Verification', u.emailVerified ? 'Verified' : 'Not verified'); const since = row(right, 'Member since', '—'); const cloud = row(right, 'Cloud profile', 'Loading…');
+                const verifyMsg = node('p', 'p-msg'); verifyMsg.setAttribute('role', 'status');
+                if (!u.emailVerified) {
+                    const vActs = node('div', 'p-actions');
+                    const resend = node('button', 'p-action', 'Resend verification email'); resend.type = 'button';
+                    const refresh = node('button', 'p-action secondary', 'I verified it. Refresh'); refresh.type = 'button';
+                    resend.addEventListener('click', async function () {resend.disabled = true; verifyMsg.textContent = 'Sending…'; try {await EcotekkAuth.resendVerification(); verifyMsg.textContent = 'Sent to ' + (u.email || 'your email') + '. Check your inbox and spam folder, open the link, then tap Refresh.';} catch (e) {verifyMsg.textContent = e && e.code === 'auth/too-many-requests' ? 'Too many requests. Please wait a few minutes and try again.' : 'Could not send the email right now. Please try again later.';} setTimeout(function () {resend.disabled = false;}, 30000);});
+                    refresh.addEventListener('click', async function () {refresh.disabled = true; try {await EcotekkAuth.refreshUser(); location.reload();} catch (e) {refresh.disabled = false; verifyMsg.textContent = 'Could not refresh. Please reload the page.';}});
+                    vActs.append(resend, refresh); right.append(vActs, verifyMsg);
+                }
                 const signout = node('button', 'p-action secondary', 'Log out'); signout.type = 'button'; signout.style.marginTop = '20px'; signout.addEventListener('click', async function () {signout.disabled = true; signout.textContent = 'Logging out…'; try {await EcotekkAuth.logout(); location.href = 'index.html';} catch (e) {signout.disabled = false; signout.textContent = 'Log out'; cloud.textContent = 'Logout failed: ' + (e.message || 'Please retry');} }); right.append(signout);
-                grid.append(left, right); root.replaceChildren(title, heading, intro, hero, grid);
-                try {EcotekkAuth.watchProfile(function (p) {cloud.textContent = p ? 'Connected' : 'Profile not available yet'; if (p && typeof p.name === 'string' && p.name.trim()) {name.textContent = p.name; nameValue.textContent = p.name; avatar.textContent = p.name.trim().slice(0, 1).toUpperCase();} });} catch (e) {cloud.textContent = 'Unable to load profile';}
+                grid.append(left, right); root.replaceChildren(title, heading, intro, hero, grid, activityPanel(u.uid));
+                try {EcotekkAuth.watchProfile(function (p) {cloud.textContent = p ? 'Connected' : 'Profile not available yet'; if (p && typeof p.name === 'string' && p.name.trim()) {name.textContent = p.name; nameValue.textContent = p.name; avatar.textContent = p.name.trim().slice(0, 1).toUpperCase();} if (p && p.createdAt && typeof p.createdAt.toDate === 'function') since.textContent = p.createdAt.toDate().toLocaleDateString('en-PH', {dateStyle: 'long'}); });} catch (e) {cloud.textContent = 'Unable to load profile';}
             }).catch(function (e) {root.replaceChildren(node('p', 'p-muted', 'Unable to load account: ' + (e.message || 'Please refresh.')));});
         })();
     </script>

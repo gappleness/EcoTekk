@@ -85,6 +85,7 @@
   EcoTracker.init({
     sites: SHOPS,
     page: 'techhelp.html',
+    activityKind: 'shop',
     tallyPrefix: 'shop-',
     noun: 'shop', nounPlural: 'shops',
     defaultHint: 'Showing shops near Calamba, Laguna (default area). Use your location for distances from where you are.',

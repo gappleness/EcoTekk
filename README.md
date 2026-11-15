@@ -19,3 +19,8 @@ HTML • CSS • JavaScript • Firebase
 ---
 
 Made with 💚 for a greener future.
+
+
+## Firestore rules
+
+`firestore.rules` must be published (Firebase console → Firestore → Rules) for the **undo** feature on "I went here" and "I have this issue too". Adding to a count works with the older rules, but undoing needs the updated ones.

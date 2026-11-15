@@ -119,6 +119,7 @@
   EcoTracker.init({
     sites: SITES,
     page: 'ewaste.html',
+    activityKind: 'dropoff',
     tallyPrefix: 'dropoff-',
     noun: 'drop-off', nounPlural: 'drop-offs',
     defaultHint: 'Showing sites near Calamba, Laguna (default area). Use your location for distances from where you are.',

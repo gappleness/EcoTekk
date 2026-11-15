@@ -31,6 +31,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="auth.js"></script>
+<script src="activity.js"></script>
 <script src="content.js" defer></script>
 <script src="experience.js" defer></script>
 </head>
@@ -213,12 +214,25 @@
     btn.classList.remove('is-done');
     if (!currentId || !db) { btn.disabled = true; btn.textContent = 'I have this issue too'; return; }
     if (reported) {
-      btn.disabled = true; btn.classList.add('is-done'); btn.textContent = '✓ Counted. Thanks!'; return;
+      // Counted: the same button now undoes it.
+      btn.disabled = busy; btn.classList.add('is-done');
+      btn.textContent = busy ? 'Removing…' : '✓ Counted · Undo'; return;
     }
     if (!user) { btn.disabled = false; btn.textContent = 'Sign in or use guest to add yours'; return; }
     btn.disabled = busy;
     btn.textContent = 'I have this issue too';
   }
+
+  function issueEntry() {
+    var cat = document.getElementById('category'), dev = document.getElementById('device');
+    var q = new URLSearchParams();
+    if (cat && cat.value) q.set('category', cat.value);
+    if (dev && dev.value) q.set('device', dev.value);
+    q.set('case', caseSel.value);
+    var opt = caseSel.options[caseSel.selectedIndex];
+    return { id: currentId, kind: 'issue', label: opt ? opt.text : currentId, href: 'explore.html?' + q.toString() };
+  }
+  function remember() { if (user && window.EcoActivity && currentId) EcoActivity.add(user.uid, issueEntry()); }
 
   function resetDisplay(topic, status) {
     if (unsubscribe) { unsubscribe(); unsubscribe = null; }
@@ -236,7 +250,7 @@
     db.collection('issueReports').doc(id).collection('reporters').doc(user.uid).get()
       .then(function (snap) {
         if (id !== currentId) return;
-        if (snap.exists) { reported = true; refreshButton(); }
+        if (snap.exists) { reported = true; remember(); refreshButton(); }
       }).catch(function () { /* rules not published yet or offline: ignore */ });
   }
 
@@ -247,7 +261,7 @@
       updateMeter(count);
       setStatus(count === 0
         ? 'No one has added this yet. Be the first.'
-        : 'Live count from EcoTekk users. Each account or guest session can add one report per topic.');
+        : 'Live count from EcoTekk users. Each account or guest session can add one report per topic, and you can undo yours.');
     }, function () {
       numEl.textContent = '–';
       barEl.style.width = '0';
@@ -274,10 +288,7 @@
     checkReported();
   }
 
-  btn.addEventListener('click', function () {
-    if (!db || !currentId) return;
-    if (!user) { location.href = 'login.html?next=' + encodeURIComponent('explore.html' + location.search); return; }
-    if (reported || busy) return;
+  function addReport() {
     busy = true; refreshButton(); setStatus('Adding yours…');
     var id = currentId;
     var ref = db.collection('issueReports').doc(id);
@@ -285,13 +296,13 @@
     batch.set(ref.collection('reporters').doc(user.uid), { createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     batch.set(ref, { count: firebase.firestore.FieldValue.increment(1) }, { merge: true });
     batch.commit().then(function () {
-      reported = true; busy = false; refreshButton();
-      setStatus('Thanks. Your report was added to the count.');
+      reported = true; busy = false; remember(); refreshButton();
+      setStatus('Thanks. Your report was added to the count. Tap the button again to undo.');
     }).catch(function () {
       busy = false;
       // A rejected batch usually means this account already reported this topic.
       ref.collection('reporters').doc(user.uid).get().then(function (s) {
-        if (s.exists) { reported = true; setStatus('You already added this one. Thanks!'); }
+        if (s.exists) { reported = true; remember(); setStatus('You already added this one. Tap the button to undo it.'); }
         else setStatus('Could not add your report right now. Please try again later.');
         refreshButton();
       }).catch(function () {
@@ -299,6 +310,35 @@
         refreshButton();
       });
     });
+  }
+
+  function removeReport() {
+    busy = true; refreshButton(); setStatus('Removing yours…');
+    var id = currentId, uid = user.uid;
+    var ref = db.collection('issueReports').doc(id);
+    var batch = db.batch();
+    batch.delete(ref.collection('reporters').doc(uid));
+    batch.update(ref, { count: firebase.firestore.FieldValue.increment(-1) });
+    batch.commit().then(function () {
+      busy = false;
+      if (id === currentId) reported = false;
+      if (window.EcoActivity) EcoActivity.remove(uid, id);
+      refreshButton();
+      setStatus('Removed. Your report is no longer counted.');
+    }).catch(function (err) {
+      busy = false;
+      setStatus(err && err.code === 'permission-denied'
+        ? 'Undo is not enabled yet. The updated Firestore rules need to be published.'
+        : 'Could not undo right now. Please try again later.');
+      refreshButton();
+    });
+  }
+
+  btn.addEventListener('click', function () {
+    if (!db || !currentId) return;
+    if (!user) { location.href = 'login.html?next=' + encodeURIComponent('explore.html' + location.search); return; }
+    if (busy) return;
+    if (reported) removeReport(); else addReport();
   });
 
   caseSel.addEventListener('change', syncTopic);

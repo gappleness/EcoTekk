@@ -37,12 +37,15 @@
   async function guestLogin(){await ensurePersistence();if(auth.currentUser)return auth.currentUser;const c=await auth.signInAnonymously();return c.user;}
   async function logout(){requireConfig();await auth.signOut();}
   function currentUser(){const active = auth ? auth.currentUser : user; if(!active)return null; const guest=!!active.isAnonymous; return {uid:active.uid,isGuest:guest,name:guest?'Guest':(active.displayName || (active.email||'').split('@')[0]),email:guest?'':active.email,emailVerified:guest?false:active.emailVerified};}
+  // Email verification helpers for the profile page (real accounts only).
+  async function resendVerification(){requireConfig();const u=auth.currentUser;if(!u||u.isAnonymous)throw new Error('Sign in with an email account first.');await u.sendEmailVerification();}
+  async function refreshUser(){requireConfig();if(auth.currentUser)await auth.currentUser.reload();}
   function isGuest(){const u=currentUser();return !!(u&&u.isGuest);}
   // Fills the #nav-auth item on every page: Profile for members, Guest for guests, Login otherwise.
   function renderNav(){ready.then(function(){const el=document.getElementById('nav-auth'),u=currentUser();if(el&&u)el.innerHTML='<a href="profile.html">'+(u.isGuest?'Guest':'Profile')+'</a>';}).catch(function(){});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',renderNav);else renderNav();
   // No client-controlled cloud points: a verified server-side award/redemption workflow is required.
-  global.EcotekkAuth={ready,currentUser,isGuest,signup,login,googleLogin,guestLogin,resetPassword,logout,REWARDS:rewards,
+  global.EcotekkAuth={ready,currentUser,isGuest,resendVerification,refreshUser,signup,login,googleLogin,guestLogin,resetPassword,logout,REWARDS:rewards,
     watchProfile(callback){requireConfig();if(isGuest()){callback(null);return function(){};}return profileRef().onSnapshot(s=>callback(s.exists?s.data():null));},
     getPoints(){return 0;},getHistory(){return [];},
     async recordDisposal(){throw new Error('Point awards are disabled until a verified server-side disposal workflow is installed.');},

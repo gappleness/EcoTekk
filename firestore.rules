@@ -14,7 +14,7 @@ service cloud.firestore {
 
     // "Community pulse" counter on explore.html. It also backs the "I went here" tally on ewaste.html and
     // techhelp.html, which use prefixed ids (dropoff-... and shop-...) in this same collection.
-    // Anyone can read the count. A signed-in user can add 1, once per topic.
+    // Anyone can read the count. A signed-in user can add 1 once per topic, and undo their own +1.
     // The count change and the per-user marker must be written in the same batch.
     match /issueReports/{caseId} {
       allow read: if caseId.matches('[a-z0-9_-]{1,60}');
@@ -25,11 +25,19 @@ service cloud.firestore {
         && request.resource.data.count == 1
         && existsAfter(/databases/$(database)/documents/issueReports/$(caseId)/reporters/$(request.auth.uid));
 
+      // +1: add your own marker in the same batch. -1 (undo): remove your own marker in the same batch.
       allow update: if request.auth != null
         && request.resource.data.keys().hasOnly(['count'])
-        && request.resource.data.count == resource.data.count + 1
-        && existsAfter(/databases/$(database)/documents/issueReports/$(caseId)/reporters/$(request.auth.uid))
-        && !exists(/databases/$(database)/documents/issueReports/$(caseId)/reporters/$(request.auth.uid));
+        && (
+          (request.resource.data.count == resource.data.count + 1
+            && existsAfter(/databases/$(database)/documents/issueReports/$(caseId)/reporters/$(request.auth.uid))
+            && !exists(/databases/$(database)/documents/issueReports/$(caseId)/reporters/$(request.auth.uid)))
+          ||
+          (resource.data.count >= 1
+            && request.resource.data.count == resource.data.count - 1
+            && exists(/databases/$(database)/documents/issueReports/$(caseId)/reporters/$(request.auth.uid))
+            && !existsAfter(/databases/$(database)/documents/issueReports/$(caseId)/reporters/$(request.auth.uid)))
+        );
 
       allow delete: if false;
 
@@ -38,7 +46,12 @@ service cloud.firestore {
         allow create: if request.auth != null && request.auth.uid == uid
           && request.resource.data.keys().hasOnly(['createdAt'])
           && request.resource.data.createdAt == request.time;
-        allow list, update, delete: if false;
+        allow list, update: if false;
+        // Undo: you can only remove your own marker, and only in the same batch that lowers the count by 1,
+        // so a marker can't be deleted on its own and then re-used to inflate the count.
+        allow delete: if request.auth != null && request.auth.uid == uid
+          && getAfter(/databases/$(database)/documents/issueReports/$(caseId)).data.count
+             == get(/databases/$(database)/documents/issueReports/$(caseId)).data.count - 1;
       }
     }
 

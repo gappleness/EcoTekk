@@ -115,12 +115,22 @@
           msg.textContent = db ? 'The tally is unavailable right now.' : 'The tally is not connected on this page yet.';
           return;
         }
-        if (reported[id]) { btn.disabled = true; btn.classList.add('is-done'); btn.textContent = '✓ Counted. Thanks!'; msg.textContent = notes[id] || ''; return; }
+        if (reported[id]) {
+          // Counted: the same button now undoes it.
+          btn.disabled = !!busy[id]; btn.classList.add('is-done'); btn.setAttribute('aria-pressed', 'true');
+          btn.textContent = busy[id] ? 'Removing…' : '✓ Counted · Undo';
+          msg.textContent = notes[id] || 'Thanks. Tap again to undo.'; return;
+        }
+        btn.setAttribute('aria-pressed', 'false');
         if (!user) { btn.disabled = false; btn.textContent = 'Sign in or use guest to count yours'; msg.textContent = notes[id] || ''; return; }
         btn.disabled = !!busy[id]; btn.textContent = 'I went here'; msg.textContent = notes[id] || '';
       });
     }
     function updateAll() { SITES.forEach(function (s) { updateRow(tallyId(s)); }); }
+
+    function remember(s) {
+      if (user && global.EcoActivity) EcoActivity.add(user.uid, { id: tallyId(s), kind: cfg.activityKind, label: s.name, href: cfg.page });
+    }
 
     function checkReported() {
       if (!db || !user) return;
@@ -129,7 +139,7 @@
         var id = tallyId(s);
         db.collection(COLL).doc(id).collection('reporters').doc(uid).get().then(function (snap) {
           if (!user || user.uid !== uid) return;
-          if (snap.exists) { reported[id] = true; updateRow(id); }
+          if (snap.exists) { reported[id] = true; remember(s); updateRow(id); }
         }).catch(function () { /* offline: ignore */ });
       });
     }
@@ -149,26 +159,54 @@
       });
     }
 
-    function addVisit(id) {
+    function siteById(id) { return SITES.filter(function (s) { return tallyId(s) === id; })[0]; }
+
+    function toggleVisit(id) {
       if (!db) return;
       if (!user) { location.href = 'login.html?next=' + encodeURIComponent(cfg.page + location.search); return; }
-      if (reported[id] || busy[id]) return;
+      if (busy[id]) return;
+      if (reported[id]) removeVisit(id); else addVisit(id);
+    }
+
+    function addVisit(id) {
       busy[id] = true; notes[id] = 'Adding yours…'; updateRow(id);
       var ref = db.collection(COLL).doc(id), uid = user.uid;
       var batch = db.batch();
       batch.set(ref.collection('reporters').doc(uid), { createdAt: firebase.firestore.FieldValue.serverTimestamp() });
       batch.set(ref, { count: firebase.firestore.FieldValue.increment(1) }, { merge: true });
       batch.commit().then(function () {
-        busy[id] = false; reported[id] = true; notes[id] = 'Thanks. Your visit was added to the tally.'; updateRow(id);
+        busy[id] = false; reported[id] = true; notes[id] = 'Thanks. Your visit was added. Tap again to undo.';
+        var s = siteById(id); if (s) remember(s);
+        updateRow(id);
       }).catch(function (err) {
         console.warn('EcoTekk tally write failed for', id, err && err.code);
         busy[id] = false;
         // A rejected batch usually means this account/guest session already counted this place.
         ref.collection('reporters').doc(uid).get().then(function (s) {
-          if (s.exists) { reported[id] = true; notes[id] = 'You already counted this one. Thanks!'; }
+          if (s.exists) { reported[id] = true; notes[id] = 'You already counted this one. Tap again to undo.'; }
           else notes[id] = 'Could not add yours right now. Please try again later.';
           updateRow(id);
         }).catch(function () { notes[id] = 'Could not add yours right now. Please try again later.'; updateRow(id); });
+      });
+    }
+
+    function removeVisit(id) {
+      busy[id] = true; notes[id] = 'Removing yours…'; updateRow(id);
+      var ref = db.collection(COLL).doc(id), uid = user.uid;
+      var batch = db.batch();
+      batch.delete(ref.collection('reporters').doc(uid));
+      batch.update(ref, { count: firebase.firestore.FieldValue.increment(-1) });
+      batch.commit().then(function () {
+        busy[id] = false; reported[id] = false; notes[id] = 'Removed. Your visit is no longer counted.';
+        if (global.EcoActivity) EcoActivity.remove(uid, id);
+        updateRow(id);
+      }).catch(function (err) {
+        console.warn('EcoTekk tally undo failed for', id, err && err.code);
+        busy[id] = false;
+        notes[id] = err && err.code === 'permission-denied'
+          ? 'Undo is not enabled yet. The updated Firestore rules need to be published.'
+          : 'Could not undo right now. Please try again later.';
+        updateRow(id);
       });
     }
 
@@ -242,7 +280,7 @@
         return;
       }
       var went = e.target.closest('.went-btn');
-      if (went) addVisit(went.getAttribute('data-went'));
+      if (went) toggleVisit(went.getAttribute('data-went'));
     });
 
     $('showNearest').onclick = function () { var c = filtered(); if (c[0]) showSite(c[0]); else statusEl.textContent = 'No listed match for these filters.'; };
