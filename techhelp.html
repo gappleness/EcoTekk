@@ -8,15 +8,15 @@
     <meta name="theme-color" content="#166747">
     <link rel="stylesheet" href="stylesheet.css">
     <link rel="stylesheet" href="experience.css">
-    <link rel="stylesheet" href="tracker.css?v=3">
+    <link rel="stylesheet" href="tracker.css">
     <script src="theme.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="auth.js"></script>
-    <script src="community-tally.js?v=3" defer></script>
-    <script src="techhelp.js?v=3" defer></script>
+    <script src="tracker.js" defer></script>
+    <script src="techhelp.js" defer></script>
     <script src="experience.js" defer></script>
 </head>
 <body>
@@ -60,7 +60,7 @@
             <div class="et-filter-grid et-filter-grid-2">
                 <div>
                     <label class="et-field" for="deviceFilter">Device</label>
-                    <select class="et-input" id="deviceFilter">
+                    <select class="et-input" id="deviceFilter" data-filter="device">
                         <option value="">Any device</option>
                         <option value="phones">Phones and tablets</option>
                         <option value="laptops">Laptops and computers</option>
@@ -69,7 +69,7 @@
                 </div>
                 <div>
                     <label class="et-field" for="kindFilter">Type of shop</label>
-                    <select class="et-input" id="kindFilter">
+                    <select class="et-input" id="kindFilter" data-filter="kind">
                         <option value="">Any type</option>
                         <option value="authorized">Brand service center</option>
                         <option value="independent">Independent repair shop / kiosk</option>

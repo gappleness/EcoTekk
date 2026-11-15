@@ -8,15 +8,15 @@
     <meta name="theme-color" content="#166747">
     <link rel="stylesheet" href="stylesheet.css">
     <link rel="stylesheet" href="experience.css">
-    <link rel="stylesheet" href="tracker.css?v=3">
+    <link rel="stylesheet" href="tracker.css">
     <script src="theme.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="auth.js"></script>
-    <script src="community-tally.js?v=3" defer></script>
-    <script src="ewaste.js?v=3" defer></script>
+    <script src="tracker.js" defer></script>
+    <script src="ewaste.js" defer></script>
     <script src="experience.js" defer></script>
 </head>
 <body>
@@ -57,57 +57,18 @@
     <section class="tracker-results">
         <h2>Find a suitable drop-off</h2>
         <div class="et-card" style="margin:14px 0">
-            <div class="et-filter-grid et-filter-grid-2">
-                <div>
-                    <label class="et-field" for="wasteTypeFilter">Accepted waste type</label>
-                    <select class="et-input" id="wasteTypeFilter">
-                        <option value="">Any type</option>
-                        <option value="small-electronics">Small electronics</option>
-                        <option value="computers">Computers and laptops</option>
-                        <option value="phones">Phones and tablets</option>
-                        <option value="batteries">Batteries</option>
-                        <option value="cables">Cables and accessories</option>
-                        <option value="appliances">Large appliances</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="et-field" for="kindFilter">Type of site</label>
-                    <select class="et-input" id="kindFilter">
-                        <option value="">Any type</option>
-                        <option value="retail">Mall / store bin</option>
-                        <option value="brand">Brand take-back</option>
-                        <option value="government">Local government</option>
-                        <option value="recycler">Licensed recycler</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="et-field" for="wasteScaleFilter">Waste quantity scale</label>
-                    <select class="et-input" id="wasteScaleFilter">
-                        <option value="">Any quantity</option>
-                        <option value="Individual">Individual (a few items)</option>
-                        <option value="Household">Household (a box or bag)</option>
-                        <option value="Community">Community (barangay or subdivision drive)</option>
-                        <option value="Industrial">Industrial (business or bulk loads)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="et-field" for="locationScaleFilter">Location scale</label>
-                    <select class="et-input" id="locationScaleFilter">
-                        <option value="">Any location scale</option>
-                        <option value="Barangay">Barangay</option>
-                        <option value="City/Municipality">City/Municipality</option>
-                        <option value="Province">Province</option>
-                        <option value="Region">Region</option>
-                    </select>
-                </div>
+            <div class="et-filter-grid">
+                <div><label class="et-field" for="wasteTypeFilter">Accepted waste type</label><select class="et-input" id="wasteTypeFilter" data-filter="type"><option value="">Any type</option><option value="small-electronics">Small electronics</option><option value="computers">Computers and laptops</option><option value="phones">Phones and tablets</option><option value="batteries">Batteries</option><option value="cables">Cables and accessories</option><option value="appliances">Large appliances</option></select></div>
+                <div><label class="et-field" for="wasteScaleFilter">Waste quantity scale</label><select class="et-input" id="wasteScaleFilter" data-filter="scale"><option value="">Any quantity</option><option value="Individual">Individual</option><option value="Household">Household</option><option value="Community">Community</option><option value="Industrial">Industrial</option></select></div>
+                <div><label class="et-field" for="locationScaleFilter">Location scale</label><select class="et-input" id="locationScaleFilter" data-filter="reach"><option value="">Any location scale</option><option value="Barangay">Barangay</option><option value="City/Municipality">City/Municipality</option><option value="Province">Province</option><option value="Region">Region</option></select></div>
             </div>
-            <p class="et-note" id="filterNotice">Accepted materials come from each program’s published list where there is one. Quantity and location scale are approximate, estimated from the kind of site (a mall bin suits a few items, a licensed recycler can take bulk loads), so a match means “likely”. If nothing fits every filter, the closest matches are shown. Confirm before you go.</p>
+            <p class="et-note" id="filterNotice"></p>
         </div>
 
         <h2>Nearby sites</h2>
         <div class="results-meta" id="resultsMeta">Sorted by estimated distance · call ahead to confirm accepted materials</div>
-        <div class="sites" id="sitesList"><!-- filled by ewaste.js --></div>
-        <p class="et-note" style="margin-top:16px">“I went here” is a simple community tally. It does not rate a site, and it never changes the order or contents of the list above.</p>
+        <div class="sites" id="sitesList"><!-- filled by tracker.js --></div>
+        <p class="et-note" style="margin-top:16px">“I went here” is a simple community tally. It does not rate a drop-off, and it never changes the order or contents of the list above.</p>
     </section>
 
     <p class="tracker-footnote">DISTANCES ARE ESTIMATES · LISTINGS COMPILED FROM PUBLIC PAGES, NOT VERIFIED BY ECOTEKK · ALWAYS CALL AHEAD TO CONFIRM HOURS AND ACCEPTED MATERIALS</p>
@@ -115,5 +76,6 @@
     <footer class="et-footer">
         <div class="et-container">EcoTekk · Understand it. Fix it. Reuse it. Recycle it. · Early functional prototype. Facility acceptance and operating details must be confirmed directly.</div>
     </footer>
+
 </body>
 </html>

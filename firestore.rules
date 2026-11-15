@@ -12,13 +12,10 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // Community counters. One collection, three uses, told apart by the document id:
-    //   "power", "screen", ...   "Community pulse" on explore.html
-    //   "shop-<id>"              "I went here" on techhelp.html (repair shops)
-    //   "dropoff-<id>"           "I went here" on ewaste.html (e-waste drop-offs)
-    // Anyone can read a count. A signed-in user (member OR guest) can add 1, once per document.
+    // "Community pulse" counter on explore.html. It also backs the "I went here" tally on ewaste.html and
+    // techhelp.html, which use prefixed ids (dropoff-... and shop-...) in this same collection.
+    // Anyone can read the count. A signed-in user can add 1, once per topic.
     // The count change and the per-user marker must be written in the same batch.
-    // Counts are display only; they never rank or alter any list.
     match /issueReports/{caseId} {
       allow read: if caseId.matches('[a-z0-9_-]{1,60}');
 

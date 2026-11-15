@@ -30,7 +30,7 @@
         <p class="slogan">We'll use your current location to show drop-off options nearby. One tap is all it takes.</p>
         <button type="button" id="locateBtn" class="getStarted big-locate">Locate nearest drop-off</button>
         <p id="geoError" class="empty-note" role="alert" style="margin-top:16px;display:none;"></p>
-        <p><a href="ewaste.html?fallback=1">Browse drop-offs near Calamba without sharing your location</a></p>
+        <p><a href="ewaste.html?fallback=1">Browse demonstration drop-offs without location</a></p>
     </section>
 
     <div class="loading-screen" id="loadingScreen" aria-live="polite">
@@ -82,7 +82,7 @@
                             var msg = 'Could not get your location. ';
                             if (err.code === 1) msg += 'Permission denied. Check Chrome site settings and Windows Location settings.';
                             else if (err.code === 2) msg += 'Position unavailable. Check Windows Location services, Wi-Fi/network positioning, then retry.';
-                            else if (err.code === 3) msg += 'Request timed out. Try again or browse drop-offs near Calamba instead.';
+                            else if (err.code === 3) msg += 'Request timed out. Try again or browse the demonstration locations below.';
                             else msg += err.message || 'Unknown geolocation error.';
                             showError(msg);
                         }, wait);
