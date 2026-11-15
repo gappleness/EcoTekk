@@ -89,39 +89,17 @@
         </div>
 
         <label class="et-field" for="brand">Brand</label>
-        <select class="et-input" id="brand">
-          <option value="">Choose a brand (optional)</option>
-          <option>Samsung</option>
-          <option>Xiaomi</option>
-          <option>Apple</option>
-          <option>Google</option>
-          <option>OPPO</option>
-          <option>vivo</option>
-          <option>realme</option>
-          <option>Motorola</option>
-          <option>Huawei</option>
-          <option>Acer</option>
-          <option>Lenovo</option>
-          <option>Dell</option>
-          <option>ASUS</option>
-          <option>HP</option>
-          <option>MSI</option>
-          <option>Microsoft</option>
-          <option>Nintendo</option>
-          <option>Sony</option>
-          <option>Canon</option>
-          <option>Epson</option>
-          <option>TP-Link</option>
-          <option>Garmin</option>
-          <option>JBL</option>
+        <select class="et-input" id="brand" disabled aria-describedby="brand-hint">
+          <option value="">Choose a problem and device type first</option>
         </select>
+        <p id="brand-hint" class="et-small" aria-live="polite">Brand unlocks after you choose the problem and the device type.</p>
 
         <label class="et-field" for="model">Model</label>
         <select class="et-input" id="model" disabled>
           <option value="">Choose a brand first</option>
         </select>
 
-        <p class="et-small">Start with the category. Brand and model narrow the result when documented instructions are available.</p>
+        <p class="et-small">Start with the problem and device type. Brand then lists only brands that make that device, and brand and model narrow the result when documented instructions are available.</p>
 
         <label class="et-field" for="case">Matching topics</label>
         <select class="et-input" id="case" required>

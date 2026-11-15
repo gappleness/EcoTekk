@@ -11,6 +11,9 @@
     let userTouchedDevice = false;
     let userTouchedBrand = false;
     let userTouchedModel = false;
+    let pendingBrand = '';   // brand suggested by auto-detection or the URL, applied once brands unlock
+    let pendingModel = '';
+    const brandHint = document.getElementById('brand-hint');
 
     if (!form || !data || !categorySelect || !deviceSelect || !brandSelect || !modelSelect || !caseSelect || !output) return;
 
@@ -234,6 +237,77 @@
         return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(query + (area ? ' ' + area : ''));
     }
 
+    // Brands offered for each device type. Anything with a documented sample model for a device is also added,
+    // so a brand can never appear for a device type it has no entry for, and vice versa.
+    const BRANDS_BY_DEVICE = {
+        'Phone': ['Samsung', 'Xiaomi', 'Apple', 'Google', 'OPPO', 'vivo', 'realme', 'Motorola', 'Huawei'],
+        'Tablet': ['Samsung', 'Xiaomi', 'Apple', 'Huawei', 'Lenovo', 'Microsoft'],
+        'Laptop / computer': ['Acer', 'Apple', 'ASUS', 'Dell', 'Google', 'HP', 'Huawei', 'Lenovo', 'Microsoft', 'MSI', 'Samsung'],
+        'Smartwatch': ['Samsung', 'Xiaomi', 'Apple', 'Google', 'Huawei', 'Garmin'],
+        'TV / monitor': ['Samsung', 'Sony', 'Xiaomi', 'Acer', 'ASUS', 'Dell', 'HP', 'Lenovo', 'MSI'],
+        'Printer': ['Canon', 'Epson', 'HP'],
+        'Router': ['TP-Link', 'ASUS', 'Huawei', 'Xiaomi'],
+        'Game console': ['Nintendo', 'Sony', 'Microsoft'],
+        'Camera': ['Canon', 'Sony'],
+        'Audio device': ['JBL', 'Sony', 'Samsung', 'Apple', 'Google', 'Huawei', 'Xiaomi'],
+        'Cables / chargers': ['Apple', 'Samsung', 'Xiaomi', 'OPPO', 'vivo', 'realme', 'Huawei', 'Motorola', 'Google', 'Acer', 'ASUS', 'Dell', 'HP', 'Lenovo'],
+        'Batteries': []
+    };
+
+    function brandsFor(device) {
+        const list = (BRANDS_BY_DEVICE[device] || []).slice();
+        Object.entries(models).forEach(([brand, entries]) => {
+            if (entries.some(entry => entry.device === device) && !list.includes(brand)) list.push(brand);
+        });
+        return list;
+    }
+
+    // Brand is locked until BOTH the problem category and the device type are chosen, then it only lists brands
+    // that make that device type.
+    function updateBrands() {
+        const category = categorySelect.value;
+        const device = deviceSelect.value;
+        const previous = brandSelect.value;
+        brandSelect.replaceChildren();
+        const first = el('option', '', '');
+        first.value = '';
+        brandSelect.append(first);
+
+        function lock(label, hint) {
+            first.textContent = label;
+            brandSelect.disabled = true;
+            brandSelect.value = '';
+            if (brandHint) brandHint.textContent = hint;
+            updateModels();
+        }
+
+        if (!category || !device) {
+            const missing = [!category ? 'the problem' : '', !device ? 'the device type' : ''].filter(Boolean).join(' and ');
+            lock('Choose a problem and device type first', 'Brand unlocks after you choose ' + missing + '.');
+            return;
+        }
+        const list = brandsFor(device);
+        if (!list.length) {
+            lock('No brand needed for this device type', 'Brands are not used for ' + device.toLowerCase() + '. Continue with the topic below.');
+            return;
+        }
+        first.textContent = 'Choose a brand (optional)';
+        list.forEach(brand => {
+            const option = el('option', '', brand);
+            option.value = brand;
+            brandSelect.append(option);
+        });
+        brandSelect.disabled = false;
+        if (list.includes(previous)) brandSelect.value = previous;
+        else if (pendingBrand && !userTouchedBrand && list.includes(pendingBrand)) brandSelect.value = pendingBrand;
+        if (brandHint) brandHint.textContent = 'Showing ' + list.length + ' brand' + (list.length === 1 ? '' : 's') + ' that make ' + device.toLowerCase() + ' devices.';
+        updateModels();
+        if (pendingModel && !userTouchedModel && brandSelect.value === pendingBrand) {
+            const match = [...modelSelect.options].find(option => option.value.toLowerCase() === pendingModel.toLowerCase());
+            if (match) modelSelect.value = match.value;
+        }
+    }
+
     function updateModels() {
         const brand = brandSelect.value;
         const device = deviceSelect.value;
@@ -415,17 +489,12 @@
         if (info.device && !pageParams.has('device') && !userTouchedDevice) {
             deviceSelect.value = info.device;
         }
-        if (info.brand && !pageParams.has('brand') && !userTouchedBrand &&
-            [...brandSelect.options].some(option => option.value === info.brand || option.textContent === info.brand)) {
-            brandSelect.value = info.brand;
-        }
-        updateModels();
+        if (info.brand && !pageParams.has('brand') && !userTouchedBrand) pendingBrand = info.brand;
         if (info.model && !pageParams.has('model') && !userTouchedModel) {
             addDetectedModelOption(info.brand, info.model, info.device);
-            updateModels();
-            const match = [...modelSelect.options].find(option => option.value.toLowerCase() === info.model.toLowerCase());
-            if (match) modelSelect.value = match.value;
+            pendingModel = info.model;
         }
+        updateBrands();   // applies the detected brand/model only once a category is chosen and the brand fits the device
         updateTopics();
         if (detectStatus) detectStatus.textContent = info.message;
     }
@@ -502,11 +571,11 @@
 
     brandSelect.addEventListener('change', function () { userTouchedBrand = true; updateModels(); });
     modelSelect.addEventListener('change', function () { userTouchedModel = true; });
-    deviceSelect.addEventListener('change', function () { userTouchedDevice = true; updateModels(); updateTopics(); });
-    categorySelect.addEventListener('change', updateTopics);
+    deviceSelect.addEventListener('change', function () { userTouchedDevice = true; updateBrands(); updateTopics(); });
+    categorySelect.addEventListener('change', function () { updateBrands(); updateTopics(); });
 
     // Category-first: topics remain filtered as the user changes any selection.
-    updateModels();
+    updateBrands();
     updateTopics();
 
     form.addEventListener('submit', function (event) {
@@ -525,9 +594,9 @@
     const params = pageParams;
     if (params.has('device')) deviceSelect.value = params.get('device');
     if (params.has('category')) categorySelect.value = params.get('category');
-    if (params.has('brand')) brandSelect.value = params.get('brand');
-    updateModels();
-    if (params.has('model')) modelSelect.value = params.get('model');
+    if (params.has('brand')) pendingBrand = params.get('brand');
+    if (params.has('model')) pendingModel = params.get('model');
+    updateBrands();
     updateTopics();
     if (params.has('case') && data[params.get('case')]) {
         caseSelect.value = params.get('case');
