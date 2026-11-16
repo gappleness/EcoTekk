@@ -427,9 +427,9 @@
         output.append(block('4 / When to act', [item.when, 'Before visiting a service: confirm current hours, fees, booking requirements and acceptance for your exact device.']));
 
         const actions = el('div', 'et-actions');
-        actions.append(link('Find relevant help on Maps', googleMaps(item.query, area)), link('Use EcoTekk drop-off finder', 'home.html', true), link('Open preparation checklist', 'checklist.html?case=' + encodeURIComponent(id), true));
+        actions.append(link('Open tech help tracker', 'techhelp.html'), link('Use EcoTekk drop-off finder', 'home.html', true), link('Open preparation checklist', 'checklist.html?case=' + encodeURIComponent(id), true));
         output.append(actions);
-        output.append(el('p', 'et-note', 'Model-specific instructions are shown only where a manufacturer or official support source documents them. The Maps button opens an external search, not a verified EcoTekk partner list.'));
+        output.append(el('p', 'et-note', 'Model-specific instructions are shown only where a manufacturer or official support source documents them. The tech help tracker lists local options for you to check; it is not a verified EcoTekk partner list.'));
 
         try {
             sessionStorage.setItem('ecotekk-last-case', id);
