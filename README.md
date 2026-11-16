@@ -38,3 +38,31 @@ https://gappleness.github.io/EcoTekk/
 ---
 
 Made with 💚 for a greener future.
+
+
+## Installable PWA
+
+EcoTekk can be installed as a Progressive Web App (PWA) on supported browsers. The PWA uses a relative manifest and service-worker scope so it works when hosted as a GitHub Pages project site at `https://gappleness.github.io/EcoTekk/`. The original bright-green navigation (`#20B64F`) is retained.
+
+### Deploy to GitHub Pages
+
+1. Extract the ZIP and open the inner `EcoTekk-main` folder.
+2. Upload the **contents** of that folder to the root of the existing `gappleness/EcoTekk` repository (do not upload the outer folder as a nested directory).
+3. Commit and push to the branch/folder configured in Settings → Pages. The usual setup is `main` and `/(root)`.
+4. Open the HTTPS site and reload once after deployment. The service worker installs and caches the local app shell.
+
+### Install on Android / desktop
+
+Open the website in a supported browser (Chrome or Edge is recommended), choose **Install app** in EcoTekk's navigation, or use the browser menu → **Install EcoTekk** / **Add to Home screen**. On iPhone/iPad, open the site in Safari, tap Share, then **Add to Home Screen**.
+
+### Offline behavior
+
+The service worker caches the site's local pages, styles, scripts, images and app icons. This allows the app shell and previously cached pages to open offline. Live Google Maps embeds, GPS location acquisition, Firebase authentication, Firestore/community updates and other cloud requests still require internet. Firebase and map responses are intentionally not cached as private/offline data. The checklist and theme preference continue to use browser-local storage.
+
+### Firebase and privacy check
+
+In Firebase Console → Authentication → Settings → Authorized domains, confirm `gappleness.github.io` is listed. Do not add private service-account credentials to this repository. The existing public Firebase web configuration remains unchanged.
+
+### Updating the PWA
+
+After pushing a new project version, the service worker checks for an update when the app is opened or returns to the foreground while online. A refresh notice appears when a new version takes control. If an old version appears stuck, close all EcoTekk tabs/windows and reopen the app online.

@@ -13,15 +13,29 @@
   ];
   let auth, db;
   let persistenceReady = Promise.resolve();
-  if (configured) {
-    firebase.initializeApp(cfg);
-    auth = firebase.auth(); db = firebase.firestore();
-    // Keep the account signed in across reloads and browser restarts.
-    persistenceReady = auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-    auth.onAuthStateChanged(u => {user=u; readyResolve(u);}, e=>{console.error(e);readyResolve(null);});
+  // The PWA can open its cached local pages offline. Firebase's SDK is a remote dependency,
+  // so expose a safe signed-out state when that SDK did not load instead of aborting auth.js.
+  const firebaseSdkReady = !!(global.firebase &&
+    typeof global.firebase.initializeApp === 'function' &&
+    typeof global.firebase.auth === 'function' &&
+    typeof global.firebase.firestore === 'function');
+  if (configured && firebaseSdkReady) {
+    try {
+      if (!global.firebase.apps || !global.firebase.apps.length) global.firebase.initializeApp(cfg);
+      auth = global.firebase.auth(); db = global.firebase.firestore();
+      // Keep the account signed in across reloads and browser restarts.
+      persistenceReady = auth.setPersistence(global.firebase.auth.Auth.Persistence.LOCAL);
+      auth.onAuthStateChanged(u => {user=u; readyResolve(u);}, e=>{console.error(e);readyResolve(null);});
+    } catch (e) {
+      console.warn('EcoTekk Firebase is unavailable. Local tools remain available; account features need a connection.', e);
+      readyResolve(null);
+    }
   } else {readyResolve(null);}
   async function ensurePersistence(){requireConfig(); await persistenceReady;}
-  function requireConfig(){if(!configured)throw new Error('Configure firebase-config.js first.');}
+  function requireConfig(){
+    if(!configured)throw new Error('Configure firebase-config.js first.');
+    if(!auth || !db)throw new Error('Firebase is unavailable. Check your internet connection and reload EcoTekk.');
+  }
   function profileRef(){const active=auth && auth.currentUser;if(!active)throw new Error('Please sign in.');return db.collection('profiles').doc(active.uid);}
   async function ensureProfile(u, displayName) {
     const ref=db.collection('profiles').doc(u.uid);
