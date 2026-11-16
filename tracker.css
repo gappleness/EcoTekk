@@ -40,10 +40,27 @@
 @media(max-width:600px) { .ecotekk-toolbar button { flex:1 1 140px; } .site-links .visit { flex:1 1 140px; } }
 @media (prefers-reduced-motion:reduce) { .went-btn, .ecotekk-toolbar button { transition:none; } }
 
-/* Premium tracker controls */
-#mapControls button, .site-links .directions-link { background:linear-gradient(135deg,#168653,#0f7044); border-radius:10px; box-shadow:0 5px 14px rgba(15,112,68,.16); }
-.site-links .visit { border-radius:10px; }
-.ecotekk-toolbar button { border-radius:10px; }
-.shop-tag { border-radius:7px; padding:4px 9px; background:var(--mist); }
-.went-btn { border-radius:10px; }
-[data-theme="dark"] .shop-tag { background:#203328; color:#8be0ae; border-color:#385342; }
+/* Premium tracker controls — use EcoTekk's original signature green. */
+#mapControls button,
+.site-links .directions-link {
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+  color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 5px 14px rgba(21,138,61,.18);
+}
+#mapControls button:hover:not(:disabled),
+.site-links .directions-link:hover {
+  filter: brightness(.96);
+  box-shadow: 0 8px 18px rgba(21,138,61,.23);
+}
+.site-links .visit { border-radius: 10px; }
+.ecotekk-toolbar button { border-radius: 10px; }
+.shop-tag {
+  border-radius: 7px;
+  padding: 4px 9px;
+  background: var(--mist);
+  color: var(--brand-dark);
+  border-color: var(--line);
+}
+.went-btn { border-radius: 10px; }
+[data-theme="dark"] .shop-tag { background: #203328; color: #8be0ae; border-color: #385342; }
