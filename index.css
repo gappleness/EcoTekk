@@ -29,9 +29,7 @@
 /* Sentence-style quick start */
 .quickstart { max-width: 600px; padding: 20px 22px 18px; border: 1px solid var(--line-strong); border-radius: 18px; background: var(--paper); box-shadow: var(--shadow-sm); }
 .qs-label { margin: 0 0 10px; color: var(--muted); font: 600 10px var(--font-mono); letter-spacing: .14em; text-transform: uppercase; }
-.qs-sentence { --quickstart-font-size: clamp(1.1rem, 2.4vw, 1.4rem); display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font: 700 var(--quickstart-font-size) var(--font-display); }
-/* Keep every part of the quick-start sentence at exactly the same text size. */
-.qs-my, .qs-sentence > .pick > .pick-btn, .qs-sentence > .pick > .pick-btn .pick-label { font-size: var(--quickstart-font-size); }
+.qs-sentence { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font: 700 clamp(1.1rem, 2.4vw, 1.4rem) var(--font-display); }
 .qs-my { color: var(--ink); }
 .qs-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 18px; }
 .qs-skip { color: var(--ink-soft); font-size: 13px; font-weight: 700; text-underline-offset: 3px; }
@@ -174,4 +172,4 @@
     .loop *, .pick-btn, .pick-panel, .pick-opt, .pick-glide, .pick-chev { animation: none !important; transition-duration: .01ms !important; }
     .loop-dot { display: none !important; }
 }
-@media (max-width: 640px) { .pick-panel { left: 0; } .qs-sentence { --quickstart-font-size: 1.15rem; } }
+@media (max-width: 640px) { .pick-panel { left: 0; } .qs-sentence { font-size: 1.15rem; } }
