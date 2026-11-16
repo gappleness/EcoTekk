@@ -1,31 +1,119 @@
 <!doctype html>
 <html lang="en">
 <head>
-<title>EcoTekk | Device Explorer</title>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-<meta name="theme-color" content="#166747">
-<link rel="stylesheet" href="stylesheet.css">
-<link rel="stylesheet" href="experience.css">
-<style>
-.et-side{display:flex;flex-direction:column;gap:18px;min-width:0;align-self:start}
-.et-issue-topic{margin:8px 0 14px;font-weight:600}
-.et-issue-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px}
-.et-issue-count{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.et-issue-num{font-size:2.6rem;font-weight:800;line-height:1;color:#22c55e;font-variant-numeric:tabular-nums}
-.et-issue-unit{opacity:.8;font-size:.95rem}
-.et-issue-btn{font:inherit;font-weight:700;cursor:pointer;padding:11px 18px;border-radius:10px;border:2px solid #22c55e;background:transparent;color:inherit;transition:background .15s,color .15s,transform .15s}
-.et-issue-btn:hover:not(:disabled){background:#166747;border-color:#166747;color:#fff}
-.et-issue-btn:active:not(:disabled){transform:scale(.97)}
-.et-issue-btn:disabled{opacity:.55;cursor:not-allowed}
-.et-issue-btn.is-done{background:#166747;border-color:#166747;color:#fff;opacity:1}
-.et-issue-meter{height:8px;border-radius:999px;background:rgba(128,128,128,.25);overflow:hidden;margin-top:16px}
-.et-issue-bar{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#166747,#22c55e);transition:width .6s ease}
-.et-issue-status{margin:10px 0 0}
-@media (prefers-reduced-motion:reduce){.et-issue-bar{transition:none}.et-issue-btn{transition:none}}
-</style>
-<script src="theme.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>EcoTekk | Device Explorer</title>
+  <meta name="description" content="Choose a device and issue to receive useful checks, options and next steps. ">
+  <meta name="theme-color" content="#20B64F">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=3">
+  <link rel="stylesheet" href="stylesheet.css">
+  <link rel="stylesheet" href="experience.css">
+  
+  <script src="theme.js"></script>
+</head>
+<body class="page-workspace page-explore">
+<nav class="et-nav" aria-label="Main navigation">
+  <div class="et-nav-inner">
+    <a href="index.html" class="logo" aria-label="EcoTekk home"><span class="logo-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 3.5C12 3.7 5.2 5.3 4 11.4c-.7 3.8 2 6.8 5.6 6.4C16 16.8 19.1 10.7 20.5 3.5Z"/><path d="M3.5 21c3.2-5.8 7.2-9.2 12.1-12"/><path d="M8.2 17.5c-2.2.1-4.4-.5-5.7-2"/></svg></span><span class="logo-word">EcoTekk<small>technology, responsibly</small></span></a>
+    <button class="nav-menu-toggle" id="nav-menu-toggle" type="button" aria-controls="et-nav-links" aria-expanded="false" aria-label="Open navigation"><span></span><span></span><span></span></button>
+    <ul class="et-nav-links" id="et-nav-links"><li><a href="explore.html" aria-current="page">Device explorer</a></li><li><a href="techhelp.html">Tech help</a></li><li><a href="home.html">E-waste finder</a></li><li id="nav-auth"><a href="login.html">Sign in</a></li><li><button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle theme">◐</button></li></ul>
+  </div>
+</nav>
+<main class="et-workspace">
+  <div class="et-container">
+    <div class="workspace-heading" data-reveal="left"><div><span class="et-eyebrow">EcoTekk / Device Explorer</span><h1>Tell us what's happening.</h1><p class="et-lead">Start with what you know. Choose the situation that best matches your device and get relevant first checks, possible outcomes, nearby support searches and a handover checklist.</p></div><span class="workspace-aside-tag"><i></i> Practical guidance</span></div>
+    <div class="et-layout">
+      <form class="et-card et-form-panel" id="et-form"><div class="form-head"><span class="et-eyebrow">Your device / your situation</span><h2>Build your next steps</h2><p>Answer a few details to narrow down guidance for your device.</p></div>
+<label class="et-field" for="category">What are you having trouble with?</label>
+<select class="et-input" id="category" required="">
+<option value="">Choose a category</option>
+<option value="power">Power / Won’t turn on</option>
+<option value="screen">Screen / Display</option>
+<option value="software">Software / System</option>
+<option value="performance">Performance / Slow device</option>
+<option value="connectivity">Connectivity</option>
+<option value="charging">Charging / Battery</option>
+<option value="reuse">Device reuse / End of life</option>
+<option value="accessories">Cables / Accessories</option>
+</select>
+<label class="et-field" for="device">Device type</label>
+<select class="et-input" id="device" required="">
+<option value="">Choose a device type</option>
+<option value="Phone">Phone</option>
+<option value="Laptop / computer">Laptop / computer</option>
+<option value="Cables / chargers">Cables / chargers</option>
+<option value="Batteries">Batteries</option>
+<option value="Tablet">Tablet</option>
+<option value="Smartwatch">Smartwatch / fitness band</option>
+<option value="TV / monitor">TV / monitor</option>
+<option value="Printer">Printer</option>
+<option value="Router">Router / modem</option>
+<option value="Game console">Game console</option>
+<option value="Camera">Camera</option>
+<option value="Audio device">Audio device / speaker</option>
+</select>
+<div class="et-detect-row">
+<span aria-live="polite" class="et-small" id="detect-status" role="status">Automatically detecting your device and model…</span>
+</div>
+<label class="et-field" for="brand">Brand</label>
+<select aria-describedby="brand-hint" class="et-input" disabled="" id="brand">
+<option value="">Choose a problem and device type first</option>
+</select>
+<p aria-live="polite" class="et-small" id="brand-hint">Brand unlocks after you choose the problem and the device type.</p>
+<label class="et-field" for="model">Model</label>
+<select class="et-input" disabled="" id="model">
+<option value="">Choose a brand first</option>
+</select>
+<p class="et-small">Start with the problem and device type. Brand then lists only brands that make that device, and brand and model narrow the result when documented instructions are available.</p>
+<label class="et-field" for="case">Matching topics</label>
+<select class="et-input" id="case" required="">
+<option value="">Choose a topic</option>
+</select>
+<label class="et-field" for="area">Where would you look for help? (optional)</label>
+<input autocomplete="address-level2" class="et-input" id="area" maxlength="90" placeholder="e.g., Calamba, Laguna"/>
+<p class="et-small">Used only to form a Maps search; no location is uploaded to EcoTekk. You can also use the existing location finder separately.</p>
+<button class="et-btn" type="submit">Build my next steps →</button>
+<p class="et-note">Prototype guidance, not automatic hardware diagnosis or a verified business listing.</p>
+</form>
+      <div class="et-side">
+<section aria-label="How many people share this issue" class="et-card et-issue" id="et-issue">
+<span class="et-eyebrow">Community pulse</span>
+<p class="et-issue-topic" id="et-issue-topic">Choose a topic to see how many people share it.</p>
+<div class="et-issue-row">
+<div aria-live="polite" class="et-issue-count">
+<span class="et-issue-num" id="et-issue-num">–</span>
+<span class="et-issue-unit">people have this issue</span>
+</div>
+<button class="et-issue-btn" disabled="" id="et-issue-btn" type="button">I have this issue too</button>
+</div>
+<div aria-label="Progress toward the next milestone" class="et-issue-meter" role="img">
+<div class="et-issue-bar" id="et-issue-bar"></div>
+</div>
+<p class="et-small et-issue-status" id="et-issue-status">Pick a topic on the left to get started.</p>
+</section>
+<div aria-live="polite" class="et-card" id="et-output">
+<span class="et-eyebrow">Your next steps</span>
+<h2>Not just a list of pages.</h2>
+<p class="et-lead">Your answers produce one useful result in this space, with concrete guidance and actions you can take away.</p>
+<div class="et-result">
+<h3>Example: an old working phone</h3>
+<p>Check suitability → prepare your accounts/data → explore practical reuse → ask a recipient what they accept → recycle when it can no longer be used.</p>
+</div>
+</div>
+</div>
+    </div>
+  </div>
+</main>
+<footer class="et-footer">
+  <div class="et-container">
+    <div class="footer-inner">
+      <a href="index.html" class="footer-brand"><span class="logo-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 3.5C12 3.7 5.2 5.3 4 11.4c-.7 3.8 2 6.8 5.6 6.4C16 16.8 19.1 10.7 20.5 3.5Z"/><path d="M3.5 21c3.2-5.8 7.2-9.2 12.1-12"/><path d="M8.2 17.5c-2.2.1-4.4-.5-5.7-2"/></svg></span>EcoTekk</a>
+      <nav class="footer-links" aria-label="Footer navigation"><a href="explore.html">Device explorer</a><a href="techhelp.html">Tech help</a><a href="home.html">E-waste finder</a><a href="profile.html">My space</a></nav>
+    </div>
+    <p class="footer-copy">Understand it. Fix it. Reuse it. Recycle it. · EcoTekk is an educational prototype. Confirm provider details, operating hours and acceptance directly before visiting.</p>
+  </div>
+</footer>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -34,123 +122,8 @@
 <script src="activity.js"></script>
 <script src="content.js" defer></script>
 <script src="experience.js" defer></script>
-</head>
-<body>
-<nav class="et-nav">
-  <a href="index.html" class="logo">EcoTekk</a>
-  <ul>
-    <li><a href="explore.html">Explore a device</a></li>
-    <li><a href="techhelp.html">Tech help</a></li>
-    <li><a href="home.html">E-waste finder</a></li>
-    <li id="nav-auth"><a href="login.html">Login</a></li>
-    <li><button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button></li>
-  </ul>
-</nav>
-
-<main class="et-workspace">
-  <div class="et-container">
-    <span class="et-eyebrow">EcoTekk / Device Explorer</span>
-    <h1>Tell us what's happening.</h1>
-    <p class="et-lead">Choose the situation that best matches your device. Your result will include actual first checks, possible outcomes, relevant services, and a handover checklist.</p>
-
-    <div class="et-layout">
-      <form id="et-form" class="et-card">
-        <label class="et-field" for="category">What are you having trouble with?</label>
-        <select class="et-input" id="category" required>
-          <option value="">Choose a category</option>
-          <option value="power">Power / Won’t turn on</option>
-          <option value="screen">Screen / Display</option>
-          <option value="software">Software / System</option>
-          <option value="performance">Performance / Slow device</option>
-          <option value="connectivity">Connectivity</option>
-          <option value="charging">Charging / Battery</option>
-          <option value="reuse">Device reuse / End of life</option>
-          <option value="accessories">Cables / Accessories</option>
-        </select>
-
-        <label class="et-field" for="device">Device type</label>
-        <select class="et-input" id="device" required>
-          <option value="">Choose a device type</option>
-          <option value="Phone">Phone</option>
-          <option value="Laptop / computer">Laptop / computer</option>
-          <option value="Cables / chargers">Cables / chargers</option>
-          <option value="Batteries">Batteries</option>
-          <option value="Tablet">Tablet</option>
-          <option value="Smartwatch">Smartwatch / fitness band</option>
-          <option value="TV / monitor">TV / monitor</option>
-          <option value="Printer">Printer</option>
-          <option value="Router">Router / modem</option>
-          <option value="Game console">Game console</option>
-          <option value="Camera">Camera</option>
-          <option value="Audio device">Audio device / speaker</option>
-        </select>
-
-        <div class="et-detect-row">
-          <span id="detect-status" class="et-small" role="status" aria-live="polite">Automatically detecting your device and model…</span>
-        </div>
-
-        <label class="et-field" for="brand">Brand</label>
-        <select class="et-input" id="brand" disabled aria-describedby="brand-hint">
-          <option value="">Choose a problem and device type first</option>
-        </select>
-        <p id="brand-hint" class="et-small" aria-live="polite">Brand unlocks after you choose the problem and the device type.</p>
-
-        <label class="et-field" for="model">Model</label>
-        <select class="et-input" id="model" disabled>
-          <option value="">Choose a brand first</option>
-        </select>
-
-        <p class="et-small">Start with the problem and device type. Brand then lists only brands that make that device, and brand and model narrow the result when documented instructions are available.</p>
-
-        <label class="et-field" for="case">Matching topics</label>
-        <select class="et-input" id="case" required>
-          <option value="">Choose a topic</option>
-        </select>
-
-        <label class="et-field" for="area">Where would you look for help? (optional)</label>
-        <input id="area" class="et-input" placeholder="e.g., Calamba, Laguna" maxlength="90" autocomplete="address-level2">
-        <p class="et-small">Used only to form a Maps search; no location is uploaded to EcoTekk. You can also use the existing location finder separately.</p>
-
-        <button type="submit" class="et-btn" style="margin-top:14px;width:100%">Build my next steps →</button>
-        <p class="et-note">Prototype guidance, not automatic hardware diagnosis or a verified business listing.</p>
-      </form>
-
-      <div class="et-side">
-      <section id="et-issue" class="et-card et-issue" aria-label="How many people share this issue">
-        <span class="et-eyebrow">Community pulse</span>
-        <p id="et-issue-topic" class="et-issue-topic">Choose a topic to see how many people share it.</p>
-        <div class="et-issue-row">
-          <div class="et-issue-count" aria-live="polite">
-            <span id="et-issue-num" class="et-issue-num">–</span>
-            <span class="et-issue-unit">people have this issue</span>
-          </div>
-          <button type="button" id="et-issue-btn" class="et-issue-btn" disabled>I have this issue too</button>
-        </div>
-        <div class="et-issue-meter" role="img" aria-label="Progress toward the next milestone">
-          <div id="et-issue-bar" class="et-issue-bar"></div>
-        </div>
-        <p id="et-issue-status" class="et-small et-issue-status">Pick a topic on the left to get started.</p>
-      </section>
-
-      <div id="et-output" class="et-card" aria-live="polite">
-        <span class="et-eyebrow">Your next steps</span>
-        <h2>Not just a list of pages.</h2>
-        <p class="et-lead">Your answers produce one useful result in this space, with concrete guidance and actions you can take away.</p>
-        <div class="et-result">
-          <h3>Example: an old working phone</h3>
-          <p>Check suitability → prepare your accounts/data → explore practical reuse → ask a recipient what they accept → recycle when it can no longer be used.</p>
-        </div>
-      </div>
-      </div>
-    </div>
-  </div>
-</main>
-
-<footer class="et-footer">
-  <div class="et-container">EcoTekk · Understand it. Fix it. Reuse it. Recycle it. · Early functional prototype. Facility acceptance and operating details must be confirmed directly.</div>
-</footer>
-
 <script>
+
 /* Community pulse: live "how many people have this issue" counter (Firestore).
    Reads are public; adding yours needs an account or a guest session, one time per user per topic. */
 (function () {
@@ -356,9 +329,9 @@
   }
   refreshButton();
 })();
-</script>
 
-<script>
+</script><script>
+
 /* Temporary diagnostic: shows a visible notice only if the planner is really not running.
    Safe to delete once Model / Matching topics work. */
 window.addEventListener('load', function () {
@@ -387,8 +360,7 @@ window.addEventListener('load', function () {
     form.insertBefore(box, form.firstChild);
   }, 600);
 });
-</script>
 
+</script>
 <script src="planner.js" defer></script>
-</body>
-</html>
+</body></html>
