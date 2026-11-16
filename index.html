@@ -9,6 +9,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg?v=3">
   <link rel="stylesheet" href="stylesheet.css">
   <link rel="stylesheet" href="experience.css">
+  <link rel="stylesheet" href="index.css">
   
   <script src="theme.js"></script>
 </head>
@@ -21,69 +22,81 @@
   </div>
 </nav>
 <main>
-  <section class="et-hero" id="top">
-    <div class="hero-grid">
-      <div class="hero-copy" data-reveal="left">
-        <span class="et-eyebrow hero-kicker">Technology has more than one next step</span>
-        <h1>Make better decisions for the tech <span>you already own.</span></h1>
-        <p>From a device that suddenly stopped working to electronics you no longer need, EcoTekk helps you understand what comes next: check it, repair it, reuse it or hand it over responsibly.</p>
-        <div class="hero-actions">
-          <a class="et-btn" href="explore.html">Explore my device <span aria-hidden="true">↗</span></a>
-          <a class="et-btn ghost" href="home.html">Find e-waste drop-offs</a>
-        </div>
-        <div class="hero-footnote"><span>Practical first checks</span><span>Local support options</span><span>Responsible handover</span></div>
-      </div>
-      <div class="hero-visual" data-reveal="right" aria-label="Illustration of a device moving through repair, reuse and recycling steps">
-        <div class="hero-orbit"></div>
-        <div class="hero-console">
-          <div class="console-top"><span>ECOTEKK / DEVICE FLOW</span><span class="console-dots"><i></i><i></i><i></i></span></div>
-          <div class="console-screen">
-            <span class="console-label">A smarter next step</span>
-            <div class="console-device">
-              <div class="device-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2.4"/><path d="M10 18.5h4"/><path d="M9 6h6"/></svg></div>
-              <div class="device-info"><strong>Your device, understood.</strong><span>Check the issue. Compare your options.</span></div>
-            </div>
-            <div class="console-track"><span></span><span></span><span></span><span></span></div>
+  <section class="home-hero has-bg" id="top">
+    <div class="home-hero-inner">
+      <div class="home-hero-copy">
+        <span class="et-eyebrow">For the tech already in your drawer</span>
+        <h1>Don’t bin it yet. <em>Check it, fix it, reuse it,</em> then recycle it.</h1>
+        <p class="home-lede">EcoTekk walks you through what to try before you replace a device, who nearby can repair it, and where to take it when it really is done.</p>
+
+        <form class="quickstart" id="quickstart" aria-label="Quick start" novalidate>
+          <p class="qs-label">Start here</p>
+          <div class="qs-sentence">
+            <span class="qs-my" id="qs-my">My</span>
+            <select id="qs-device" required><option value="">device</option><option value="Phone">Phone</option><option value="Laptop / computer">Laptop / computer</option><option value="Tablet">Tablet</option><option value="Smartwatch">Smartwatch / fitness band</option><option value="TV / monitor">TV / monitor</option><option value="Printer">Printer</option><option value="Router">Router / modem</option><option value="Game console">Game console</option><option value="Camera">Camera</option><option value="Audio device">Audio device / speaker</option><option value="Cables / chargers">Cables / chargers</option><option value="Batteries">Batteries</option></select>
+            <select id="qs-category" required aria-label="What is the problem"><option value="">has a problem</option><option value="power">has a power problem</option><option value="screen">has a screen problem</option><option value="software">has a software problem</option><option value="performance">has a slow-performance problem</option><option value="connectivity">has a connectivity problem</option><option value="charging">has a charging or battery problem</option><option value="accessories">has a cable or accessory problem</option><option value="reuse">has reached the end of its life</option></select>
           </div>
-          <div class="console-footer"><div class="console-stat"><strong>01</strong><span>Understand</span></div><div class="console-stat"><strong>02</strong><span>Choose next step</span></div></div>
+          <div class="qs-actions">
+            <button class="et-btn" type="submit">Show me what to try <span aria-hidden="true">→</span></button>
+            <a class="qs-skip" href="home.html">or just find a drop-off</a>
+          </div>
+          <p class="qs-msg" id="qs-msg" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+      <div class="home-hero-visual">
+        <svg class="loop" viewBox="0 0 360 360" role="img" aria-labelledby="loop-title loop-desc">
+      <title id="loop-title">The EcoTekk device loop</title>
+      <desc id="loop-desc">A cycle of four steps: Check it, Fix it, Reuse it, Recycle it. Each step links to its tool.</desc>
+      <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1.5 8 5 1 8.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+      <path class="loop-arc" d="M234.5 75.3 A118 118 0 0 1 284.7 125.5" marker-end="url(#arrow)"/>
+      <path class="loop-arc" d="M284.7 234.5 A118 118 0 0 1 234.5 284.7" marker-end="url(#arrow)"/>
+      <path class="loop-arc" d="M125.5 284.7 A118 118 0 0 1 75.3 234.5" marker-end="url(#arrow)"/>
+      <path class="loop-arc" d="M75.3 125.5 A118 118 0 0 1 125.5 75.3" marker-end="url(#arrow)"/>
+      <a href="explore.html" class="loop-node" aria-label="Check"><circle class="loop-ripple" cx="180.0" cy="62.0" r="42"/><circle cx="180.0" cy="62.0" r="42"/><text x="180.0" y="54.0" class="loop-num">01</text><text x="180.0" y="73.0" class="loop-label">Check</text></a>
+      <a href="techhelp.html" class="loop-node" aria-label="Fix"><circle class="loop-ripple" cx="298.0" cy="180.0" r="42"/><circle cx="298.0" cy="180.0" r="42"/><text x="298.0" y="172.0" class="loop-num">02</text><text x="298.0" y="191.0" class="loop-label">Fix</text></a>
+      <a href="explore.html?category=reuse" class="loop-node" aria-label="Reuse"><circle class="loop-ripple" cx="180.0" cy="298.0" r="42"/><circle cx="180.0" cy="298.0" r="42"/><text x="180.0" y="290.0" class="loop-num">03</text><text x="180.0" y="309.0" class="loop-label">Reuse</text></a>
+      <a href="home.html" class="loop-node" aria-label="Recycle"><circle class="loop-ripple" cx="62.0" cy="180.0" r="42"/><circle cx="62.0" cy="180.0" r="42"/><text x="62.0" y="172.0" class="loop-num">04</text><text x="62.0" y="191.0" class="loop-label">Recycle</text></a>
+      <circle class="loop-dot" r="4.5"/><circle class="loop-dot trail" r="3"/><text x="180" y="172" class="loop-center">keep it</text><text x="180" y="192" class="loop-center strong">in the loop</text>
+    </svg>
+        <p class="loop-caption">Tap a step to jump straight to it.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="et-section home-steps" id="tools">
+    <div class="et-container">
+      <div class="steps-head" data-reveal><span class="et-eyebrow">The loop, in order</span><h2>Four moves. Most devices only need the first two.</h2></div>
+      <ol class="steps">
+        <li class="step" data-reveal><a href="explore.html"><span class="step-num">01</span><span class="step-body"><strong>Check it</strong><span>Pick the device and what’s going wrong. Get safe first checks, likely causes and when to stop and ask a professional.</span></span><span class="step-go">Device explorer <i aria-hidden="true">→</i></span></a></li>
+        <li class="step" data-reveal><a href="techhelp.html"><span class="step-num">02</span><span class="step-body"><strong>Fix it</strong><span>Repair shops and brand service centers near Calamba, filtered by device, with a quick “I went here” tally from other users.</span></span><span class="step-go">Tech help <i aria-hidden="true">→</i></span></a></li>
+        <li class="step" data-reveal><a href="explore.html?category=reuse"><span class="step-num">03</span><span class="step-body"><strong>Reuse it</strong><span>Still works, just not for you? See what to wipe, what to bundle and how to hand it on.</span></span><span class="step-go">Reuse guide <i aria-hidden="true">→</i></span></a></li>
+        <li class="step" data-reveal><a href="home.html"><span class="step-num">04</span><span class="step-body"><strong>Recycle it</strong><span>Drop-offs filtered by what they accept, how much you’re bringing and how far they serve.</span></span><span class="step-go">E-waste finder <i aria-hidden="true">→</i></span></a></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="et-section home-asks">
+    <div class="et-container">
+      <div class="asks">
+        <div class="asks-lead" data-reveal><span class="et-eyebrow">Before you replace anything</span><h2>Three questions worth two minutes.</h2></div>
+        <div class="asks-list">
+          <div data-reveal><strong>Is it the device, or what plugs into it?</strong><p>Cables, chargers and adapters fail far more often than the thing they power.</p></div>
+          <div data-reveal><strong>Can someone nearby fix it?</strong><p>A repair is often cheaper than a replacement, and keeps a working device out of the waste stream.</p></div>
+          <div data-reveal><strong>Could someone else still use it?</strong><p>Wipe it, reset it, pass it on. Recycling is for what can’t be reused.</p></div>
         </div>
-        <div class="float-chip one"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12.5 9 17l11-11"/></svg><span><strong>Repair first</strong><small>Keep useful tech in use</small></span></div>
-        <div class="float-chip two"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="9"/></svg><span><strong>Know your options</strong><small>Before you replace or recycle</small></span></div>
       </div>
     </div>
   </section>
 
-  <div class="trust-strip"><div class="trust-inner"><span class="trust-label">One place to move forward</span><div class="trust-items"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H4zM8 20h8M12 16v4"/></svg>Device guidance</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>Nearby options</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 7-4 5 4 5M16 7l4 5-4 5M14 4l-4 16"/></svg>Practical next steps</span></div></div></div>
-
-  <section class="et-section" id="tools">
+  <section class="et-section home-guest">
     <div class="et-container">
-      <div class="section-header" data-reveal><span class="et-eyebrow">Pick a starting point</span><h2>What does your tech need today?</h2><p>Three connected tools help you move from uncertainty to a practical decision. Start with the one that fits your situation.</p></div>
-      <div class="et-grid">
-        <a class="et-linkcard" href="explore.html" data-reveal style="--reveal-delay:0ms"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 18h4M9 6h6"/></svg></div><span class="card-index">01 / Understand it</span><h3>Device Explorer</h3><p>Choose a device and describe what is happening. Get relevant first checks, possible outcomes and a handover checklist.</p><span class="card-link">Explore a device <span>→</span></span></a>
-        <a class="et-linkcard" href="techhelp.html" data-reveal style="--reveal-delay:100ms"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5a4.5 4.5 0 0 0-6 6l-5 5a2.1 2.1 0 0 0 3 3l5-5a4.5 4.5 0 0 0 6-6L15 12l-3-3 2.5-2.5Z"/></svg></div><span class="card-index">02 / Fix it</span><h3>Tech Help</h3><p>Find repair shops and service centers, filter by device type and compare nearby options before you make the trip.</p><span class="card-link">Find repair support <span>→</span></span></a>
-        <a class="et-linkcard" href="home.html" data-reveal style="--reveal-delay:200ms"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10l2 4-7 10-7-10 2-4Z"/><path d="M7 7 12 21 17 7M5 11h14M9 4l3-2 3 2"/></svg></div><span class="card-index">03 / Recycle it</span><h3>E-waste Finder</h3><p>Locate collection and drop-off options, filter by accepted materials and check the route on a map.</p><span class="card-link">Find a drop-off <span>→</span></span></a>
-      </div>
-    </div>
-  </section>
-
-  <section class="et-section soft workflow-section">
-    <div class="et-container">
-      <div class="section-header center" data-reveal><span class="et-eyebrow">A more thoughtful technology loop</span><h2>Keep good tech moving.</h2><p>Replacing a device is not always the first answer. A little information can help you decide what is safe, useful and realistic.</p></div>
-      <div class="workflow-grid">
-        <div class="workflow-step" data-reveal><div class="step-number">01</div><h3>Understand the situation</h3><p>Start with the device, issue and condition. Use practical guidance to make sense of what you have.</p></div>
-        <div class="workflow-step" data-reveal style="--reveal-delay:100ms"><div class="step-number">02</div><h3>Compare your next move</h3><p>Consider first checks, qualified repair support or possible reuse before making a replacement decision.</p></div>
-        <div class="workflow-step" data-reveal style="--reveal-delay:200ms"><div class="step-number">03</div><h3>Hand it over responsibly</h3><p>When a device reaches end of life, look for an appropriate collection option and confirm acceptance first.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="et-section">
-    <div class="et-container">
-      <div class="guest-band" id="guest-strip" data-reveal>
-        <span class="et-eyebrow">No account needed to get started</span>
-        <h2>Explore first. Create an account when you need a saved space.</h2>
-        <p>Guests can use the explorer, drop-off finder, tech help and community counters. A free account adds a personal profile and account access across sessions.</p>
-        <div class="et-actions"><button type="button" id="guestStart" class="et-btn">Continue as guest <span>→</span></button><a class="et-btn ghost" href="login.html">Log in / Sign up</a></div>
+      <div class="guest-card" id="guest-strip" data-reveal>
+        <div>
+          <span class="et-eyebrow">No account needed</span>
+          <h2>Try everything first. Sign up only if you want a saved space.</h2>
+          <p>Guests can use every tool and the community counters. A free account adds a profile and keeps your activity in one place.</p>
+        </div>
+        <div class="guest-actions"><button type="button" id="guestStart" class="et-btn">Continue as guest <span>→</span></button><a class="et-btn ghost" href="login.html">Log in / Sign up</a></div>
         <p id="guestMsg" class="et-note" role="status" aria-live="polite"></p>
       </div>
     </div>
@@ -98,14 +111,19 @@
     <p class="footer-copy">Understand it. Fix it. Reuse it. Recycle it. · EcoTekk is an educational prototype. Confirm provider details, operating hours and acceptance directly before visiting.</p>
   </div>
 </footer>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="auth.js"></script>
-<script src="content.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js" defer></script>
+<script src="firebase-config.js" defer></script>
+<script src="auth.js" defer></script>
 <script src="experience.js" defer></script>
+<script src="index.js" defer></script>
 <script>
-EcotekkAuth.ready.then(function(){if(EcotekkAuth.currentUser()){var g=document.getElementById('guest-strip');if(g)g.style.display='none';}}).catch(function(){});(function(){var b=document.getElementById('guestStart'),m=document.getElementById('guestMsg');if(!b)return;b.addEventListener('click',async function(){b.disabled=true;m.textContent='Starting guest session…';try{await EcotekkAuth.guestLogin();location.href='explore.html';}catch(e){b.disabled=false;m.textContent=(e&&(e.code==='auth/operation-not-allowed'||e.code==='auth/admin-restricted-operation'))?'Guest access is not switched on yet. Enable Anonymous sign-in in Firebase Authentication.':'Could not start a guest session. Please try again.';}});})();
+document.addEventListener('DOMContentLoaded',function(){
+  /* Hide the guest card once someone is signed in. */
+  if(window.EcotekkAuth)EcotekkAuth.ready.then(function(){if(EcotekkAuth.currentUser()){var g=document.getElementById('guest-strip');if(g)g.style.display='none';}}).catch(function(){});
+  var b=document.getElementById('guestStart'),m=document.getElementById('guestMsg');
+  if(b)b.addEventListener('click',async function(){b.disabled=true;m.textContent='Starting guest session…';try{await EcotekkAuth.guestLogin();location.href='explore.html';}catch(e){b.disabled=false;m.textContent=(e&&(e.code==='auth/operation-not-allowed'||e.code==='auth/admin-restricted-operation'))?'Guest access is not switched on yet. Enable Anonymous sign-in in Firebase Authentication.':'Could not start a guest session. Please try again.';}});
+});
 </script>
 </body></html>

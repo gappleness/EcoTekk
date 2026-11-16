@@ -40,27 +40,37 @@
 
   var menuButton = document.getElementById('nav-menu-toggle');
   var menu = document.getElementById('et-nav-links');
-  function closeMenu() {
+  var backdrop = null;
+  function setMenu(open) {
     if (!menuButton || !menu) return;
-    menuButton.setAttribute('aria-expanded', 'false');
-    menuButton.setAttribute('aria-label', 'Open navigation');
-    menu.classList.remove('is-open');
+    menuButton.setAttribute('aria-expanded', String(open));
+    menuButton.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+    menu.classList.toggle('is-open', open);
+    if (backdrop) backdrop.classList.toggle('is-open', open);
+    root.classList.toggle('nav-open', open);
+  }
+  function closeMenu(returnFocus) {
+    var wasOpen = menu && menu.classList.contains('is-open');
+    setMenu(false);
+    if (wasOpen && returnFocus && menuButton) menuButton.focus();
   }
   if (menuButton && menu) {
+    // Dimmed backdrop lives inside the nav so it stacks under the drawer but over the page.
+    backdrop = document.createElement('div');
+    backdrop.className = 'nav-backdrop';
+    backdrop.setAttribute('aria-hidden', 'true');
+    menuButton.parentNode.parentNode.insertBefore(backdrop, menuButton.parentNode);
+    backdrop.addEventListener('click', function () { closeMenu(true); });
+
     menuButton.addEventListener('click', function () {
       var open = menuButton.getAttribute('aria-expanded') !== 'true';
-      menuButton.setAttribute('aria-expanded', String(open));
-      menuButton.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
-      menu.classList.toggle('is-open', open);
+      setMenu(open);
+      if (open) { var first = menu.querySelector('a, button'); if (first) setTimeout(function () { first.focus({ preventScroll: true }); }, 60); }
     });
     menu.addEventListener('click', function (event) {
-      if (event.target.closest && event.target.closest('a')) closeMenu();
+      if (event.target.closest && event.target.closest('a')) closeMenu(false);
     });
-    document.addEventListener('keydown', function (event) { if (event.key === 'Escape') closeMenu(); });
-    document.addEventListener('click', function (event) {
-      if (!menu.contains(event.target) && !menuButton.contains(event.target)) closeMenu();
-    });
-    window.addEventListener('resize', function () { if (window.innerWidth > 900) closeMenu(); });
+    document.addEventListener('keydown', function (event) { if (event.key === 'Escape') closeMenu(true); });
   }
 
   // Reveal elements on entry and stagger cards. The observer also watches content inserted by the tracker.
@@ -103,30 +113,24 @@
     document.querySelectorAll(revealSelector).forEach(function (node) { node.classList.add('is-visible'); });
   }
 
-  // Pointer-following highlights on desktop cards and the hero illustration.
+  // Pointer-following highlight on desktop cards. Throttled to one update per frame.
   if (!reduceMotion && window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    var pending = null, ticking = false;
     document.addEventListener('pointermove', function (event) {
       var card = event.target.closest && event.target.closest('.et-linkcard, .et-card, .site-card, .p-panel');
-      if (card) {
-        var rect = card.getBoundingClientRect();
-        card.style.setProperty('--pointer-x', (event.clientX - rect.left) + 'px');
-        card.style.setProperty('--pointer-y', (event.clientY - rect.top) + 'px');
-      }
-      var visual = event.target.closest && event.target.closest('.hero-visual');
-      if (visual) {
-        var vr = visual.getBoundingClientRect();
-        var px = (event.clientX - vr.left) / Math.max(1, vr.width) - .5;
-        var py = (event.clientY - vr.top) / Math.max(1, vr.height) - .5;
-        visual.style.setProperty('--tilt-x', (py * -4).toFixed(2) + 'deg');
-        visual.style.setProperty('--tilt-y', (px * 5).toFixed(2) + 'deg');
-      }
+      if (!card) return;
+      pending = { card: card, x: event.clientX, y: event.clientY };
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(function () {
+        ticking = false;
+        if (!pending) return;
+        var rect = pending.card.getBoundingClientRect();
+        pending.card.style.setProperty('--pointer-x', (pending.x - rect.left) + 'px');
+        pending.card.style.setProperty('--pointer-y', (pending.y - rect.top) + 'px');
+        pending = null;
+      });
     }, { passive: true });
-    document.addEventListener('pointerleave', function (event) {
-      if (event.target && event.target.classList && event.target.classList.contains('hero-visual')) {
-        event.target.style.removeProperty('--tilt-x');
-        event.target.style.removeProperty('--tilt-y');
-      }
-    }, true);
   }
 
   // Small scroll-to-top control on longer pages.

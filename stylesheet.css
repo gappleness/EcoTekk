@@ -136,44 +136,6 @@ h3 { font-size: 1.18rem; font-weight: 800; }
     letter-spacing: .12em;
     text-transform: uppercase;
 }
-.et-nav-links {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 6px;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-.et-nav-links li { display: flex; align-items: center; }
-.et-nav-links a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 42px;
-    padding: 0 14px;
-    border-radius: 12px;
-    color: rgba(255,255,255,.94);
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 700;
-    white-space: nowrap;
-    transition: background .2s ease, transform .2s ease, color .2s ease;
-}
-.et-nav-links a:hover,
-.et-nav-links a[aria-current="page"] {
-    background: rgba(0, 78, 28, .16);
-    color: #fff;
-}
-.et-nav-links a:hover { transform: translateY(-1px); }
-.et-nav-links #nav-auth a {
-    min-height: 40px;
-    margin-left: 7px;
-    padding: 0 17px;
-    background: #fff;
-    color: #117834;
-    box-shadow: 0 5px 15px rgba(5, 92, 34, .13);
-}
-.et-nav-links #nav-auth a:hover { background: #f0fff3; transform: translateY(-2px); }
 .theme-toggle {
     display: grid;
     place-items: center;
@@ -191,7 +153,10 @@ h3 { font-size: 1.18rem; font-weight: 800; }
 }
 .theme-toggle:hover { background: rgba(255,255,255,.25); transform: rotate(-8deg); }
 .nav-menu-toggle {
-    display: none;
+    display: block;
+    position: relative;
+    z-index: 3;
+    margin-left: auto;
     width: 44px;
     height: 42px;
     padding: 10px;
@@ -201,6 +166,7 @@ h3 { font-size: 1.18rem; font-weight: 800; }
     cursor: pointer;
 }
 .nav-menu-toggle span { display: block; width: 19px; height: 2px; margin: 4px auto; border-radius: 2px; background: #fff; transition: transform .2s ease, opacity .2s ease; }
+.nav-menu-toggle[aria-expanded="true"] { background: #20b64f; border-color: #20b64f; }
 .nav-menu-toggle[aria-expanded="true"] span:first-child { transform: translateY(6px) rotate(45deg); }
 .nav-menu-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
 .nav-menu-toggle[aria-expanded="true"] span:last-child { transform: translateY(-6px) rotate(-45deg); }
@@ -293,28 +259,60 @@ select.et-input { cursor: pointer; }
 @media (max-width: 900px) {
     :root { --nav-height: 72px; }
     .et-nav-inner { width: min(100% - 36px, 1240px); gap: 14px; }
-    .nav-menu-toggle { display: block; margin-left: auto; }
-    .et-nav-links {
-        position: absolute;
-        top: calc(100% - 1px);
-        left: 0; right: 0;
-        display: none;
-        align-items: stretch;
-        flex-direction: column;
-        gap: 5px;
-        padding: 12px 18px 18px;
-        background: #20b64f;
-        box-shadow: 0 18px 24px rgba(16,98,42,.15);
-        border-radius: 0 0 20px 20px;
-    }
-    .et-nav-links.is-open { display: flex; animation: navDrop .24s ease both; }
-    .et-nav-links li, .et-nav-links a { width: 100%; }
-    .et-nav-links a { min-height: 46px; padding: 0 14px; }
-    .et-nav-links #nav-auth a { margin: 5px 0 0; justify-content: center; }
-    .theme-toggle { margin: 5px 0 0; }
 }
 @media (max-width: 520px) {
     .et-container { width: min(100% - 34px, 1200px); }
     .logo { font-size: 22px; }
     .logo-symbol { width: 35px; height: 35px; }
+}
+
+
+/* ---------- Side drawer navigation (all pages) ---------- */
+html.nav-open { overflow: hidden; }
+.nav-backdrop { position: fixed; inset: 0; z-index: 0; background: rgba(6, 20, 11, .5); opacity: 0; visibility: hidden; transition: opacity .25s ease, visibility 0s .25s; }
+.nav-backdrop.is-open { opacity: 1; visibility: visible; transition: opacity .25s ease; }
+
+.et-nav .et-nav-links {
+    position: fixed; top: 0; right: 0; z-index: 2;
+    width: min(86vw, 330px); height: 100vh; height: 100dvh;
+    display: flex; flex-direction: column; gap: 4px;
+    margin: 0; padding: calc(var(--nav-height) + 14px) 16px 20px; list-style: none; overflow-y: auto;
+    background: linear-gradient(#20b64f var(--nav-height), var(--paper) var(--nav-height));
+    color: var(--ink);
+    box-shadow: -18px 0 48px rgba(0, 0, 0, .22);
+    transform: translateX(104%); visibility: hidden;
+    transition: transform .28s cubic-bezier(.2, .7, .2, 1), visibility 0s .28s;
+}
+.et-nav .et-nav-links.is-open { transform: translateX(0); visibility: visible; transition: transform .28s cubic-bezier(.2, .7, .2, 1); }
+.et-nav .et-nav-links::before {
+    content: "Menu"; position: absolute; top: 0; left: 0; display: flex; align-items: center; height: var(--nav-height); padding: 0 20px;
+    color: #fff; font: 700 11px var(--font-mono); letter-spacing: .16em; text-transform: uppercase;
+}
+.et-nav .et-nav-links li { display: flex; width: 100%; }
+.et-nav .et-nav-links a {
+    display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 52px; padding: 0 16px;
+    border-radius: 14px; color: var(--ink); font-size: 15px; font-weight: 700; white-space: normal; text-decoration: none;
+    transition: background-color .15s ease, color .15s ease;
+}
+.et-nav .et-nav-links li:not(#nav-auth):not(:last-child) a::after { content: "→"; color: var(--muted); font-weight: 600; transition: transform .15s ease; }
+.et-nav .et-nav-links a:hover, .et-nav .et-nav-links a:focus-visible { background: var(--brand-soft); color: var(--brand-ink); transform: none; }
+.et-nav .et-nav-links a:hover::after { transform: translateX(4px); }
+.et-nav .et-nav-links a[aria-current="page"] { background: var(--brand-soft); color: var(--brand-ink); box-shadow: inset 3px 0 0 var(--brand); }
+[data-theme="dark"] .et-nav .et-nav-links a:hover, [data-theme="dark"] .et-nav .et-nav-links a[aria-current="page"] { color: #7be59a; }
+/* Sign in / Profile sits at the bottom as a button, with the theme switch under it */
+.et-nav .et-nav-links #nav-auth { margin-top: auto; padding-top: 14px; }
+.et-nav .et-nav-links #nav-auth a { justify-content: center; margin: 0; background: #20b64f; color: #fff; box-shadow: none; }
+.et-nav .et-nav-links #nav-auth a:hover { background: #148b3b; color: #fff; }
+.et-nav .et-nav-links .theme-toggle {
+    width: 100%; height: 48px; margin: 0; padding: 0 16px; display: flex; justify-content: flex-start; align-items: center; gap: 10px;
+    border: 1px solid var(--line-strong); border-radius: 14px; background: transparent; color: var(--ink); font-size: 17px;
+}
+.et-nav .et-nav-links .theme-toggle::after { content: "Switch theme"; font: 700 14px var(--font-body); }
+.et-nav .et-nav-links .theme-toggle:hover { background: var(--brand-soft); transform: none; }
+@media (max-width: 900px) {
+    :root { --nav-height: 72px; }
+    .et-nav-inner { width: min(100% - 36px, 1240px); gap: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .et-nav .et-nav-links, .nav-backdrop { transition: none; }
 }
