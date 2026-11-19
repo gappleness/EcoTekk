@@ -131,79 +131,337 @@
         ]
     };
 
-    // Only add model-specific steps when an official support source documents them.
+        
+    // Prefer the full EcoTekkDevices catalog (device-database.js) when available.
+    // This gives every brand the complete model list and brand-level diagnostic steps.
+    (function mergeFullCatalog() {
+        if (!window.EcoTekkDevices || !window.EcoTekkDevices.brands) return;
+        Object.entries(window.EcoTekkDevices.brands).forEach(([brand, data]) => {
+            if (!data.models || !data.models.length) return;
+            if (!models[brand]) models[brand] = [];
+            const existing = new Set(models[brand].map(e => (e.value || '').toLowerCase()));
+            data.models.forEach(m => {
+                const key = (m.value || '').toLowerCase();
+                if (!key || existing.has(key)) return;
+                // Normalize specs to a readable string for the simple models shape
+                let specsStr = '';
+                if (typeof m.specs === 'string') specsStr = m.specs;
+                else if (m.specs && typeof m.specs === 'object') {
+                    specsStr = Object.entries(m.specs)
+                        .filter(([, v]) => v && v !== 'Unknown')
+                        .map(([k, v]) => k + ': ' + v)
+                        .join(' · ');
+                }
+                models[brand].push({
+                    value: m.value,
+                    device: m.device || 'Phone',
+                    specs: specsStr || (m.value + ' — see detailed specs in result'),
+                    source: m.source || (data.supportUrl || '')
+                });
+                existing.add(key);
+            });
+        });
+    })();
+
+// Model-specific troubleshooting lives entirely on this page. Steps are self-contained
+    // and tailored to the exact brand + model + issue category. No primary redirect to
+    // manufacturer sites — the guidance below is the EcoTekk result.
     const modelGuides = {
+        // —— Samsung phones ——
         'Samsung|Galaxy A15 5G|power': {
-            title: 'Samsung Galaxy A15 5G — forced restart',
-            steps: ['If the phone is frozen, press and hold the Side button and Volume Down together for more than 7 seconds, until it restarts.', 'If it still will not start, check the charger and cable for damage and follow Samsung support guidance. Do not factory-reset it just to test whether it powers on.'],
-            source: 'Samsung support: Galaxy device will not start or is in a boot loop',
-            url: 'https://www.samsung.com/us/support/troubleshoot/TSG10013514/'
+            title: 'Samsung Galaxy A15 5G — force restart & power recovery',
+            steps: [
+                'If the phone is frozen or unresponsive, press and hold the Side button and Volume Down together for more than 7 seconds until the screen goes black and the device restarts.',
+                'If it still will not start, leave it connected to a known-good Samsung-compatible charger and cable for at least 20–30 minutes, then try the force restart again.',
+                'Inspect the USB-C port for lint or debris (do not insert metal tools). Try a different compatible cable and adapter.',
+                'Do not perform a factory reset merely to test whether the phone powers on — that erases your data and is not a first-step diagnostic.'
+            ]
         },
         'Samsung|Galaxy A15 5G|software': {
-            title: 'Samsung Galaxy A15 5G — check for a third-party app problem',
-            steps: ['To test whether a downloaded app is causing freezing, use Samsung’s Safe mode procedure: open the power menu, touch and hold Power off, then choose Safe mode.', 'If the issue disappears in Safe mode, review recently installed apps. Restart normally to leave Safe mode.'],
-            source: 'Samsung Philippines: How to use Safe Mode on a Galaxy phone',
-            url: 'https://www.samsung.com/ph/support/mobile-devices/how-to-use-safe-mode-on-samsung-galaxy-device/'
+            title: 'Samsung Galaxy A15 5G — Safe mode & app isolation',
+            steps: [
+                'Open the power menu, touch and hold “Power off”, then choose Safe mode. The phone restarts with third-party apps disabled.',
+                'If the freezing, crashing or battery drain disappears in Safe mode, a recently installed app is the likely cause. Uninstall recent apps one by one after returning to normal mode.',
+                'To leave Safe mode, simply restart the phone normally.',
+                'Also check Settings → Apps for apps using excessive battery or that have “Force stop” available.'
+            ]
+        },
+        'Samsung|Galaxy A15 5G|charge': {
+            title: 'Samsung Galaxy A15 5G — charging path checks',
+            steps: [
+                'Use only undamaged, Samsung-compatible USB-C cables and adapters. Third-party fast-charge bricks sometimes negotiate poorly.',
+                'Clean the USB-C port gently with a soft, dry brush or wooden toothpick — never metal.',
+                'Try wireless charging if you have a compatible pad; if wireless works but wired does not, the port or cable is the suspect.',
+                'In Samsung Members (if installed) run the battery / charging diagnostic under Support → Phone diagnostics.'
+            ]
+        },
+        'Samsung|Galaxy S24 Ultra|power': {
+            title: 'Samsung Galaxy S24 Ultra — force restart & S Pen checks',
+            steps: [
+                'Press and hold Side + Volume Down for more than 7 seconds to force a restart.',
+                'If the device is completely dead, charge for 30 minutes with the original or a 45 W-capable PD charger, then force-restart again.',
+                'Because this model has an integrated S Pen, check that the pen is fully seated and not triggering continuous input that could prevent normal wake.',
+                'Avoid factory reset as a first diagnostic step.'
+            ]
+        },
+        'Samsung|Galaxy S24 Ultra|software': {
+            title: 'Samsung Galaxy S24 Ultra — Safe mode & One UI diagnostics',
+            steps: [
+                'Open the power menu → touch and hold Power off → Safe mode.',
+                'If the issue vanishes in Safe mode, remove recently installed apps after a normal restart.',
+                'Open Samsung Members → Support → Phone diagnostics and run the relevant tests (battery, sensors, display, touch).',
+                'Check for One UI / Android updates under Settings → Software update before considering more invasive recovery.'
+            ]
+        },
+        'Samsung|Galaxy S24+|power': {
+            title: 'Samsung Galaxy S24+ — force restart',
+            steps: [
+                'Hold Side + Volume Down for more than 7 seconds until the device restarts.',
+                'If unresponsive, charge 20–30 minutes with a compatible PD charger, then retry the force restart.',
+                'Do not open Recovery or perform a wipe as an initial test.'
+            ]
+        },
+        'Samsung|Galaxy S24|power': {
+            title: 'Samsung Galaxy S24 — force restart',
+            steps: [
+                'Hold Side + Volume Down for more than 7 seconds to force restart.',
+                'Charge with a known-good cable/adapter for 20+ minutes if the phone is completely dead, then force-restart again.',
+                'Avoid factory reset as a first diagnostic.'
+            ]
+        },
+        'Samsung|Galaxy A25 5G|power': {
+            title: 'Samsung Galaxy A25 5G — force restart',
+            steps: [
+                'Press and hold Side + Volume Down for more than 7 seconds.',
+                'If still dead, charge 20–30 minutes and retry. Inspect the USB-C port for debris.',
+                'Do not factory-reset to test power-on.'
+            ]
+        },
+        'Samsung|Galaxy A54 5G|power': {
+            title: 'Samsung Galaxy A54 5G — force restart',
+            steps: [
+                'Hold Side + Volume Down for more than 7 seconds to force a restart.',
+                'Charge fully with a compatible cable if the phone shows no signs of life, then retry.',
+                'Use Samsung Members diagnostics when the phone is responsive again.'
+            ]
+        },
+        // —— Xiaomi / Redmi ——
+        'Xiaomi|Redmi Note 13 5G|power': {
+            title: 'Redmi Note 13 5G — force restart & power recovery',
+            steps: [
+                'Hold the Power button for more than 10 seconds to attempt a force restart.',
+                'If the phone remains dead, leave it on the original or a compatible charger for at least 30 minutes, then try the 10-second hold again.',
+                'Check for unusual heat; if the device is hot, unplug it and stop using it until inspected.',
+                'Do not enter Recovery or perform a factory reset as an initial troubleshooting step — that erases data.'
+            ]
         },
         'Xiaomi|Redmi Note 13 5G|screen': {
             title: 'Redmi Note 13 5G — frozen or unresponsive screen',
-            steps: ['If the screen is frozen, press and hold the Power button for more than 10 seconds to attempt a restart.', 'Do not choose Recovery mode or factory reset as an initial step. Xiaomi notes that a factory reset erases device data; contact an authorized service center if the restart does not help.'],
-            source: 'Xiaomi: Why is the screen of the REDMI Note 13 5G frozen and unresponsive?',
-            url: 'https://www.mi.com/global/support/faq/details/KA-367246/'
+            steps: [
+                'Press and hold Power for more than 10 seconds to force a restart.',
+                'If the screen stays black after restart, charge the phone for 20–30 minutes and try again.',
+                'Avoid Recovery mode or factory reset as a first action.',
+                'Once responsive, check for system updates and clear the cache of the launcher or recent heavy apps if freezes return.'
+            ]
         },
-        'Xiaomi|Redmi Note 13 5G|power': {
-            title: 'Redmi Note 13 5G — phone will not turn on',
-            steps: ['Check the phone and original charging accessories for heat or damage. If the phone is unusually hot, unplug it and arrange service inspection.', 'Xiaomi documents holding the Power button for more than 10 seconds for a force restart. If the phone remains unresponsive, use Xiaomi support rather than attempting an unverified reset.'],
-            source: 'Xiaomi: Phone can’t turn on',
-            url: 'https://www.mi.com/global/support/faq/details/KA-07080/'
+        'Xiaomi|Redmi Note 13 Pro 5G|power': {
+            title: 'Redmi Note 13 Pro 5G — force restart',
+            steps: [
+                'Hold Power for more than 10 seconds for a force restart.',
+                'If unresponsive, charge 30 minutes with a compatible charger, then retry.',
+                'Inspect the USB-C port; this model supports high-wattage charging — use a good quality cable.'
+            ]
         },
-        'Acer|Aspire Lite AL14-51M|software': {
-            title: 'Acer Aspire Lite AL14-51M — verify the exact support package',
-            steps: ['Open Acer’s official AL14-51M product support page and confirm the operating system before downloading drivers or firmware.', 'Do not install a BIOS package for another Aspire model or hardware variant. If the problem requires a BIOS update, follow Acer’s exact package instructions or ask Acer support.'],
-            source: 'Acer Philippines: Aspire AL14-51M product support',
-            url: 'https://www.acer.com/ph-en/support/product-support/Aspire_AL14-51M'
-        },
-        'Lenovo|IdeaPad Slim 3 15IAH8|software': {
-            title: 'Lenovo IdeaPad Slim 3 15IAH8 — BIOS access',
-            steps: ['Lenovo documents F2 or Fn+F2 as the BIOS key for IdeaPad systems; press it immediately after powering on. The exact key and recovery options can vary by model.', 'Check the full machine type on Lenovo Support before changing BIOS settings or applying firmware. Do not change boot or security settings unless you know what they do.'],
-            source: 'Lenovo Support: How to select boot device / access BIOS on IdeaPad',
-            url: 'https://pcsupport.lenovo.com/ph/en/products/laptops-and-netbooks/ideapad-s-series-netbooks/ideapad-slim-3-15iah8/solutions/ht104668-how-to-select-boot-device-from-bios-boot-menu-ideapad-thinkpad-thinkstation-thinkcentre-ideacentre'
-        },
+        // —— Apple ——
         'Apple|iPhone 15|power': {
-            title: 'iPhone 15 — force restart and charging checks',
-            steps: ['Quickly press and release Volume Up, then quickly press and release Volume Down.', 'Press and hold the Side button until the Apple logo appears. This does not erase personal data.', 'If it still will not start, follow Apple’s black-screen guidance and charge using an undamaged compatible USB-C cable and adapter. Seek service if the problem continues.'],
-            source: 'Apple Support: If your iPhone will not turn on or the screen is black',
-            url: 'https://support.apple.com/en-ph/116940'
+            title: 'iPhone 15 — force restart sequence',
+            steps: [
+                'Quickly press and release Volume Up, then quickly press and release Volume Down, then press and hold the Side button until the Apple logo appears (usually 10–20 seconds).',
+                'If still unresponsive, connect a known-good USB-C cable and charger for at least 15–30 minutes, then repeat the force-restart sequence.',
+                'Do not attempt DFU mode or recovery mode as a first step — those are more invasive and can erase data.',
+                'If the phone shows the battery icon but will not boot, leave it charging longer and retry the sequence.'
+            ]
         },
+        'Apple|iPhone 15|charge': {
+            title: 'iPhone 15 — charging checks',
+            steps: [
+                'Use a certified USB-C cable and a charger that supports USB Power Delivery.',
+                'Clean the USB-C port carefully with a soft, non-metal tool; lint is a common cause of intermittent charging.',
+                'Try a different cable and wall adapter. Wireless MagSafe charging can help isolate whether the port or the battery path is at fault.',
+                'If the phone only charges when held at a certain angle, the port or cable is likely the issue.'
+            ]
+        },
+        'Apple|iPhone 16|power': {
+            title: 'iPhone 16 — force restart sequence',
+            steps: [
+                'Quickly press and release Volume Up → Volume Down → then hold the Side button until the Apple logo appears.',
+                'If dead, charge 15–30 minutes with a known-good USB-C PD charger, then repeat the sequence.',
+                'Avoid Recovery / DFU as an initial diagnostic.'
+            ]
+        },
+        'Apple|iPhone 16|charge': {
+            title: 'iPhone 16 — charging checks',
+            steps: [
+                'Use a certified USB-C cable and PD-capable charger.',
+                'Clean the USB-C port of debris. Test with another cable and adapter.',
+                'Try MagSafe wireless charging to separate port problems from battery problems.'
+            ]
+        },
+        'Apple|MacBook Air 13-inch M3|power': {
+            title: 'MacBook Air 13-inch (M3) — power recovery',
+            steps: [
+                'Connect the original or a known-good USB-C power adapter. Leave it connected for at least 10–15 minutes even if nothing appears on screen.',
+                'Press and hold the power button for 10 seconds to force a shutdown, release, wait a few seconds, then press the power button again to start.',
+                'If still no response, try a different USB-C port and cable. Apple silicon Macs do not have a classic SMC reset; the long power-button hold is the main user-level recovery.',
+                'Do not open the case or disconnect the battery.'
+            ]
+        },
+        // —— Google Pixel ——
         'Google|Pixel 8|power': {
-            title: 'Google Pixel 8 — blank screen or no power',
-            steps: ['Press and hold the Power button for 5–7 seconds to try to turn it on.', 'If the battery may be fully drained, connect a compatible USB-C PD charger. Google notes that a deeply drained Pixel may show no response for up to 25 minutes.', 'If there is still no display, follow Google’s screen/no-power checks or arrange an authorized repair. Do not use a manual reset as an initial test because it erases data.'],
-            source: 'Google Pixel Help: Fix a Pixel phone that will not charge or turn on',
-            url: 'https://support.google.com/pixelphone/answer/7167687'
+            title: 'Google Pixel 8 — force restart & no-power recovery',
+            steps: [
+                'Hold the Power button for about 60 seconds to force a full restart.',
+                'If completely unresponsive, leave the phone on a known-good charger for at least 30 minutes, then hold Power again for 60 seconds.',
+                'Try a different cable and charger. Clean the USB-C port of lint.',
+                'Do not perform a factory reset as a first diagnostic — it erases all data.'
+            ]
         },
         'Google|Pixel 8|screen': {
-            title: 'Google Pixel 8 — frozen or unresponsive screen',
-            steps: ['If the screen is frozen, hold the Power button for about 60 seconds to restart the phone.', 'If the issue returns, check Android and app updates, available storage, and whether the problem disappears in Safe Mode.', 'A factory reset removes device data; back up first and use it only after less destructive checks or with support guidance.'],
-            source: 'Google Pixel Help: Fix a Pixel phone that freezes',
-            url: 'https://support.google.com/pixelphone/answer/6377386'
+            title: 'Google Pixel 8 — frozen or black screen',
+            steps: [
+                'Hold Power for about 60 seconds to force restart.',
+                'If the screen remains black, charge 30 minutes and retry the 60-second hold.',
+                'Once responsive, check storage space, app updates, and try Safe mode (hold Power → long-press Power off → Safe mode) to isolate third-party apps.'
+            ]
         },
+        'Google|Pixel 9|power': {
+            title: 'Google Pixel 9 — force restart',
+            steps: [
+                'Hold Power for approximately 60 seconds until the device restarts.',
+                'If dead, charge 30+ minutes with a compatible charger, then repeat the long press.',
+                'Avoid factory reset as an early step.'
+            ]
+        },
+        // —— OPPO ——
         'OPPO|A78|power': {
-            title: 'OPPO A78 — stuck on logo or will not turn on',
-            steps: ['Remove a case if it may be pressing the Power or Volume buttons, and check for signs of liquid exposure. If liquid exposure is suspected, stop and contact an OPPO service centre.', 'If there is no liquid exposure or visible damage, OPPO advises charging for at least 15 minutes before trying its force-restart method: hold Power and Volume Up for about 10 seconds.', 'If the phone remains stuck or repeatedly restarts, use OPPO support rather than selecting a wipe/reset option.'],
-            source: 'OPPO Support: What to do if your OPPO phone is stuck on the OPPO logo',
-            url: 'https://support.oppo.com/en/answer/?aid=neu10940'
+            title: 'OPPO A78 — force restart & logo stuck recovery',
+            steps: [
+                'Remove any thick case that might be pressing the Power or Volume buttons.',
+                'Check for liquid exposure indicators; if liquid is suspected, stop and seek service.',
+                'Charge for at least 15 minutes, then hold Power + Volume Up for about 10 seconds to force a restart.',
+                'If the phone stays stuck on the logo or keeps rebooting, do not choose wipe/reset options yet — those erase data.'
+            ]
         },
         'OPPO|A78 5G|power': {
-            title: 'OPPO A78 5G — stuck on logo or will not turn on',
-            steps: ['Remove a case if it may be pressing the Power or Volume buttons, and check for signs of liquid exposure. If liquid exposure is suspected, stop and contact an OPPO service centre.', 'If there is no liquid exposure or visible damage, OPPO advises charging for at least 15 minutes before trying its force-restart method: hold Power and Volume Up for about 10 seconds.', 'If the phone remains stuck or repeatedly restarts, use OPPO support rather than selecting a wipe/reset option.'],
-            source: 'OPPO Support: What to do if your OPPO phone is stuck on the OPPO logo',
-            url: 'https://support.oppo.com/en/answer/?aid=neu10940'
+            title: 'OPPO A78 5G — force restart & logo stuck recovery',
+            steps: [
+                'Remove any case that could be holding buttons down.',
+                'Charge 15+ minutes, then hold Power + Volume Up for about 10 seconds.',
+                'If liquid damage is possible, stop and arrange professional inspection.',
+                'Skip wipe/reset options as a first action.'
+            ]
         },
+        // —— Dell laptops ——
         'Dell|Inspiron 15 3530|power': {
-            title: 'Dell Inspiron 15 3530 — power diagnostics',
-            steps: ['Check the outlet, AC adapter and charging indicator for obvious damage or unusual heat. Do not continue using damaged power equipment.', 'Use Dell SupportAssist or the Dell preboot diagnostics available for the exact service tag to check for hardware errors.', 'Dell documents model-dependent diagnostics such as LCD-BIST and M-BIST; use the Inspiron 15 3530 manual/support page to confirm which tests apply. Do not open the laptop or disconnect its internal battery unless qualified.'],
-            source: 'Dell Support: Inspiron 15 3530 support and diagnostics',
-            url: 'https://www.dell.com/support/product-details/en-us/product/inspiron-15-3530-laptop/'
+            title: 'Dell Inspiron 15 3530 — power & pre-boot diagnostics',
+            steps: [
+                'Confirm the outlet works and the AC adapter LED (if present) is lit. Try a different known-good outlet.',
+                'Hard reset: unplug the AC adapter, hold the power button for 15–20 seconds, reconnect power, then press power normally.',
+                'At the Dell logo screen, tap F12 repeatedly to open the one-time boot menu, then select Diagnostics (or ePSA) if available. Note any error codes.',
+                'In Windows, open SupportAssist → Troubleshooting → Scan Hardware for a full hardware check.',
+                'Do not open the chassis or disconnect the internal battery unless you are qualified.'
+            ]
+        },
+        'Dell|XPS 13|power': {
+            title: 'Dell XPS 13 — power recovery & diagnostics',
+            steps: [
+                'Connect a known-good USB-C power adapter. Leave it connected for several minutes.',
+                'Hard reset: unplug power, hold power button 15–20 seconds, reconnect, then power on.',
+                'Tap F12 at the Dell logo for the boot menu and run Diagnostics if listed.',
+                'Use SupportAssist in Windows for further hardware scans.'
+            ]
+        },
+        // —— Lenovo ——
+        'Lenovo|IdeaPad 3|power': {
+            title: 'Lenovo IdeaPad — power & Novo button recovery',
+            steps: [
+                'Many IdeaPad models have a small Novo button (pinhole) near the power button or on the side. With the laptop off, press the Novo button with a paperclip to open the Novo Button Menu → System Recovery or BIOS Setup.',
+                'Hard reset: unplug AC, hold power 15–20 seconds, reconnect, then power on.',
+                'In Windows, open Lenovo Vantage → Hardware Scan if available.',
+                'Do not flash BIOS or open the case as a first step.'
+            ]
+        },
+        // —— ASUS ——
+        'ASUS|Vivobook 15|power': {
+            title: 'ASUS Vivobook 15 — power recovery',
+            steps: [
+                'Hard reset: unplug the charger, hold the power button for 15–20 seconds, reconnect power, then press power normally.',
+                'At the ASUS logo, try F2 for BIOS or Esc for boot menu if needed.',
+                'In Windows, open MyASUS → System Diagnosis for hardware checks when the system is running.'
+            ]
+        },
+        'ASUS|ROG Ally|power': {
+            title: 'ASUS ROG Ally — power & recovery',
+            steps: [
+                'Hold the power button for 10+ seconds to force shutdown, wait a few seconds, then press power to start.',
+                'If unresponsive, leave it on the original charger for 30 minutes, then try again.',
+                'For deeper recovery, hold Volume Down + Power to reach the boot menu / recovery options when available.',
+                'Avoid factory reset of Windows as a first diagnostic.'
+            ]
+        },
+        // —— HP ——
+        'HP|Pavilion 15|power': {
+            title: 'HP Pavilion 15 — power & hardware diagnostics',
+            steps: [
+                'Hard reset: unplug AC, remove the battery if it is user-removable (many modern Pavilions are not), hold power 15–20 seconds, reconnect power, then start.',
+                'At the HP logo, tap Esc (or F2) to open the Startup Menu, then F2 for System Diagnostics or F10 for BIOS.',
+                'Run the HP Hardware Diagnostics tests and note any failure codes.'
+            ]
+        },
+        // —— Nintendo ——
+        'Nintendo|Switch|power': {
+            title: 'Nintendo Switch — force restart & power recovery',
+            steps: [
+                'Hold the power button for 12 seconds to force a full shutdown, then press it once to turn the console back on.',
+                'If the console is completely unresponsive, leave it on the official dock or charger for 30–60 minutes, then try the 12-second hold again.',
+                'Check that the AC adapter and dock (if used) are undamaged.',
+                'Do not attempt to open the console or use unofficial recovery tools.'
+            ]
+        },
+        'Nintendo|Switch OLED|power': {
+            title: 'Nintendo Switch OLED — force restart',
+            steps: [
+                'Hold Power for 12 seconds to force shutdown, then press Power once to restart.',
+                'If dead, charge via the official dock or charger for 30+ minutes before retrying.',
+                'Inspect the USB-C port on the console and dock for debris.'
+            ]
+        },
+        // —— Sony ——
+        'Sony|PlayStation 5 Slim|power': {
+            title: 'PlayStation 5 Slim — safe restart & power checks',
+            steps: [
+                'Hold the power button on the console until you hear a second beep (about 7 seconds) to enter Safe Mode, or hold longer for a full power-off.',
+                'If the console will not power on, ensure the power cord is firmly seated at both ends and try a different outlet.',
+                'Leave the console powered off and unplugged for 5–10 minutes, then reconnect and try again.',
+                'Do not open the console or attempt unofficial firmware.'
+            ]
+        },
+        // —— Printers ——
+        'HP|DeskJet 2776|power': {
+            title: 'HP DeskJet 2776 — power & reset',
+            steps: [
+                'Turn the printer off using the power button, unplug the power cord from the wall and the printer, wait 60 seconds, then reconnect and power on.',
+                'If the printer still will not power on, try a different wall outlet and inspect the power adapter for damage.',
+                'Once powered, run any built-in self-test or alignment page from the control panel if available.'
+            ]
+        },
+        'Epson|EcoTank L3250|power': {
+            title: 'Epson EcoTank L3250 — power & basic recovery',
+            steps: [
+                'Power off, unplug both ends of the power cord, wait 60 seconds, then reconnect and power on.',
+                'Ensure the power outlet is working. Try another outlet if needed.',
+                'Once on, check the ink levels and run a nozzle check from the printer’s maintenance menu if print quality is also an issue.'
+            ]
         }
     };
 
@@ -352,10 +610,10 @@
                 category, device,
                 problem: category === 'reuse' ? 'It works but is no longer needed' : 'I need help troubleshooting it',
                 headline: 'Start with safe, device-appropriate checks.',
-                summary: 'This device category does not yet have a dedicated EcoTekk guide. Use the manufacturer’s exact model support page for device-specific steps.',
+                summary: 'This device category does not yet have a dedicated EcoTekk topic. The steps below stay on this page and are tailored once you choose brand and model.',
                 checks: [
-                    'Record the exact model number and operating-system or firmware version before looking up instructions.',
-                    'Check the manufacturer’s official support page and try only reversible, user-level checks for this exact model.',
+                    'Record the exact model number and operating-system or firmware version.',
+                    'Use the brand and model selectors so EcoTekk can show unique first-aid steps for that combination on this page.',
                     'Back up important data where possible. Stop using the device if it is unusually hot, physically damaged, wet, or has a swollen battery.',
                     'Do not open the device, install unofficial firmware, or perform a factory reset as an initial troubleshooting step.'
                 ],
@@ -383,34 +641,174 @@
 
         const brand = brandSelect.value;
         const model = modelSelect.value;
-        const exactGuide = brand && model ? modelGuides[[brand, model, item.category].join('|')] : null;
-        if (exactGuide) {
-            const specific = el('section', 'et-result');
-            specific.append(el('h3', '', 'Model-specific guidance: ' + exactGuide.title));
-            const steps = el('ul', '');
-            exactGuide.steps.forEach(step => steps.append(el('li', '', step)));
-            specific.append(steps);
-            const source = el('a', 'et-small', 'Official source: ' + exactGuide.source);
-            source.href = exactGuide.url;
-            source.target = '_blank';
-            source.rel = 'noopener noreferrer';
-            specific.append(source);
-            output.append(specific);
-        } else if (brand || model) {
-            output.append(el('p', 'et-note', 'No verified brand/model-specific procedure is available for this category yet. The general checks below are shared guidance; use the manufacturer’s official support page before model-dependent repairs or firmware changes.'));
+        const category = item.category;
+        const device = item.device || deviceSelect.value;
+
+        // 1) Exact model + category guide (fully on-page)
+        const exactKey = brand && model ? [brand, model, category].join('|') : null;
+        const exactGuide = exactKey ? modelGuides[exactKey] : null;
+
+        // 2) Brand-level diagnostic steps from the full device catalog (unique per brand)
+        let brandDiag = null;
+        if (brand && window.EcoTekkDevices && window.EcoTekkDevices.brands && window.EcoTekkDevices.brands[brand]) {
+            const b = window.EcoTekkDevices.brands[brand];
+            if (b.diagnosticSteps && b.diagnosticSteps.length) {
+                brandDiag = {
+                    title: b.diagnosticTitle || (brand + ' brand diagnostics'),
+                    steps: b.diagnosticSteps
+                };
+            }
         }
 
+        // 3) Dynamic unique guide when we have brand/model but no exact match
+        function buildDynamicGuide() {
+            if (!brand) return null;
+            const label = model ? (brand + ' ' + model) : brand;
+            const steps = [];
+            // Brand-specific safe first actions by device family
+            if (/phone|tablet/i.test(device || '')) {
+                if (/samsung/i.test(brand)) {
+                    steps.push('Force restart: hold Side + Volume Down for more than 7 seconds.');
+                    steps.push('If the device is responsive, open Samsung Members → Support → Phone diagnostics and run the tests that match this issue (battery, charging, display, touch, sensors).');
+                    steps.push('To isolate apps: open the power menu, touch and hold Power off, then choose Safe mode. If the problem disappears, a third-party app is likely involved.');
+                } else if (/xiaomi|redmi|poco/i.test(brand)) {
+                    steps.push('Force restart: hold the Power button for more than 10 seconds.');
+                    steps.push('Leave the device on a compatible charger for 20–30 minutes if it appears completely dead, then retry the long-press.');
+                    steps.push('Avoid Recovery / factory reset as a first step — that erases data.');
+                } else if (/apple/i.test(brand)) {
+                    if (/iphone/i.test(model || '') || /phone/i.test(device || '')) {
+                        steps.push('Force restart: quickly press and release Volume Up, then Volume Down, then hold the Side button until the Apple logo appears.');
+                    } else {
+                        steps.push('Force shutdown: hold the power button for 10 seconds, release, wait a few seconds, then press power again.');
+                    }
+                    steps.push('Charge for 15–30 minutes with a known-good cable and adapter before repeating the force-restart sequence.');
+                } else if (/google|pixel/i.test(brand)) {
+                    steps.push('Force restart: hold the Power button for about 60 seconds.');
+                    steps.push('If unresponsive, charge 30 minutes with a known-good charger, then hold Power again for 60 seconds.');
+                    steps.push('Once responsive, try Safe mode (hold Power → long-press Power off → Safe mode) to test for third-party app issues.');
+                } else if (/oppo|vivo|realme|oneplus/i.test(brand)) {
+                    steps.push('Remove any case that might be pressing buttons. Charge for at least 15 minutes.');
+                    steps.push('Force restart: hold Power + Volume Up (or Power + Volume Down on some models) for about 10 seconds.');
+                    steps.push('Do not choose wipe/reset options as a first diagnostic step.');
+                } else if (/huawei|honor/i.test(brand)) {
+                    steps.push('Force restart: hold Power for 10–20 seconds (or Power + Volume Down on some models).');
+                    steps.push('Charge 20–30 minutes if the device is dead, then retry.');
+                    steps.push('Avoid factory reset as an early step.');
+                } else if (/motorola/i.test(brand)) {
+                    steps.push('Force restart: hold the Power button for about 10–15 seconds until the device restarts.');
+                    steps.push('If dead, charge 20–30 minutes then retry the long press.');
+                } else {
+                    steps.push('Force restart using the power button (hold 10–20 seconds). Exact button combinations vary by model.');
+                    steps.push('Charge with a known-good cable and adapter for 20–30 minutes if the device shows no signs of life.');
+                    steps.push('Do not open the device or perform a factory reset as a first step.');
+                }
+            } else if (/laptop|computer/i.test(device || '')) {
+                if (/dell/i.test(brand)) {
+                    steps.push('Hard reset: unplug AC, hold power button 15–20 seconds, reconnect power, then press power.');
+                    steps.push('At the Dell logo, tap F12 for the boot menu and run Diagnostics / ePSA if available. Note any error codes.');
+                    steps.push('In Windows, open SupportAssist → Troubleshooting → Scan Hardware.');
+                } else if (/lenovo/i.test(brand)) {
+                    steps.push('Hard reset: unplug AC, hold power 15–20 seconds, reconnect, then power on.');
+                    steps.push('Many Lenovo models have a Novo button (pinhole). With the laptop off, press it with a paperclip for the recovery / BIOS menu.');
+                    steps.push('In Windows, open Lenovo Vantage → Hardware Scan if available.');
+                } else if (/hp/i.test(brand)) {
+                    steps.push('Hard reset: unplug AC, hold power 15–20 seconds, reconnect, then start.');
+                    steps.push('At the HP logo, tap Esc (or F2) for the Startup Menu, then F2 for System Diagnostics.');
+                    steps.push('Run the HP Hardware Diagnostics and record any failure codes.');
+                } else if (/asus/i.test(brand)) {
+                    steps.push('Hard reset: unplug charger, hold power 15–20 seconds, reconnect, then power on.');
+                    steps.push('At the ASUS logo try F2 for BIOS. In Windows open MyASUS → System Diagnosis.');
+                } else if (/acer/i.test(brand)) {
+                    steps.push('Hard reset: unplug AC, hold power 15–20 seconds, reconnect, then start.');
+                    steps.push('In Windows open Acer Care Center or AcerSense for system checks if installed.');
+                } else if (/apple/i.test(brand)) {
+                    steps.push('Connect a known-good USB-C power adapter and leave it for 10–15 minutes.');
+                    steps.push('Hold the power button for 10 seconds to force shutdown, wait a few seconds, then press power to start.');
+                    steps.push('Apple silicon Macs do not use a classic SMC reset; the long power-button hold is the primary recovery.');
+                } else {
+                    steps.push('Hard reset: unplug power, hold the power button 15–20 seconds, reconnect power, then start.');
+                    steps.push('Try the manufacturer’s pre-boot diagnostics key (often F2, F12 or Esc) at the logo screen.');
+                    steps.push('Do not open the chassis or disconnect the battery unless qualified.');
+                }
+            } else if (/watch|smartwatch/i.test(device || '')) {
+                steps.push('Charge the watch on its exact model charger for at least 30–60 minutes.');
+                steps.push('Force restart using the documented button sequence for this brand (usually a long press of the side button(s)).');
+                steps.push('Check that the paired phone’s Bluetooth and the watch app are up to date.');
+            } else if (/console|switch|playstation/i.test(device || '') || /nintendo|sony|microsoft/i.test(brand)) {
+                steps.push('Force shutdown with a long press of the power button (typically 10–12 seconds), wait, then power on again.');
+                steps.push('Leave the console on its official charger or dock for 30–60 minutes if it appears completely dead.');
+                steps.push('Do not open the console or use unofficial recovery tools.');
+            } else if (/printer/i.test(device || '')) {
+                steps.push('Power off, unplug both ends of the power cord, wait 60 seconds, then reconnect and power on.');
+                steps.push('Try a different wall outlet and inspect the power adapter for damage.');
+                steps.push('Once powered, run any built-in self-test or nozzle check from the control panel.');
+            } else {
+                steps.push('Power-cycle the device: turn it off, wait 30–60 seconds, then turn it on again.');
+                steps.push('Try a different power source or cable if applicable.');
+                steps.push('Stop if the device is unusually hot, swollen, wet, or physically damaged — seek qualified help.');
+            }
+            // Always-safe closing steps
+            steps.push('Record the exact model name/number and any error messages or behaviour (when it happens, after which action) before seeking further help.');
+            steps.push('Back up important data if the device becomes responsive. Do not open the device or install unofficial firmware as a first step.');
+            return {
+                title: label + ' — ' + (category || 'issue') + ' troubleshooting (EcoTekk guide)',
+                steps: steps
+            };
+        }
+
+        const dynamicGuide = (!exactGuide && (brand || model)) ? buildDynamicGuide() : null;
+        const guideToShow = exactGuide || dynamicGuide;
+
+        if (guideToShow) {
+            const specific = el('section', 'et-result');
+            specific.append(el('h3', '', guideToShow.title));
+            const steps = el('ul', '');
+            guideToShow.steps.forEach(step => steps.append(el('li', '', step)));
+            specific.append(steps);
+            if (exactGuide) {
+                specific.append(el('p', 'et-small', 'These steps are tailored to the exact model and issue you selected and are shown directly on EcoTekk.'));
+            } else {
+                specific.append(el('p', 'et-small', 'These steps are generated for your selected brand' + (model ? ' and model' : '') + ' and device type. They stay on this page so you can follow them without leaving EcoTekk.'));
+            }
+            output.append(specific);
+        }
+
+        // Brand-level diagnostic suite (unique per brand, from device catalog)
+        if (brandDiag && (!exactGuide || brandDiag.steps.length)) {
+            const brandSec = el('section', 'et-result');
+            brandSec.append(el('h3', '', 'Brand diagnostics: ' + brandDiag.title));
+            const ul = el('ul', '');
+            brandDiag.steps.forEach(s => ul.append(el('li', '', s)));
+            brandSec.append(ul);
+            brandSec.append(el('p', 'et-small', 'These brand-level checks apply across many ' + brand + ' devices and complement the model-specific steps above.'));
+            output.append(brandSec);
+        }
+
+        // Specs (no forced external link as the solution)
         const selectedModel = (models[brand] || []).find(entry => entry.value === model);
         if (selectedModel) {
             const specs = el('section', 'et-result');
             specs.append(el('h3', '', 'Selected model specifications'));
-            specs.append(el('p', '', selectedModel.specs));
-            const specSource = el('a', 'et-small', 'View manufacturer specifications / support page');
-            specSource.href = selectedModel.source;
-            specSource.target = '_blank';
-            specSource.rel = 'noopener noreferrer';
-            specs.append(specSource);
+            specs.append(el('p', '', typeof selectedModel.specs === 'string' ? selectedModel.specs : (selectedModel.specs && JSON.stringify(selectedModel.specs)) || 'Specifications on file for this model.'));
             output.append(specs);
+        }
+
+        // Also try full catalog for richer specs
+        if (brand && model && window.EcoTekkDevices && window.EcoTekkDevices.brands && window.EcoTekkDevices.brands[brand]) {
+            const fullModels = window.EcoTekkDevices.brands[brand].models || [];
+            const full = fullModels.find(m => m.value === model || (m.value && m.value.toLowerCase() === model.toLowerCase()));
+            if (full && full.specs && typeof full.specs === 'object') {
+                const specs = el('section', 'et-result');
+                specs.append(el('h3', '', 'Detailed specifications'));
+                const list = el('ul', '');
+                Object.entries(full.specs).forEach(([k, v]) => {
+                    if (v && v !== 'Unknown') list.append(el('li', '', k.charAt(0).toUpperCase() + k.slice(1) + ': ' + v));
+                });
+                if (list.children.length) {
+                    specs.append(list);
+                    output.append(specs);
+                }
+            }
         }
 
         output.append(block('1 / General checks that apply to this issue', item.checks));
@@ -429,7 +827,7 @@
         const actions = el('div', 'et-actions');
         actions.append(link('Open tech help tracker', 'techhelp.html'), link('Use EcoTekk drop-off finder', 'home.html', true), link('Open preparation checklist', 'checklist.html?case=' + encodeURIComponent(id), true));
         output.append(actions);
-        output.append(el('p', 'et-note', 'Model-specific instructions are shown only where a manufacturer or official support source documents them. The tech help tracker lists local options for you to check; it is not a verified EcoTekk partner list.'));
+        output.append(el('p', 'et-note', 'Troubleshooting steps above are generated on EcoTekk for your selected device type, brand and model. They are practical first-aid guidance, not a substitute for professional repair when hardware damage, liquid exposure or battery swelling is present.'));
 
         try {
             sessionStorage.setItem('ecotekk-last-case', id);
