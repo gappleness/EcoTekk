@@ -28,10 +28,11 @@
   <div class="ecotekk-map-status" id="mapStatus" role="status" aria-live="polite"></div>
   <section class="tracker-results">
     <h2>Narrow down the kind of support</h2>
-    <div class="et-card" style="margin:14px 0" data-reveal><div class="et-filter-grid et-filter-grid-2">
+    <div class="et-card" style="margin:14px 0" data-reveal><div class="et-filter-grid">
   <div><label class="et-field" for="deviceFilter">Device</label><select class="et-input" id="deviceFilter" data-filter="device"><option value="">Any device</option><option value="phones">Phones and tablets</option><option value="laptops">Laptops and computers</option><option value="electronics">Other electronics</option></select></div>
   <div><label class="et-field" for="kindFilter">Type of shop</label><select class="et-input" id="kindFilter" data-filter="kind"><option value="">Any type</option><option value="authorized">Brand service center</option><option value="independent">Independent repair shop / kiosk</option></select></div>
-</div><p class="et-note" id="filterNotice">A brand service center usually handles its own brand and may be best for warranty work. Independent shops and kiosks take a wider range of devices. Confirm what they accept before you go.</p></div>
+  <div><label class="et-field" for="brandFilter">Brand</label><select class="et-input" id="brandFilter" data-filter="brand"><option value="">Any brand</option></select></div>
+</div><p class="et-note" id="filterNotice">Choose a device, shop type and brand. The list and guidance update live — authorized centers are best for warranty; independents take a wider range. Confirm what they accept before you go.</p></div>
     <h2>Nearby repair shops</h2>
     <div class="results-meta" id="resultsMeta">Sorted by estimated distance · call ahead to confirm hours, prices and your device</div>
     <div class="sites" id="sitesList"><!-- populated by the shared tracker engine --></div>

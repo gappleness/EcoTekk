@@ -114,6 +114,16 @@
     cables: 'cable e-waste recycling', appliances: 'appliance e-waste recycling'
   };
 
+  // Preparation tips shown when a specific waste type is selected
+  var TYPE_PREP = {
+    'small-electronics': 'Remove batteries if they are loose. Wipe personal accounts if the gadget still powers on. Place items in a small box or bag so the bin attendant can identify them.',
+    computers: 'Remove or securely wipe hard drives if you care about data. Detach power bricks and loose cables. Large towers may not fit a mall bin — call first.',
+    phones: 'Back up and factory-reset if the phone still works. Remove SIM and microSD cards. Sealed lithium batteries stay inside the phone for drop-off.',
+    batteries: 'Tape the terminals of loose lithium and alkaline batteries. Do not put damaged or swollen batteries in a public bin — ask the facility how they accept them.',
+    cables: 'Bundle cables with a rubber band or bag. Chargers and power banks often go with cables or small-electronics streams.',
+    appliances: 'Large appliances usually need a recycler or scheduled pick-up, not a mall bin. Confirm acceptance and any fee before transporting.'
+  };
+
   function has(arr, v) { return Array.isArray(arr) && arr.indexOf(v) !== -1; }
 
   EcoTracker.init({
@@ -132,31 +142,66 @@
     },
     describeFilters: function (v) {
       var p = [];
-      if (v.type) p.push(TYPE_LABEL[v.type]);
+      if (v.type) p.push(TYPE_LABEL[v.type] || v.type);
       if (v.scale) p.push(v.scale + ' quantity');
       if (v.reach) p.push(v.reach + ' reach');
-      return p.join(' · ');
+      return p.join(' · ') || 'All listed drop-offs';
     },
-    filterNote: function (v) {
-      if (v.type || v.scale || v.reach) {
-        return 'These are approximate matches. Accepted items come from each programme’s public page; quantity and reach are EcoTekk’s estimates from the kind of site. None are confirmed by the facilities, so call ahead before bringing anything.';
+    filterNote: function (v, count) {
+      var parts = [];
+      if (v.type && TYPE_PREP[v.type]) {
+        parts.push('For ' + (TYPE_LABEL[v.type] || v.type) + ': ' + TYPE_PREP[v.type]);
       }
-      return 'Pick a waste type, quantity, or location scale to see approximate matches. “Location scale” is how wide an area a drop-off serves, from a single barangay up to a whole region.';
+      if (v.scale === 'Industrial' || v.scale === 'Community') {
+        parts.push('Larger loads usually need a recycler or scheduled collection, not a public mall bin.');
+      } else if (v.scale === 'Individual' || v.scale === 'Household') {
+        parts.push('Individual / household quantities fit most public bins and brand drop boxes.');
+      }
+      if (v.reach === 'Barangay') {
+        parts.push('Barangay-level sites are rare in the list; many city halls and malls serve the whole city.');
+      } else if (v.reach === 'Region' || v.reach === 'Province') {
+        parts.push('Province / region reach usually means a professional recycler that can take bigger or mixed loads.');
+      }
+      if (!parts.length) {
+        parts.push('Pick a waste type, quantity, or location scale. Accepted items come from each programme’s public page; quantity and reach are EcoTekk estimates. Call ahead before bringing anything.');
+      } else {
+        parts.push('Accepted items and hours are not verified by EcoTekk — confirm before you travel.');
+      }
+      if (typeof count === 'number') {
+        parts.push(count === 0 ? 'No matches for this combination.' : count + ' match' + (count === 1 ? '' : 'es') + '.');
+      }
+      return parts.join(' ');
     },
     emptyMessage: function (v) {
       if (v.reach === 'Barangay') {
         return 'No barangay-level drop-off is listed yet. Ask your barangay hall whether its Materials Recovery Facility (MRF) accepts e-waste, or try City/Municipality.';
       }
-      return 'No listed drop-off matches this combination. Try loosening one filter, or use Explore nearby to search Maps. For business-scale loads, contact a recycler directly.';
+      if (v.type === 'appliances' && (v.scale === 'Individual' || !v.scale)) {
+        return 'Large appliances rarely fit public bins. Try a recycler with Industrial or Community scale, or contact your city environment office.';
+      }
+      if (v.type === 'batteries' && v.scale === 'Industrial') {
+        return 'No industrial battery stream is listed here. Contact a licensed hazardous-waste handler or the recycler directly.';
+      }
+      return 'No listed drop-off matches this combination. Loosen one filter, or use Explore nearby to search Maps. For business-scale loads, contact a recycler directly.';
     },
     tags: function (s) {
       var t = [s.kind];
-      if (s.types.length) s.types.forEach(function (x) { t.push(TYPE_LABEL[x]); });
+      if (s.types && s.types.length) s.types.forEach(function (x) { t.push(TYPE_LABEL[x] || x); });
       else t.push('Business / industrial scrap');
+      if (s.scales && s.scales.length) t.push(s.scales[0] + (s.scales.length > 1 ? '+' : '') + ' qty');
       return t;
     },
     detail: function (s) {
-      return 'Quantity: ' + s.scales.join(', ') + ' · Reach: ' + s.reach.join(', ') + ' (estimated)';
+      var lines = [];
+      lines.push('Quantity: ' + (s.scales || []).join(', ') + ' · Reach: ' + (s.reach || []).join(', ') + ' (estimated)');
+      if (s.kind && /bin|drop box/i.test(s.kind)) {
+        lines.push('Public bin / drop box — best for small sealed items. Do not leave loose damaged batteries.');
+      } else if (s.kind && /recycler|scrap/i.test(s.kind)) {
+        lines.push('Recycler / scrap buyer — call first for acceptance rules, fees and whether they take walk-ins.');
+      } else if (s.kind && /brand/i.test(s.kind)) {
+        lines.push('Brand drop box — usually limited to that brand’s products. Confirm what is accepted.');
+      }
+      return lines.join(' · ');
     }
   });
 })();
