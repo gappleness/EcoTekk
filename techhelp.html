@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>EcoTekk | Tech Help</title>
+  <meta name="description" content="Showing shops near Calamba, Laguna (default area). Use your location for distances from where you are. ">
+  <meta name="theme-color" content="#20B64F">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=3">
+  <link rel="stylesheet" href="stylesheet.css">
+  <link rel="stylesheet" href="experience.css">
+  <link rel="stylesheet" href="tracker.css">
+  <script src="theme.js"></script>
+</head>
+<body class="page-tracker page-techhelp">
+<nav class="et-nav" aria-label="Main navigation">
+  <div class="et-nav-inner">
+    <a href="index.html" class="logo" aria-label="EcoTekk home"><span class="logo-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 3.5C12 3.7 5.2 5.3 4 11.4c-.7 3.8 2 6.8 5.6 6.4C16 16.8 19.1 10.7 20.5 3.5Z"/><path d="M3.5 21c3.2-5.8 7.2-9.2 12.1-12"/><path d="M8.2 17.5c-2.2.1-4.4-.5-5.7-2"/></svg></span><span class="logo-word">EcoTekk<small>technology, responsibly</small></span></a>
+    <button class="nav-menu-toggle" id="nav-menu-toggle" type="button" aria-controls="et-nav-links" aria-expanded="false" aria-label="Open navigation"><span></span><span></span><span></span></button>
+    <ul class="et-nav-links" id="et-nav-links"><li><a href="explore.html">Device explorer</a></li><li><a href="techhelp.html" aria-current="page">Tech help</a></li><li><a href="home.html">E-waste finder</a></li><li id="nav-auth"><a href="login.html">Sign in</a></li><li><button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle theme">◐</button></li></ul>
+  </div>
+</nav>
+<main>
+  <section class="tracker-hero" data-reveal="left"><span class="et-eyebrow">EcoTekk / Local options</span><h1>Find the right hands for the repair.</h1><p id="locLabel">Showing shops near Calamba, Laguna (default area). Use your location for distances from where you are.</p><span class="hero-subtag">Map-assisted local search · call ahead to confirm details</span></section>
+  <div class="map-frame" data-reveal><iframe id="mapFrame" src="https://www.google.com/maps?q=phone+laptop+repair+Calamba+Laguna+Philippines&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Map showing nearby techhelp options"></iframe></div>
+  <div class="map-location-actions" id="locationActions" hidden></div>
+  <div class="map-location-actions ecotekk-toolbar" id="mapControls" aria-label="Map controls"><button type="button" id="showNearest" class="visit">Nearest shop</button><button type="button" id="showAll" class="visit">Explore nearby</button><button type="button" id="useLocation" class="visit">Use my location</button></div>
+  <div class="ecotekk-map-status" id="mapStatus" role="status" aria-live="polite"></div>
+  <section class="tracker-results">
+    <h2>Narrow down the kind of support</h2>
+    <div class="et-card" style="margin:14px 0" data-reveal><div class="et-filter-grid">
+  <div><label class="et-field" for="deviceFilter">Device</label><select class="et-input" id="deviceFilter" data-filter="device"><option value="">Any device</option><option value="phones">Phones and tablets</option><option value="laptops">Laptops and computers</option><option value="electronics">Other electronics</option></select></div>
+  <div><label class="et-field" for="kindFilter">Type of shop</label><select class="et-input" id="kindFilter" data-filter="kind"><option value="">Any type</option><option value="authorized">Brand service center</option><option value="independent">Independent repair shop / kiosk</option></select></div>
+  <div><label class="et-field" for="brandFilter">Brand</label><select class="et-input" id="brandFilter" data-filter="brand"><option value="">Any brand</option></select></div>
+</div><p class="et-note" id="filterNotice">Choose a device, shop type and brand. The list and guidance update live — authorized centers are best for warranty; independents take a wider range. Confirm what they accept before you go.</p></div>
+    <h2>Nearby repair shops</h2>
+    <div class="results-meta" id="resultsMeta">Sorted by estimated distance · call ahead to confirm hours, prices and your device</div>
+    <div class="sites" id="sitesList"><!-- populated by the shared tracker engine --></div>
+    <p class="et-note" style="margin-top:16px">“I went here” is a simple community tally. It does not rate a provider, and it never changes the order or contents of the list above.</p>
+  </section>
+  <p class="tracker-footnote">DISTANCES ARE ESTIMATES · LISTINGS COMPILED FROM PUBLIC PAGES, NOT VERIFIED BY ECOTEKK · ALWAYS CALL AHEAD TO CONFIRM HOURS, PRICES AND WHETHER THEY CAN SERVICE YOUR DEVICE</p>
+</main>
+<footer class="et-footer">
+  <div class="et-container">
+    <div class="footer-inner">
+      <a href="index.html" class="footer-brand"><span class="logo-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 3.5C12 3.7 5.2 5.3 4 11.4c-.7 3.8 2 6.8 5.6 6.4C16 16.8 19.1 10.7 20.5 3.5Z"/><path d="M3.5 21c3.2-5.8 7.2-9.2 12.1-12"/><path d="M8.2 17.5c-2.2.1-4.4-.5-5.7-2"/></svg></span>EcoTekk</a>
+      <nav class="footer-links" aria-label="Footer navigation"><a href="explore.html">Device explorer</a><a href="techhelp.html">Tech help</a><a href="home.html">E-waste finder</a><a href="profile.html">My space</a></nav>
+    </div>
+    <p class="footer-copy">Understand it. Fix it. Reuse it. Recycle it. · EcoTekk is an educational prototype. Confirm provider details, operating hours and acceptance directly before visiting.</p>
+  </div>
+</footer>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="auth.js"></script>
+<script src="activity.js"></script>
+<script src="tracker.js" defer></script>
+<script src="techhelp.js" defer></script>
+<script src="experience.js" defer></script>
+</body></html>

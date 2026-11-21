@@ -1,19 +1,22 @@
 # EcoTekk ♻️
 
-**EcoTekk** is a web-based platform designed to help users find nearby e-waste drop-off locations and encourage responsible electronic waste disposal.
+EcoTekk helps users troubleshoot electronic devices, find repair services, and locate e-waste recycling facilities.
 
-### Features
-- Find nearby e-waste drop-off locations
-- View locations on Google Maps and get directions
-- Sign in with Google or email using Firebase
-- Personal profile and dark mode
+## Features
+- Device troubleshooting
+- Repair shop locator
+- E-waste drop-off locator
+- User accounts
+- Preparation checklist
+- Light and dark mode
 
-### Built With
-HTML • CSS • JavaScript • Firebase
+## Technologies
+- HTML, CSS, JavaScript
+- Firebase
+- Google Maps
 
-### Live Website
-🌐 https://gappleness.github.io/EcoTekk/
+## Website
+https://gappleness.github.io/EcoTekk/
 
----
-
-Made with 💚 for a greener future.
+## Developers
+EcoTekk Development Team
