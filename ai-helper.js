@@ -1,6 +1,6 @@
 /* EcoTekk AI helper (Gemini through Firebase AI Logic). Loaded on ewaste.html and techhelp.html only.
 
-   - No API key in this repo. Firebase AI Logic keeps it server-side; App Check (optional but recommended) limits who can call it.
+   - No Gemini API key in this repo. Firebase AI Logic keeps it server-side; App Check verifies requests from this web app.
    - Uses the free Gemini Developer API tier, so it stays on the Firebase Spark plan. Models are listed in
      firebase-config.js (window.ECOTEKK_AI.models) and tried in order if one is unavailable or out of quota.
    - Members only (guests are view-only). A soft per-browser hourly limit protects the shared free quota.
@@ -116,7 +116,7 @@
     sdk = Promise.all([import(SDK + 'firebase-app.js'), import(SDK + 'firebase-ai.js'), cfg.appCheckSiteKey ? import(SDK + 'firebase-app-check.js') : Promise.resolve(null)])
       .then(function (m) {
         var app = m[0].initializeApp(window.ECOTEKK_FIREBASE_CONFIG, 'ecotekk-ai');
-        if (cfg.appCheckSiteKey && m[2]) m[2].initializeAppCheck(app, { provider: new m[2].ReCaptchaV3Provider(cfg.appCheckSiteKey), isTokenAutoRefreshEnabled: true });
+        if (cfg.appCheckSiteKey && m[2]) m[2].initializeAppCheck(app, { provider: new m[2].ReCaptchaEnterpriseProvider(cfg.appCheckSiteKey), isTokenAutoRefreshEnabled: true });
         return { ai: m[1].getAI(app, { backend: new m[1].GoogleAIBackend() }), getModel: m[1].getGenerativeModel };
       });
     sdk.catch(function () { sdk = null; });
