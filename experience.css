@@ -310,3 +310,16 @@
 .locator-copy > p a:hover { text-decoration: underline; }
 #guestMsg { color: rgba(236,249,239,.76); }
 #resetBtn { display: inline-block; margin-top: 12px; padding: 0; }
+
+/* ---------- "Did this fix it?" (resolve.js) ---------- */
+.et-resolve-title { margin: 6px 0 4px; font: 800 18px var(--font-display); color: var(--ink); }
+.et-resolve-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 12px 0 6px; }
+.et-resolve-btn { min-height: 40px; padding: 0 16px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--paper); color: var(--ink); font: 700 13px var(--font-display); cursor: pointer; transition: background .15s ease, border-color .15s ease; }
+.et-resolve-btn:hover:not(:disabled) { border-color: var(--brand); background: var(--brand-soft); }
+.et-resolve-btn.on { background: var(--brand); border-color: var(--brand); color: #073216; }
+.et-resolve-btn:disabled { opacity: .55; cursor: not-allowed; }
+.et-resolve-btn:focus-visible, .et-resolve-ask:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.et-resolve-ask { margin-left: auto; color: var(--brand-ink); font: 700 12px var(--font-display); text-decoration: underline; text-underline-offset: 3px; }
+[data-theme="dark"] .et-resolve-ask { color: #7be59a; }
+@media (prefers-reduced-motion: reduce) { .et-resolve-btn { transition: none !important; } }
+.et-resolve[hidden] { display: none; }

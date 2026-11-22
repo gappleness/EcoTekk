@@ -2,9 +2,26 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    /* ------------------------------------------------------------------
+       Helpers
+       - A MEMBER is a signed-in person with a real account (not a guest / anonymous session).
+       - An ADMIN is a member with a document at admins/{uid}. Admin documents can only be created by the
+         Firebase console (first admin) or by an existing admin from admin.html.
+       - A BANNED member has a document at bans/{uid} and can read but not write anything below.
+       ------------------------------------------------------------------ */
+    function signedIn() { return request.auth != null; }
+    function isMember() { return signedIn() && request.auth.token.firebase.sign_in_provider != 'anonymous'; }
+    function isAdmin() { return isMember() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+    function notBanned() { return !exists(/databases/$(database)/documents/bans/$(request.auth.uid)); }
+    function canWrite() { return isMember() && notBanned(); }
+    function safeId(id) { return id.matches('[a-z0-9_-]{1,60}'); }
+
+    /* ---------- profiles ---------- */
     match /profiles/{uid} {
-      allow read: if request.auth != null && request.auth.uid == uid;
-      allow create: if request.auth != null && request.auth.uid == uid
+      allow get: if signedIn() && request.auth.uid == uid;
+      // Admins can read every profile (admin.html > Members).
+      allow get, list: if isAdmin();
+      allow create: if signedIn() && request.auth.uid == uid
         && request.resource.data.keys().hasOnly(['name','email','createdAt'])
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.name is string && request.resource.data.name.size() <= 80
@@ -12,21 +29,45 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // "Community pulse" counter on explore.html. It also backs the "I went here" tally on ewaste.html and
-    // techhelp.html, which use prefixed ids (dropoff-... and shop-...) in this same collection.
-    // Anyone can read the count. A signed-in user can add 1 once per topic, and undo their own +1.
-    // The count change and the per-user marker must be written in the same batch.
-    match /issueReports/{caseId} {
-      allow read: if caseId.matches('[a-z0-9_-]{1,60}');
+    /* ---------- roles ---------- */
+    match /admins/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;      // so the UI can show/hide the Admin link
+      allow list: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['createdAt','by'])
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.by == request.auth.uid;
+      allow delete: if isAdmin() && request.auth.uid != uid;    // an admin cannot remove themselves
+      allow update: if false;
+    }
 
-      allow create: if request.auth != null
-        && caseId.matches('[a-z0-9_-]{1,60}')
+    match /bans/{uid} {
+      allow get: if signedIn() && request.auth.uid == uid;
+      allow list: if isAdmin();
+      allow create: if isAdmin() && request.auth.uid != uid
+        && !exists(/databases/$(database)/documents/admins/$(uid))
+        && request.resource.data.keys().hasOnly(['createdAt','by','reason'])
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.by == request.auth.uid
+        && request.resource.data.reason is string && request.resource.data.reason.size() <= 200;
+      allow delete: if isAdmin();
+      allow update: if false;
+    }
+
+    /* ---------- "I have this issue too" / "I went here" tallies ----------
+       Anyone can read a count. Only MEMBERS add 1 once per topic (guests are view-only), and can undo their
+       own +1. The count change and the per-user marker must be written in the same batch. */
+    match /issueReports/{caseId} {
+      allow read: if safeId(caseId);
+      allow list: if isAdmin();
+
+      allow create: if canWrite()
+        && safeId(caseId)
         && request.resource.data.keys().hasOnly(['count'])
         && request.resource.data.count == 1
         && existsAfter(/databases/$(database)/documents/issueReports/$(caseId)/reporters/$(request.auth.uid));
 
-      // +1: add your own marker in the same batch. -1 (undo): remove your own marker in the same batch.
-      allow update: if request.auth != null
+      allow update: if canWrite()
         && request.resource.data.keys().hasOnly(['count'])
         && (
           (request.resource.data.count == resource.data.count + 1
@@ -42,17 +83,162 @@ service cloud.firestore {
       allow delete: if false;
 
       match /reporters/{uid} {
-        allow get: if request.auth != null && request.auth.uid == uid;
-        allow create: if request.auth != null && request.auth.uid == uid
+        allow get: if signedIn() && request.auth.uid == uid;
+        allow create: if canWrite() && request.auth.uid == uid
           && request.resource.data.keys().hasOnly(['createdAt'])
           && request.resource.data.createdAt == request.time;
         allow list, update: if false;
-        // Undo: you can only remove your own marker, and only in the same batch that lowers the count by 1,
-        // so a marker can't be deleted on its own and then re-used to inflate the count.
-        allow delete: if request.auth != null && request.auth.uid == uid
+        allow delete: if canWrite() && request.auth.uid == uid
           && getAfter(/databases/$(database)/documents/issueReports/$(caseId)).data.count
              == get(/databases/$(database)/documents/issueReports/$(caseId)).data.count - 1;
       }
+    }
+
+    /* ---------- ratings + optional comments (drop-offs and repair shops) ----------
+       placeRatings/{placeId} holds the running total (sum, count). The id is the same one the "I went here"
+       tally uses (dropoff-... / shop-...). Only a member who counted a visit can rate that place, and the
+       total can only change by exactly the rating being added or edited in the same batch.
+       Reviews are public to read; only admins can delete one (and then fix the total). */
+    function wentHere(placeId) {
+      return exists(/databases/$(database)/documents/issueReports/$(placeId)/reporters/$(request.auth.uid));
+    }
+    function myReview(placeId) {
+      return /databases/$(database)/documents/placeRatings/$(placeId)/reviews/$(request.auth.uid);
+    }
+    match /placeRatings/{placeId} {
+      allow read: if safeId(placeId);
+
+      allow create: if canWrite() && safeId(placeId) && wentHere(placeId)
+        && request.resource.data.keys().hasOnly(['sum','count'])
+        && request.resource.data.count == 1
+        && existsAfter(myReview(placeId))
+        && request.resource.data.sum == getAfter(myReview(placeId)).data.rating;
+
+      allow update: if canWrite() && wentHere(placeId)
+        && request.resource.data.keys().hasOnly(['sum','count'])
+        && existsAfter(myReview(placeId))
+        && (
+          // first rating from this member
+          (!exists(myReview(placeId))
+            && request.resource.data.count == resource.data.count + 1
+            && request.resource.data.sum == resource.data.sum + getAfter(myReview(placeId)).data.rating)
+          ||
+          // editing their own rating
+          (exists(myReview(placeId))
+            && request.resource.data.count == resource.data.count
+            && request.resource.data.sum == resource.data.sum + getAfter(myReview(placeId)).data.rating - get(myReview(placeId)).data.rating)
+        );
+
+      // Admin moderation: fix the total after removing a review.
+      allow update: if isAdmin() && request.resource.data.keys().hasOnly(['sum','count'])
+        && request.resource.data.count >= 0 && request.resource.data.sum >= 0;
+
+      allow delete: if false;
+
+      match /reviews/{uid} {
+        allow read: if true;
+        allow create: if canWrite() && request.auth.uid == uid && wentHere(placeId)
+          && request.resource.data.keys().hasOnly(['rating','comment','name','createdAt','updatedAt'])
+          && request.resource.data.rating is int
+          && request.resource.data.rating >= 1 && request.resource.data.rating <= 5
+          && request.resource.data.comment is string && request.resource.data.comment.size() <= 300
+          && request.resource.data.name is string && request.resource.data.name.size() <= 80
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.updatedAt == request.time;
+        allow update: if canWrite() && request.auth.uid == uid && wentHere(placeId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rating','comment','name','updatedAt'])
+          && request.resource.data.rating is int
+          && request.resource.data.rating >= 1 && request.resource.data.rating <= 5
+          && request.resource.data.comment is string && request.resource.data.comment.size() <= 300
+          && request.resource.data.name is string && request.resource.data.name.size() <= 80
+          && request.resource.data.updatedAt == request.time;
+        allow delete: if isAdmin();
+      }
+    }
+    // Lets admin.html list recent reviews across all places (collection-group query).
+    match /{path=**}/reviews/{rid} {
+      allow read: if isAdmin();
+    }
+
+    /* ---------- "Did this fix it?" (explore.html) ----------
+       One answer per member per topic, id = <uid>__<caseId>. Admins read them for the resolved statistics. */
+    match /resolutions/{rid} {
+      allow get: if signedIn() && rid.matches(request.auth.uid + '__.*');
+      allow list: if isAdmin();
+      allow create: if canWrite()
+        && rid == request.auth.uid + '__' + request.resource.data.caseId
+        && request.resource.data.keys().hasOnly(['uid','caseId','category','device','resolved','createdAt','updatedAt'])
+        && request.resource.data.uid == request.auth.uid
+        && safeId(request.resource.data.caseId)
+        && request.resource.data.category is string && request.resource.data.category.size() <= 40
+        && request.resource.data.device is string && request.resource.data.device.size() <= 40
+        && request.resource.data.resolved is bool
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow update: if canWrite() && resource.data.uid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['resolved','updatedAt'])
+        && request.resource.data.resolved is bool
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    /* ---------- community forum ---------- */
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if canWrite()
+        && request.resource.data.keys().hasOnly(['title','body','device','category','authorUid','authorName','createdAt','solved'])
+        && request.resource.data.title is string && request.resource.data.title.size() >= 5 && request.resource.data.title.size() <= 120
+        && request.resource.data.body is string && request.resource.data.body.size() >= 1 && request.resource.data.body.size() <= 2000
+        && request.resource.data.device is string && request.resource.data.device.size() <= 40
+        && request.resource.data.category is string && request.resource.data.category.size() <= 40
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.authorName is string && request.resource.data.authorName.size() <= 80
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.solved == false;
+      // The author can only flip "solved". Admins can too.
+      allow update: if (canWrite() && resource.data.authorUid == request.auth.uid || isAdmin())
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['solved'])
+        && request.resource.data.solved is bool;
+      allow delete: if signedIn() && (resource.data.authorUid == request.auth.uid || isAdmin());
+
+      match /replies/{replyId} {
+        allow read: if true;
+        allow create: if canWrite()
+          && request.resource.data.keys().hasOnly(['body','authorUid','authorName','createdAt','helpful'])
+          && request.resource.data.body is string && request.resource.data.body.size() >= 1 && request.resource.data.body.size() <= 1500
+          && request.resource.data.authorUid == request.auth.uid
+          && request.resource.data.authorName is string && request.resource.data.authorName.size() <= 80
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.helpful == false;
+        // Only the person who asked can mark a reply helpful (one way, never their own reply), and the matching
+        // "credit" must be written in the same batch. That credit is what the "helped n people" badge counts.
+        allow update: if canWrite()
+          && get(/databases/$(database)/documents/posts/$(postId)).data.authorUid == request.auth.uid
+          && resource.data.authorUid != request.auth.uid
+          && resource.data.helpful == false
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['helpful'])
+          && request.resource.data.helpful == true
+          && existsAfter(/databases/$(database)/documents/userStats/$(resource.data.authorUid)/credits/$(postId + '_' + replyId));
+        allow delete: if signedIn() && (resource.data.authorUid == request.auth.uid || isAdmin());
+      }
+    }
+
+    /* ---------- badges ----------
+       A credit means "the person who asked said this member's reply helped". Counting a member's credits gives
+       the "helped n people" number. Credits are public to read; nobody can edit them. */
+    match /userStats/{uid}/credits/{creditId} {
+      allow read: if true;
+      allow create: if canWrite()
+        && request.resource.data.keys().hasOnly(['postId','replyId','createdAt'])
+        && request.resource.data.createdAt == request.time
+        && creditId == request.resource.data.postId + '_' + request.resource.data.replyId
+        && get(/databases/$(database)/documents/posts/$(request.resource.data.postId)).data.authorUid == request.auth.uid
+        && uid != request.auth.uid
+        && get(/databases/$(database)/documents/posts/$(request.resource.data.postId)/replies/$(request.resource.data.replyId)).data.authorUid == uid
+        && get(/databases/$(database)/documents/posts/$(request.resource.data.postId)/replies/$(request.resource.data.replyId)).data.helpful == false
+        && getAfter(/databases/$(database)/documents/posts/$(request.resource.data.postId)/replies/$(request.resource.data.replyId)).data.helpful == true;
+      allow update: if false;
+      allow delete: if isAdmin();
     }
 
     match /{document=**} { allow read, write: if false; }

@@ -1,4 +1,4 @@
-/* EcoTekk E-waste finder: drop-off tracker.
+/* EcoTekk Drop-off finder: drop-off tracker.
    Layout, location, filters and the "I went here" tally all live in tracker.js (shared with techhelp.js).
    This file only holds the drop-off data and the page-specific wording.
 

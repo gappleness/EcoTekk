@@ -33,7 +33,9 @@
   async function googleLogin(){await ensurePersistence();const provider=new firebase.auth.GoogleAuthProvider();const c=await auth.signInWithPopup(provider);await ensureProfile(c.user);return c.user;}
   async function resetPassword(email){requireConfig();await auth.sendPasswordResetEmail(email.trim());}
   // Guest access uses Firebase Anonymous Auth: a real, device-bound session with no email or profile document.
-  // Guests can use the tools and add to community counters (the existing rules only require request.auth != null).
+  // Guests are VIEW-ONLY: they can read every page and counter, but cannot count visits, report issues, rate,
+  // post, or use the AI helper. firestore.rules enforces this (sign_in_provider != 'anonymous'), the UI just
+  // explains it.
   async function guestLogin(){await ensurePersistence();if(auth.currentUser)return auth.currentUser;const c=await auth.signInAnonymously();return c.user;}
   async function logout(){requireConfig();await auth.signOut();}
   function currentUser(){const active = auth ? auth.currentUser : user; if(!active)return null; const guest=!!active.isAnonymous; return {uid:active.uid,isGuest:guest,name:guest?'Guest':(active.displayName || (active.email||'').split('@')[0]),email:guest?'':active.email,emailVerified:guest?false:active.emailVerified};}
@@ -41,11 +43,41 @@
   async function resendVerification(){requireConfig();const u=auth.currentUser;if(!u||u.isAnonymous)throw new Error('Sign in with an email account first.');await u.sendEmailVerification();}
   async function refreshUser(){requireConfig();if(auth.currentUser)await auth.currentUser.reload();}
   function isGuest(){const u=currentUser();return !!(u&&u.isGuest);}
+  function isMember(){const u=currentUser();return !!(u&&!u.isGuest);}
+  // Roles. An admin is a person with a document at admins/{uid}. Only the Firebase console (or another admin)
+  // can create it; the rules never let a user write their own. The UI check below only decides what to SHOW,
+  // firestore.rules is what actually protects admin data.
+  let adminCache=null;
+  function isAdmin(){
+    if(!configured)return Promise.resolve(false);
+    if(adminCache)return adminCache;
+    adminCache=ready.then(function(){const u=auth&&auth.currentUser;if(!u||u.isAnonymous)return false;return db.collection('admins').doc(u.uid).get().then(function(s){return s.exists;}).catch(function(){return false;});});
+    return adminCache;
+  }
+  // Is this account restricted by an admin (bans/{uid})? Used to explain why posting is blocked.
+  function isRestricted(){
+    return ready.then(function(){const u=auth&&auth.currentUser;if(!u||u.isAnonymous)return false;return db.collection('bans').doc(u.uid).get().then(function(s){return s.exists;}).catch(function(){return false;});});
+  }
   // Fills the #nav-auth item on every page: Profile for members, Guest for guests, Login otherwise.
-  function renderNav(){ready.then(function(){const el=document.getElementById('nav-auth'),u=currentUser();if(el&&u)el.innerHTML='<a href="profile.html">'+(u.isGuest?'Guest':'Profile')+'</a>';}).catch(function(){});}
+  // Admins also get an Admin link.
+  function renderNav(){ready.then(function(){
+    const el=document.getElementById('nav-auth'),u=currentUser();
+    if(el&&u)el.innerHTML='<a href="profile.html">'+(u.isGuest?'Guest':'Profile')+'</a>';
+    if(u&&!u.isGuest)isAdmin().then(function(yes){
+      if(!yes||document.getElementById('nav-admin'))return;
+      const ul=document.getElementById('et-nav-links');if(!ul)return;
+      const li=document.createElement('li');li.id='nav-admin';
+      const a=document.createElement('a');a.href='admin.html';a.textContent='Admin';
+      if(/admin\.html$/.test(location.pathname))a.setAttribute('aria-current','page');
+      li.appendChild(a);
+      const theme=document.getElementById('theme-toggle');
+      const themeLi=theme&&theme.closest?theme.closest('li'):null;
+      if(themeLi&&themeLi.parentNode===ul)ul.insertBefore(li,themeLi);else ul.appendChild(li);
+    });
+  }).catch(function(){});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',renderNav);else renderNav();
   // No client-controlled cloud points: a verified server-side award/redemption workflow is required.
-  global.EcotekkAuth={ready,currentUser,isGuest,resendVerification,refreshUser,signup,login,googleLogin,guestLogin,resetPassword,logout,REWARDS:rewards,
+  global.EcotekkAuth={ready,currentUser,isGuest,isMember,isAdmin,isRestricted,resendVerification,refreshUser,signup,login,googleLogin,guestLogin,resetPassword,logout,REWARDS:rewards,
     watchProfile(callback){requireConfig();if(isGuest()){callback(null);return function(){};}return profileRef().onSnapshot(s=>callback(s.exists?s.data():null));},
     getPoints(){return 0;},getHistory(){return [];},
     async recordDisposal(){throw new Error('Point awards are disabled until a verified server-side disposal workflow is installed.');},

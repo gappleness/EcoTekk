@@ -17,7 +17,7 @@
   <div class="et-nav-inner">
     <a href="index.html" class="logo" aria-label="EcoTekk home"><span class="logo-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 3.5C12 3.7 5.2 5.3 4 11.4c-.7 3.8 2 6.8 5.6 6.4C16 16.8 19.1 10.7 20.5 3.5Z"/><path d="M3.5 21c3.2-5.8 7.2-9.2 12.1-12"/><path d="M8.2 17.5c-2.2.1-4.4-.5-5.7-2"/></svg></span><span class="logo-word">EcoTekk<small>technology, responsibly</small></span></a>
     <button class="nav-menu-toggle" id="nav-menu-toggle" type="button" aria-controls="et-nav-links" aria-expanded="false" aria-label="Open navigation"><span></span><span></span><span></span></button>
-    <ul class="et-nav-links" id="et-nav-links"><li><a href="explore.html">Device explorer</a></li><li><a href="techhelp.html">Tech help</a></li><li><a href="home.html">E-waste finder</a></li><li><a href="profile.html" aria-current="page">My space</a></li><li><button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle theme">◐</button></li></ul>
+    <ul class="et-nav-links" id="et-nav-links"><li><a href="explore.html">Device explorer</a></li><li><a href="techhelp.html">Tech help</a></li><li><a href="home.html">Drop-off finder</a></li><li><a href="forum.html">Community</a></li><li><a href="profile.html" aria-current="page">My space</a></li><li><button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle theme">◐</button></li></ul>
   </div>
 </nav>
 <main class="profile-wrap" id="profileRoot"><p class="p-loading" role="status">Loading your profile…</p></main>
@@ -25,7 +25,7 @@
   <div class="et-container">
     <div class="footer-inner">
       <a href="index.html" class="footer-brand"><span class="logo-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 3.5C12 3.7 5.2 5.3 4 11.4c-.7 3.8 2 6.8 5.6 6.4C16 16.8 19.1 10.7 20.5 3.5Z"/><path d="M3.5 21c3.2-5.8 7.2-9.2 12.1-12"/><path d="M8.2 17.5c-2.2.1-4.4-.5-5.7-2"/></svg></span>EcoTekk</a>
-      <nav class="footer-links" aria-label="Footer navigation"><a href="explore.html">Device explorer</a><a href="techhelp.html">Tech help</a><a href="home.html">E-waste finder</a><a href="profile.html">My space</a></nav>
+      <nav class="footer-links" aria-label="Footer navigation"><a href="explore.html">Device explorer</a><a href="techhelp.html">Tech help</a><a href="home.html">Drop-off finder</a><a href="forum.html">Community</a><a href="profile.html">My space</a></nav>
     </div>
     <p class="footer-copy">Understand it. Fix it. Reuse it. Recycle it. · EcoTekk is an educational prototype. Confirm provider details, operating hours and acceptance directly before visiting.</p>
   </div>
@@ -36,6 +36,7 @@
 <script src="firebase-config.js"></script>
 <script src="auth.js"></script>
 <script src="activity.js"></script>
+<script src="badges.js"></script>
 <script>
 
         (function () {
@@ -82,6 +83,26 @@
                 })).then(rows => paint(rows.filter(Boolean)));
                 return panel;
             }
+            // "My badges": the member's "helped n people" count (badges.js counts the credits the people they helped gave them).
+            function badgePanel(uid) {
+                const panel = node('section', 'p-panel p-wide'); panel.setAttribute('aria-label', 'My badges');
+                panel.append(node('div', 'p-eyebrow', 'MY BADGES'));
+                const head = node('h3', '', 'Helped … people'); const sub = node('p', 'p-muted', 'Answer questions in the community. When the person who asked marks your reply as helpful, it counts here.');
+                const list = node('div'); list.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px;margin:14px 0';
+                const next = node('p', 'p-note'); const acts = node('div', 'p-actions'); acts.append(link('Open the community', 'forum.html', true));
+                panel.append(head, sub, list, next, acts);
+                if (!window.EcoBadges) return panel;
+                EcoBadges.helpedCount(uid).then(function (n) {
+                    head.textContent = n === 0 ? 'You haven’t helped anyone yet' : EcoBadges.label(n);
+                    EcoBadges.TIERS.forEach(function (t) {
+                        const got = n >= t.at; const chip = node('span', 'p-pill', (got ? '★ ' : '☆ ') + t.name + ' · ' + t.at + '+');
+                        chip.style.opacity = got ? '1' : '.55'; list.append(chip);
+                    });
+                    const t = EcoBadges.tier(n); const nx = t && t.next ? t.next : (n === 0 ? EcoBadges.TIERS[0] : null);
+                    next.textContent = nx ? (nx.at - n) + ' more helpful ' + ((nx.at - n) === 1 ? 'reply' : 'replies') + ' to earn “' + nx.name + '”.' : 'You’ve earned every badge. Thank you for helping.';
+                });
+                return panel;
+            }
             EcotekkAuth.ready.then(function () {
                 const u = EcotekkAuth.currentUser();
                 if (!u) {root.replaceChildren(node('div', 'p-eyebrow', 'YOUR ECOTEKK ACCOUNT'), node('h1', 'p-heading', 'Your space for greener choices'), node('p', 'p-sub', 'Sign in to view your account and keep exploring drop-off locations.')); const a = link('Log in / Sign up', 'login.html'); a.style.marginTop = '24px'; root.append(a); return;}
@@ -94,11 +115,11 @@
                     const gWho = node('div'); gWho.append(node('h2', '', 'Guest'), node('p', '', 'Browsing without an account')); gId.append(gAvatar, gWho);
                     gHero.append(gId, node('span', 'p-pill', 'Guest mode'));
                     const gGrid = node('div', 'p-grid');
-                    const gLeft = node('section', 'p-panel'); gLeft.append(node('div', 'p-eyebrow', 'START HERE'), node('h3', '', 'Everything you need is still open.'), node('p', 'p-muted', 'Guests can use the device explorer, the drop-off finder, tech help and the community counters. A free account adds a saved profile.'));
+                    const gLeft = node('section', 'p-panel'); gLeft.append(node('div', 'p-eyebrow', 'START HERE'), node('h3', '', 'Look around freely.'), node('p', 'p-muted', 'Guests can read the device explorer, the drop-off finder, tech help, ratings and the community forum. A free account lets you count visits, rate places, post in the forum and use the AI helper.'));
                     const gActions = node('div', 'p-actions'); gActions.append(link('Explore a device →', 'explore.html'), link('Find a drop-off', 'home.html', true), link('Tech help', 'techhelp.html', true)); gLeft.append(gActions);
                     const gNote = node('p', 'p-note', 'Guest sessions are tied to this browser. Clearing site data or exiting guest mode ends the session.'); gNote.style.marginTop = '24px'; gLeft.append(gNote);
-                    const gRight = node('section', 'p-panel'); gRight.append(node('div', 'p-eyebrow', 'SESSION'), node('h3', '', 'Basic display'));
-                    row(gRight, 'Account type', 'Guest'); row(gRight, 'Saved profile', 'Not available'); row(gRight, 'Customization', 'Not available');
+                    const gRight = node('section', 'p-panel'); gRight.append(node('div', 'p-eyebrow', 'SESSION'), node('h3', '', 'View-only access'));
+                    row(gRight, 'Account type', 'Guest (view only)'); row(gRight, 'Saved profile', 'Not available'); row(gRight, 'Rate, post, AI helper', 'Members only');
                     const gActs = node('div', 'p-actions');
                     const gJoin = link('Log in / Sign up', 'login.html');
                     const gExit = node('button', 'p-action secondary', 'Exit guest mode'); gExit.type = 'button';
@@ -106,7 +127,7 @@
                     gActs.append(gJoin, gExit); gRight.append(gActs);
                     gGrid.append(gLeft, gRight);
                     const gAct = activityPanel(u.uid);
-                    root.replaceChildren(node('div', 'p-eyebrow', 'MY ECOTEKK / GUEST'), node('h1', 'p-heading', 'You are browsing as a guest.'), node('p', 'p-sub', 'A limited view of the account area. Sign in any time for a saved profile.'), gHero, gGrid, gAct);
+                    root.replaceChildren(node('div', 'p-eyebrow', 'MY ECOTEKK / GUEST'), node('h1', 'p-heading', 'You are browsing as a guest.'), node('p', 'p-sub', 'A read-only view. Sign in any time to count visits, rate places, post and use the AI helper.'), gHero, gGrid, gAct);
                     return;
                 }
                 const title = node('div', 'p-eyebrow', 'MY ECOTEKK / DASHBOARD');
@@ -132,7 +153,8 @@
                     vActs.append(resend, refresh); right.append(vActs, verifyMsg);
                 }
                 const signout = node('button', 'p-action secondary', 'Log out'); signout.type = 'button'; signout.style.marginTop = '20px'; signout.addEventListener('click', async function () {signout.disabled = true; signout.textContent = 'Logging out…'; try {await EcotekkAuth.logout(); location.href = 'index.html';} catch (e) {signout.disabled = false; signout.textContent = 'Log out'; cloud.textContent = 'Logout failed: ' + (e.message || 'Please retry');} }); right.append(signout);
-                grid.append(left, right); root.replaceChildren(title, heading, intro, hero, grid, activityPanel(u.uid));
+                grid.append(left, right); root.replaceChildren(title, heading, intro, hero, grid, badgePanel(u.uid), activityPanel(u.uid));
+                EcotekkAuth.isAdmin().then(function (yes) { if (!yes) return; actions.append(link('Admin dashboard →', 'admin.html', true)); hero.append(node('span', 'p-pill', 'Admin')); });
                 try {EcotekkAuth.watchProfile(function (p) {cloud.textContent = p ? 'Connected' : 'Profile not available yet'; if (p && typeof p.name === 'string' && p.name.trim()) {name.textContent = p.name; nameValue.textContent = p.name; avatar.textContent = p.name.trim().slice(0, 1).toUpperCase();} if (p && p.createdAt && typeof p.createdAt.toDate === 'function') since.textContent = p.createdAt.toDate().toLocaleDateString('en-PH', {dateStyle: 'long'}); });} catch (e) {cloud.textContent = 'Unable to load profile';}
             }).catch(function (e) {root.replaceChildren(node('p', 'p-muted', 'Unable to load account: ' + (e.message || 'Please refresh.')));});
         })();

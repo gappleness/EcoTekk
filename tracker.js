@@ -100,8 +100,11 @@
 
     var COLL = 'issueReports';
     var counts = {}, reported = {}, busy = {}, failed = {}, notes = {};
+    // Guests (anonymous sessions) are view-only: only members with a real account can count a visit.
+    function isMember() { return !!(user && !user.isAnonymous); }
 
     function updateRow(id) {
+      if (global.EcoReviews) global.EcoReviews.visitChanged(id);
       var rows = list.querySelectorAll('[data-tally-row="' + id + '"]');
       rows.forEach(function (row) {
         var num = row.querySelector('.went-num'), lbl = row.querySelector('.went-label');
@@ -122,7 +125,11 @@
           msg.textContent = notes[id] || 'Thanks. Tap again to undo.'; return;
         }
         btn.setAttribute('aria-pressed', 'false');
-        if (!user) { btn.disabled = false; btn.textContent = 'Sign in or use guest to count yours'; msg.textContent = notes[id] || ''; return; }
+        if (!isMember()) {
+          btn.disabled = false; btn.textContent = 'Sign in to count yours';
+          msg.textContent = user && user.isAnonymous ? 'Guests can look but not count. Sign in or sign up to add yours.' : (notes[id] || '');
+          return;
+        }
         btn.disabled = !!busy[id]; btn.textContent = 'I went here'; msg.textContent = notes[id] || '';
       });
     }
@@ -163,7 +170,7 @@
 
     function toggleVisit(id) {
       if (!db) return;
-      if (!user) { location.href = 'login.html?next=' + encodeURIComponent(cfg.page + location.search); return; }
+      if (!isMember()) { location.href = 'login.html?next=' + encodeURIComponent(cfg.page + location.search); return; }
       if (busy[id]) return;
       if (reported[id]) removeVisit(id); else addVisit(id);
     }
@@ -255,12 +262,14 @@
         var btn = el('button', 'went-btn', 'I went here'); btn.type = 'button'; btn.setAttribute('data-went', id);
         went.append(cnt, btn, el('p', 'went-msg'));
 
+        var rateHost = el('div', 'rate-host'); rateHost.setAttribute('data-rate-host', id);
         body.append(el('h2', '', s.name), tags, el('p', 'addr', s.addr), metaRow);
         var detail = cfg.detail ? cfg.detail(s) : '';
         if (detail) body.appendChild(el('p', 'shop-detail', detail));
-        body.append(el('p', 'shop-src', 'Listed via ' + s.src), links, went);
+        body.append(el('p', 'shop-src', 'Listed via ' + s.src), links, went, rateHost);
         card.append(signal, body);
         list.appendChild(card);
+        if (global.EcoReviews) global.EcoReviews.mount(rateHost, id, s.name, function () { return !!reported[id]; });
       });
       updateAll();
     }
@@ -318,6 +327,7 @@
       auth.onAuthStateChanged(function (u) {
         user = u || null; reported = {}; notes = {};
         updateAll(); checkReported();
+        if (global.EcoReviews) global.EcoReviews.refreshAuth();
       });
     }
   }
