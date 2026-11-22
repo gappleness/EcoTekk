@@ -11,7 +11,7 @@
 ## What actually protects the site (do these)
 1. **Firestore rules** (`firestore.rules`) are the real lock. Publish them.
 2. **Restrict the web API key**: Google Cloud console → APIs & Services → Credentials → the "Browser key" → *Application restrictions: Websites* → add your site (e.g. `https://gappleness.github.io/*` and `http://localhost:*` while testing).
-3. **App Check** is configured here for Firebase AI Logic. Do not enforce App Check for Firestore or Authentication until App Check is also initialized for the default Firebase app (see `SETUP.md`).
+3. **App Check** for AI Logic, Firestore and Auth so only your site can use your quota (see `SETUP.md`).
 4. Set a **budget alert** in Google Cloud so a surprise never becomes a bill.
 5. Keep **Anonymous sign-in** enabled only because guest mode needs it; the rules already make guests read-only.
 

@@ -16,7 +16,7 @@ Admins are people with a document at `admins/{uid}`. Nobody can create that from
 
 ## 3. Turn on the AI helper (Gemini, free tier)
 1. Firebase console → Build → **AI Logic** → Get started → choose **Gemini Developer API**. Stay on the Spark (free) plan.
-2. Firebase console → **App Check** → **Apps** → register `EcoTekk Web` with **Fraud Defense (reCAPTCHA Enterprise)** using the public Site Key created in Google Cloud. Put that exact same Site Key in `appCheckSiteKey` in `firebase-config.js`. `ai-helper.js` initializes `ReCaptchaEnterpriseProvider` before creating the Firebase AI Logic client. As of November 2, 2026, Firebase automatically enforces App Check for Firebase AI Logic; check App Check metrics while testing and do not disable enforcement to work around token errors.
+2. Strongly recommended: Firebase console → **App Check** → register the web app with reCAPTCHA v3, enforce it for AI Logic, then paste the *site key* into `appCheckSiteKey` in `firebase-config.js`. Without App Check, anyone who copies your public Firebase config could spend your free quota.
 3. Models are listed in `firebase-config.js` (`ECOTEKK_AI.models`) and tried in order. Gemini model names change; if the helper says it is unavailable, check https://ai.google.dev/gemini-api/docs/deprecations and update the list.
 4. Add your site's domain (e.g. `gappleness.github.io`) under Authentication → Settings → Authorized domains if it isn't there.
 

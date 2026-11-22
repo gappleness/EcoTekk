@@ -1,6 +1,6 @@
 /* EcoTekk AI helper (Gemini through Firebase AI Logic). Loaded on ewaste.html and techhelp.html only.
 
-   - No Gemini API key in this repo. Firebase AI Logic keeps it server-side; App Check verifies requests from this web app.
+   - No API key in this repo. Firebase AI Logic keeps it server-side; App Check (optional but recommended) limits who can call it.
    - Uses the free Gemini Developer API tier, so it stays on the Firebase Spark plan. Models are listed in
      firebase-config.js (window.ECOTEKK_AI.models) and tried in order if one is unavailable or out of quota.
    - Members only (guests are view-only). A soft per-browser hourly limit protects the shared free quota.
@@ -116,7 +116,13 @@
     sdk = Promise.all([import(SDK + 'firebase-app.js'), import(SDK + 'firebase-ai.js'), cfg.appCheckSiteKey ? import(SDK + 'firebase-app-check.js') : Promise.resolve(null)])
       .then(function (m) {
         var app = m[0].initializeApp(window.ECOTEKK_FIREBASE_CONFIG, 'ecotekk-ai');
-        if (cfg.appCheckSiteKey && m[2]) m[2].initializeAppCheck(app, { provider: new m[2].ReCaptchaEnterpriseProvider(cfg.appCheckSiteKey), isTokenAutoRefreshEnabled: true });
+        if (cfg.appCheckSiteKey && m[2]) {
+          // On localhost, App Check needs a debug token: open the console, copy the token it prints, and register it in
+          // Firebase console > App Check > your web app > Manage debug tokens.
+          if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+          var Provider = cfg.appCheckProvider === 'enterprise' ? m[2].ReCaptchaEnterpriseProvider : m[2].ReCaptchaV3Provider;
+          m[2].initializeAppCheck(app, { provider: new Provider(cfg.appCheckSiteKey), isTokenAutoRefreshEnabled: true });
+        }
         return { ai: m[1].getAI(app, { backend: new m[1].GoogleAIBackend() }), getModel: m[1].getGenerativeModel };
       });
     sdk.catch(function () { sdk = null; });
@@ -130,7 +136,7 @@
   function explain(err) {
     var t = String((err && (err.code || '')) + ' ' + (err && err.message || '')).toLowerCase();
     if (t.indexOf('quota') !== -1 || t.indexOf('429') !== -1 || t.indexOf('resource') !== -1) return 'The free AI quota is used up for now. Please try again later.';
-    if (t.indexOf('app-check') !== -1 || t.indexOf('appcheck') !== -1 || t.indexOf('403') !== -1 || t.indexOf('permission') !== -1) return 'The AI helper isn’t switched on for this site yet (it needs AI Logic and App Check set up in the Firebase console).';
+    if (t.indexOf('app check') !== -1 || t.indexOf('app-check') !== -1 || t.indexOf('appcheck') !== -1 || t.indexOf('401') !== -1 || t.indexOf('403') !== -1 || t.indexOf('permission') !== -1) return 'The AI helper isn’t switched on for this site yet (it needs AI Logic and App Check set up in the Firebase console).';
     if (t.indexOf('network') !== -1 || t.indexOf('fetch') !== -1) return 'Couldn’t reach the AI service. Check your connection and try again.';
     if (t.indexOf('safety') !== -1 || t.indexOf('blocked') !== -1) return 'I can’t help with that one. Try rephrasing, or ask about repair, reuse or recycling.';
     return 'Something went wrong with the AI helper. Please try again in a moment.';
