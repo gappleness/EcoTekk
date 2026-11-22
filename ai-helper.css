@@ -1,0 +1,36 @@
+/* EcoTekk AI helper (ai-helper.js). */
+.ai-fab { position: fixed; right: 20px; bottom: 20px; z-index: 900; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px 0 16px; border: 0; border-radius: 999px; background: var(--brand-deep); color: #fff; font: 800 14px var(--font-display); box-shadow: var(--shadow-md); cursor: pointer; transition: transform .15s ease, background .15s ease; }
+.ai-fab:hover { background: var(--brand-ink); transform: translateY(-2px); }
+.ai-fab:focus-visible, .ai-close:focus-visible, .ai-chip:focus-visible, .ai-send:focus-visible, .ai-input:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.ai-fab[hidden], .ai-panel[hidden], .ai-form[hidden] { display: none; }
+.ai-fab-spark { font-size: 16px; }
+.ai-panel { position: fixed; right: 20px; bottom: 20px; z-index: 950; width: min(390px, calc(100vw - 24px)); height: min(560px, calc(100vh - 40px)); display: flex; flex-direction: column; border: 1px solid var(--line-strong); border-radius: 22px; background: var(--paper); box-shadow: var(--shadow-lg); overflow: hidden; }
+.ai-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; background: var(--brand-deep); color: #fff; }
+.ai-head strong { display: block; font: 800 15px var(--font-display); }
+.ai-head small { opacity: .85; font-size: 11px; }
+.ai-close { width: 34px; height: 34px; border: 0; border-radius: 10px; background: rgba(255,255,255,.14); color: #fff; font-size: 22px; line-height: 1; cursor: pointer; }
+.ai-close:hover { background: rgba(255,255,255,.26); }
+.ai-log { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; background: var(--mist); }
+.ai-msg { max-width: 88%; padding: 10px 13px; border-radius: 16px; font-size: 14px; line-height: 1.55; overflow-wrap: anywhere; }
+.ai-msg p { margin: 0 0 6px; } .ai-msg p:last-child { margin-bottom: 0; }
+.ai-msg ul { margin: 4px 0 6px; padding-left: 18px; }
+.ai-msg.user { align-self: flex-end; background: var(--brand); color: #073216; border-bottom-right-radius: 5px; font-weight: 500; }
+.ai-msg.bot { align-self: flex-start; background: var(--paper); color: var(--ink); border: 1px solid var(--line); border-bottom-left-radius: 5px; }
+.ai-msg.thinking { color: var(--muted); font-style: italic; }
+.ai-msg.error { border-color: var(--danger); color: var(--danger); }
+.ai-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 10px; background: var(--mist); }
+.ai-chips:empty { display: none; }
+.ai-chip { padding: 7px 11px; border: 1px solid var(--line-strong); border-radius: 999px; background: var(--paper); color: var(--ink-soft); font: 600 12px var(--font-body); cursor: pointer; text-align: left; }
+.ai-chip:hover { border-color: var(--brand); background: var(--brand-soft); }
+.ai-form { display: flex; align-items: flex-end; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); background: var(--paper); }
+.ai-input { flex: 1; min-height: 40px; max-height: 110px; padding: 9px 12px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--paper); color: var(--ink); font: 14px var(--font-body); resize: none; }
+.ai-send { min-height: 40px; padding: 0 16px; border: 0; border-radius: 12px; background: var(--brand); color: #073216; font: 800 13px var(--font-display); cursor: pointer; }
+.ai-send:disabled { opacity: .55; cursor: wait; }
+.ai-foot { margin: 0; padding: 8px 14px 12px; background: var(--paper); color: var(--muted); font-size: 10.5px; line-height: 1.45; }
+.ai-gate { padding: 18px; border: 1px dashed var(--line-strong); border-radius: 14px; background: var(--paper); display: grid; gap: 12px; justify-items: start; }
+.ai-gate p { margin: 0; color: var(--ink-soft); font-size: 14px; }
+.ai-gate-link { padding: 9px 16px; border-radius: 10px; background: var(--brand); color: #073216; font: 800 13px var(--font-display); text-decoration: none; }
+@media (max-width: 520px) { .ai-panel { right: 12px; bottom: 12px; height: min(78vh, 560px); } .ai-fab-text { display: none; } .ai-fab { padding: 0 16px; } }
+@media (prefers-reduced-motion: reduce) { .ai-fab { transition: none; } }
+
+.ai-detail { display: block; margin-top: 6px; color: var(--muted); font-size: 10.5px; line-height: 1.4; word-break: break-word; }

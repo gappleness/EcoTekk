@@ -1,0 +1,76 @@
+# ---------------------------------------------------------------------------
+# EcoTekk .gitignore
+# Keeps real secrets and machine-specific files out of the repo.
+#
+# NOT ignored on purpose: firebase-config.js. It holds the *public* Firebase web
+# config, which every visitor's browser has to download anyway, and GitHub Pages
+# can only serve files that are in the repo. Hiding it would break the site.
+# Protect it with the steps in SECURITY.md instead (key restrictions, App Check, rules).
+# ---------------------------------------------------------------------------
+
+# Secrets and credentials (never commit these)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+secrets/
+secret*.json
+credentials*.json
+*credentials*
+*service-account*.json
+serviceAccount*.json
+*-firebase-adminsdk-*.json
+firebase-adminsdk*.json
+google-services.json
+GoogleService-Info.plist
+.runtimeconfig.json
+
+# Local overrides (use these for private experiments, they stay on your machine)
+*.local.js
+*.local.json
+*.local.html
+*.local
+
+# Firebase tooling
+.firebase/
+.firebaserc.local
+firebase-debug.log*
+firestore-debug.log
+ui-debug.log
+database-debug.log
+.emulator-data/
+emulator-data/
+
+# Dependencies and build output
+node_modules/
+dist/
+build/
+.cache/
+.parcel-cache/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor and OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Backups and scratch
+*.bak
+*.orig
+*.tmp
+*.rej

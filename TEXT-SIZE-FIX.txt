@@ -1,0 +1,1 @@
+Quick-start text-size fix: the “My”, selected device, and problem selector labels now explicitly share one responsive font-size variable. The original placeholder opacity and all other styling are unchanged. Only index.css was modified.

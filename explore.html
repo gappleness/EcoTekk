@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>EcoTekk | Device Explorer</title>
+  <meta name="description" content="Choose a device and issue to receive useful checks, options and next steps. ">
+  <meta name="theme-color" content="#20B64F">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=3">
+  <link rel="stylesheet" href="stylesheet.css">
+  <link rel="stylesheet" href="experience.css">
+  
+  <script src="theme.js"></script>
+</head>
+<body class="page-workspace page-explore">
+<nav class="et-nav" aria-label="Main navigation">
+  <div class="et-nav-inner">
+    <a href="index.html" class="logo" aria-label="EcoTekk home"><span class="logo-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 3.5C12 3.7 5.2 5.3 4 11.4c-.7 3.8 2 6.8 5.6 6.4C16 16.8 19.1 10.7 20.5 3.5Z"/><path d="M3.5 21c3.2-5.8 7.2-9.2 12.1-12"/><path d="M8.2 17.5c-2.2.1-4.4-.5-5.7-2"/></svg></span><span class="logo-word">EcoTekk<small>technology, responsibly</small></span></a>
+    <button class="nav-menu-toggle" id="nav-menu-toggle" type="button" aria-controls="et-nav-links" aria-expanded="false" aria-label="Open navigation"><span></span><span></span><span></span></button>
+    <ul class="et-nav-links" id="et-nav-links"><li><a href="explore.html" aria-current="page">Device explorer</a></li><li><a href="techhelp.html">Tech help</a></li><li><a href="home.html">Drop-off finder</a></li><li><a href="forum.html">Community</a></li><li id="nav-auth"><a href="login.html">Sign in</a></li><li><button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle theme">◐</button></li></ul>
+  </div>
+</nav>
+<main class="et-workspace">
+  <div class="et-container">
+    <div class="workspace-heading" data-reveal="left"><div><span class="et-eyebrow">EcoTekk / Device Explorer</span><h1>Tell us what's happening.</h1><p class="et-lead">Start with what you know. Choose the situation that best matches your device and get relevant first checks, possible outcomes, nearby support searches and a handover checklist.</p></div><span class="workspace-aside-tag"><i></i> Practical guidance</span></div>
+    <div class="et-layout">
+      <form class="et-card et-form-panel" id="et-form"><div class="form-head"><span class="et-eyebrow">Your device / your situation</span><h2>Build your next steps</h2><p>Answer a few details to narrow down guidance for your device.</p></div>
+<label class="et-field" for="category">What are you having trouble with?</label>
+<select class="et-input" id="category" required="">
+<option value="">Choose a category</option>
+<option value="power">Power / Won’t turn on</option>
+<option value="screen">Screen / Display</option>
+<option value="software">Software / System</option>
+<option value="performance">Performance / Slow device</option>
+<option value="connectivity">Connectivity</option>
+<option value="charging">Charging / Battery</option>
+<option value="reuse">Device reuse / End of life</option>
+<option value="accessories">Cables / Accessories</option>
+</select>
+<label class="et-field" for="device">Device type</label>
+<select class="et-input" id="device" required="">
+<option value="">Choose a device type</option>
+<option value="Phone">Phone</option>
+<option value="Laptop / computer">Laptop / computer</option>
+<option value="Cables / chargers">Cables / chargers</option>
+<option value="Batteries">Batteries</option>
+<option value="Tablet">Tablet</option>
+<option value="Smartwatch">Smartwatch / fitness band</option>
+<option value="TV / monitor">TV / monitor</option>
+<option value="Printer">Printer</option>
+<option value="Router">Router / modem</option>
+<option value="Game console">Game console</option>
+<option value="Camera">Camera</option>
+<option value="Audio device">Audio device / speaker</option>
+</select>
+<div class="et-detect-row">
+<span aria-live="polite" class="et-small" id="detect-status" role="status">Automatically detecting your device and model…</span>
+</div>
+<label class="et-field" for="brand">Brand</label>
+<select aria-describedby="brand-hint" class="et-input" disabled="" id="brand">
+<option value="">Choose a problem and device type first</option>
+</select>
+<p aria-live="polite" class="et-small" id="brand-hint">Brand unlocks after you choose the problem and the device type.</p>
+<label class="et-field" for="model">Model</label>
+<select class="et-input" disabled="" id="model">
+<option value="">Choose a brand first</option>
+</select>
+<p class="et-small">Start with the problem and device type. Brand then lists only brands that make that device, and brand and model narrow the result when documented instructions are available.</p>
+<label class="et-field" for="case">Matching topics</label>
+<select class="et-input" id="case" required="">
+<option value="">Choose a topic</option>
+</select>
+<label class="et-field" for="area">Where would you look for help? (optional)</label>
+<input autocomplete="address-level2" class="et-input" id="area" maxlength="90" placeholder="e.g., Calamba, Laguna"/>
+<p class="et-small">Used only to form a Maps search; no location is uploaded to EcoTekk. You can also use the existing location finder separately.</p>
+<button class="et-btn" type="submit">Build my next steps →</button>
+<p class="et-note">Prototype guidance, not automatic hardware diagnosis or a verified business listing.</p>
+</form>
+      <div class="et-side">
+<section aria-label="How many people share this issue" class="et-card et-issue" id="et-issue">
+<span class="et-eyebrow">Community pulse</span>
+<p class="et-issue-topic" id="et-issue-topic">Choose a topic to see how many people share it.</p>
+<div class="et-issue-row">
+<div aria-live="polite" class="et-issue-count">
+<span class="et-issue-num" id="et-issue-num">–</span>
+<span class="et-issue-unit">people have this issue</span>
+</div>
+<button class="et-issue-btn" disabled="" id="et-issue-btn" type="button">I have this issue too</button>
+</div>
+<div aria-label="Progress toward the next milestone" class="et-issue-meter" role="img">
+<div class="et-issue-bar" id="et-issue-bar"></div>
+</div>
+<p class="et-small et-issue-status" id="et-issue-status">Pick a topic on the left to get started.</p>
+</section>
+<div aria-live="polite" class="et-card" id="et-output">
+<span class="et-eyebrow">Your next steps</span>
+<h2>Not just a list of pages.</h2>
+<p class="et-lead">Your answers produce one useful result in this space, with concrete guidance and actions you can take away.</p>
+<div class="et-result">
+<h3>Example: an old working phone</h3>
+<p>Check suitability → prepare your accounts/data → explore practical reuse → ask a recipient what they accept → recycle when it can no longer be used.</p>
+</div>
+</div>
+<section aria-label="Did this fix it?" class="et-card et-resolve" id="et-resolve" hidden="">
+<span class="et-eyebrow">After you try the steps</span>
+<h3 class="et-resolve-title">Did this fix it?</h3>
+<p class="et-small" id="et-resolve-topic"></p>
+<div class="et-resolve-actions">
+<button class="et-resolve-btn" id="et-resolve-yes" type="button" aria-pressed="false">Yes, it’s fixed</button>
+<button class="et-resolve-btn" id="et-resolve-no" type="button" aria-pressed="false">Not yet</button>
+<a class="et-resolve-ask" id="et-resolve-ask" href="forum.html">Ask the community</a>
+</div>
+<p class="et-small" id="et-resolve-status" role="status" aria-live="polite"></p>
+</section>
+</div>
+    </div>
+  </div>
+</main>
+<footer class="et-footer">
+  <div class="et-container">
+    <div class="footer-inner">
+      <a href="index.html" class="footer-brand"><span class="logo-symbol"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 3.5C12 3.7 5.2 5.3 4 11.4c-.7 3.8 2 6.8 5.6 6.4C16 16.8 19.1 10.7 20.5 3.5Z"/><path d="M3.5 21c3.2-5.8 7.2-9.2 12.1-12"/><path d="M8.2 17.5c-2.2.1-4.4-.5-5.7-2"/></svg></span>EcoTekk</a>
+      <nav class="footer-links" aria-label="Footer navigation"><a href="explore.html">Device explorer</a><a href="techhelp.html">Tech help</a><a href="home.html">Drop-off finder</a><a href="forum.html">Community</a><a href="profile.html">My space</a></nav>
+    </div>
+    <p class="footer-copy">Understand it. Fix it. Reuse it. Recycle it. · EcoTekk is an educational prototype. Confirm provider details, operating hours and acceptance directly before visiting.</p>
+  </div>
+</footer>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="auth.js"></script>
+<script src="activity.js"></script>
+<script src="content.js" defer></script>
+<script src="device-database.js" defer></script>
+<script src="experience.js" defer></script>
+<script src="resolve.js" defer></script>
+<script>
+
+/* Community pulse: live "how many people have this issue" counter (Firestore).
+   Reads are public; adding yours needs a member account (guests are view-only), one time per member per topic. */
+(function () {
+  var root = document.getElementById('et-issue');
+  var caseSel = document.getElementById('case');
+  var form = document.getElementById('et-form');
+  if (!root || !caseSel) return;
+
+  var numEl = document.getElementById('et-issue-num');
+  var topicEl = document.getElementById('et-issue-topic');
+  var btn = document.getElementById('et-issue-btn');
+  var barEl = document.getElementById('et-issue-bar');
+  var statusEl = document.getElementById('et-issue-status');
+
+  var MILESTONES = [10, 25, 50, 100, 250, 500, 1000, 5000, 10000];
+  var reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var db = null, auth = null;
+  try {
+    if (window.firebase && firebase.apps && firebase.apps.length) {
+      db = firebase.firestore();
+      auth = firebase.auth();
+    }
+  } catch (e) { db = null; auth = null; }
+
+  var user = null, currentId = '', unsubscribe = null;
+  var count = null, shown = 0, reported = false, busy = false, animFrame = null;
+
+  function safeId(v) {
+    return String(v || '').toLowerCase().replace(/[^a-z0-9_-]/g, '-').slice(0, 60);
+  }
+  function setStatus(msg) { statusEl.textContent = msg; }
+
+  function drawNumber(n) { numEl.textContent = Math.round(n).toLocaleString(); }
+
+  function animateTo(target) {
+    if (animFrame) cancelAnimationFrame(animFrame);
+    if (reduceMotion || target === shown) { shown = target; drawNumber(target); return; }
+    var from = shown, start = null, dur = 700;
+    function step(ts) {
+      if (start === null) start = ts;
+      var k = Math.min((ts - start) / dur, 1);
+      var eased = 1 - Math.pow(1 - k, 3);
+      shown = from + (target - from) * eased;
+      drawNumber(shown);
+      if (k < 1) animFrame = requestAnimationFrame(step);
+      else { shown = target; drawNumber(target); }
+    }
+    animFrame = requestAnimationFrame(step);
+  }
+
+  function updateMeter(n) {
+    var next = MILESTONES.find(function (m) { return m > n; });
+    if (!next) { barEl.style.width = '100%'; return; }
+    var prev = 0;
+    MILESTONES.forEach(function (m) { if (m <= n) prev = m; });
+    barEl.style.width = Math.max(4, ((n - prev) / (next - prev)) * 100) + '%';
+  }
+
+  function refreshButton() {
+    btn.classList.remove('is-done');
+    if (!currentId || !db) { btn.disabled = true; btn.textContent = 'I have this issue too'; return; }
+    if (reported) {
+      // Counted: the same button now undoes it.
+      btn.disabled = busy; btn.classList.add('is-done');
+      btn.textContent = busy ? 'Removing…' : '✓ Counted · Undo'; return;
+    }
+    if (!user || user.isAnonymous) { btn.disabled = false; btn.textContent = user ? 'Sign in to add yours' : 'Sign in to add yours'; return; }
+    btn.disabled = busy;
+    btn.textContent = 'I have this issue too';
+  }
+
+  function issueEntry() {
+    var cat = document.getElementById('category'), dev = document.getElementById('device');
+    var q = new URLSearchParams();
+    if (cat && cat.value) q.set('category', cat.value);
+    if (dev && dev.value) q.set('device', dev.value);
+    q.set('case', caseSel.value);
+    var opt = caseSel.options[caseSel.selectedIndex];
+    return { id: currentId, kind: 'issue', label: opt ? opt.text : currentId, href: 'explore.html?' + q.toString() };
+  }
+  function remember() { if (user && window.EcoActivity && currentId) EcoActivity.add(user.uid, issueEntry()); }
+
+  function resetDisplay(topic, status) {
+    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+    count = null; shown = 0; reported = false;
+    numEl.textContent = '–';
+    barEl.style.width = '0';
+    topicEl.textContent = topic;
+    setStatus(status);
+    refreshButton();
+  }
+
+  function checkReported() {
+    if (!db || !user || !currentId) return;
+    var id = currentId;
+    db.collection('issueReports').doc(id).collection('reporters').doc(user.uid).get()
+      .then(function (snap) {
+        if (id !== currentId) return;
+        if (snap.exists) { reported = true; remember(); refreshButton(); }
+      }).catch(function () { /* rules not published yet or offline: ignore */ });
+  }
+
+  function subscribe(id) {
+    unsubscribe = db.collection('issueReports').doc(id).onSnapshot(function (snap) {
+      count = snap.exists ? (Number(snap.data().count) || 0) : 0;
+      animateTo(count);
+      updateMeter(count);
+      setStatus(count === 0
+        ? 'No one has added this yet. Be the first.'
+        : 'Live count from EcoTekk members. Each member can add one report per topic, and you can undo yours. Guests can view the count.');
+    }, function () {
+      numEl.textContent = '–';
+      barEl.style.width = '0';
+      setStatus('The counter is unavailable right now.');
+      btn.disabled = true;
+    });
+  }
+
+  function syncTopic() {
+    var id = safeId(caseSel.value);
+    if (id === currentId) return;
+    currentId = id;
+    if (!id) {
+      resetDisplay('Choose a topic to see how many people share it.', 'Pick a topic on the left to get started.');
+      return;
+    }
+    var label = caseSel.options[caseSel.selectedIndex] ? caseSel.options[caseSel.selectedIndex].text : id;
+    if (!db) {
+      resetDisplay(label, 'The counter is not connected on this page yet.');
+      return;
+    }
+    resetDisplay(label, 'Loading…');
+    subscribe(id);
+    checkReported();
+  }
+
+  function addReport() {
+    busy = true; refreshButton(); setStatus('Adding yours…');
+    var id = currentId;
+    var ref = db.collection('issueReports').doc(id);
+    var batch = db.batch();
+    batch.set(ref.collection('reporters').doc(user.uid), { createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    batch.set(ref, { count: firebase.firestore.FieldValue.increment(1) }, { merge: true });
+    batch.commit().then(function () {
+      reported = true; busy = false; remember(); refreshButton();
+      setStatus('Thanks. Your report was added to the count. Tap the button again to undo.');
+    }).catch(function () {
+      busy = false;
+      // A rejected batch usually means this account already reported this topic.
+      ref.collection('reporters').doc(user.uid).get().then(function (s) {
+        if (s.exists) { reported = true; remember(); setStatus('You already added this one. Tap the button to undo it.'); }
+        else setStatus('Could not add your report right now. Please try again later.');
+        refreshButton();
+      }).catch(function () {
+        setStatus('Could not add your report right now. Please try again later.');
+        refreshButton();
+      });
+    });
+  }
+
+  function removeReport() {
+    busy = true; refreshButton(); setStatus('Removing yours…');
+    var id = currentId, uid = user.uid;
+    var ref = db.collection('issueReports').doc(id);
+    var batch = db.batch();
+    batch.delete(ref.collection('reporters').doc(uid));
+    batch.update(ref, { count: firebase.firestore.FieldValue.increment(-1) });
+    batch.commit().then(function () {
+      busy = false;
+      if (id === currentId) reported = false;
+      if (window.EcoActivity) EcoActivity.remove(uid, id);
+      refreshButton();
+      setStatus('Removed. Your report is no longer counted.');
+    }).catch(function (err) {
+      busy = false;
+      setStatus(err && err.code === 'permission-denied'
+        ? 'Undo is not enabled yet. The updated Firestore rules need to be published.'
+        : 'Could not undo right now. Please try again later.');
+      refreshButton();
+    });
+  }
+
+  btn.addEventListener('click', function () {
+    if (!db || !currentId) return;
+    if (!user || user.isAnonymous) { location.href = 'login.html?next=' + encodeURIComponent('explore.html' + location.search); return; }
+    if (busy) return;
+    if (reported) removeReport(); else addReport();
+  });
+
+  caseSel.addEventListener('change', syncTopic);
+  if (form) form.addEventListener('submit', function () { setTimeout(syncTopic, 0); });
+  new MutationObserver(function () { setTimeout(syncTopic, 0); }).observe(caseSel, { childList: true });
+  window.addEventListener('load', function () { setTimeout(syncTopic, 0); });
+
+  if (auth) {
+    auth.onAuthStateChanged(function (u) {
+      user = u || null;
+      reported = false;
+      refreshButton();
+      checkReported();
+    });
+  }
+  refreshButton();
+})();
+
+</script><script>
+
+/* Temporary diagnostic: shows a visible notice only if the planner is really not running.
+   Safe to delete once Model / Matching topics work. */
+window.addEventListener('load', function () {
+  setTimeout(function () {
+    var cs = document.getElementById('case'), form = document.getElementById('et-form');
+    var cat = document.getElementById('category'), dev = document.getElementById('device');
+    if (!cs || !form || !cat || !dev || cs.options.length > 1) return;   // topics present: planner is alive
+
+    // Probe: ask for the "power" topics. If nothing reacts, the planner has no listeners.
+    var sc = cat.value, sd = dev.value;
+    function fire(el) { el.dispatchEvent(new Event('change', { bubbles: true })); }
+    cat.value = 'power'; dev.value = ''; fire(cat); fire(dev);
+    var alive = cs.options.length > 1;
+    cat.value = sc; dev.value = sd; fire(cat); fire(dev);
+    if (alive) return;
+
+    var missing = [];
+    if (!window.EcoTekkContent) missing.push('EcoTekkContent (from content.js)');
+    if (!window.EcoTekkDevices || !window.EcoTekkDevices.brands) missing.push('EcoTekkDevices (the device/brand/model catalog)');
+    var box = document.createElement('div');
+    box.setAttribute('role', 'alert');
+    box.style.cssText = 'border:2px solid #ef4444;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:.9rem;line-height:1.45';
+    box.textContent = missing.length
+      ? 'Setup problem: planner.js did not start. This page could not find ' + missing.join(' and ') + '. Check that the matching <script src="..."> line points to a file that exists in the repo.'
+      : 'Setup problem: planner.js did not start. Open the browser console (F12) and look for a red error.';
+    form.insertBefore(box, form.firstChild);
+  }, 600);
+});
+
+</script>
+<script src="planner.js" defer></script>
+</body></html>
