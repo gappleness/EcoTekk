@@ -1,0 +1,38 @@
+# 1. Create .gitignore
+cat > .gitignore << 'EOF'
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+*.log
+
+# Local / secret configs
+.env
+.env.*
+*.local
+firebase-service-account.json
+serviceAccountKey.json
+*credentials*
+
+# Build leftovers
+node_modules/
+dist/
+.cache/
+build/
+EOF
+
+# 2. Remove unnecessary files
+rm index.original.html TEXT-SIZE-FIX.txt community-tally.js
+
+# 3. Stage everything
+git add .
+git status   # check what will be committed
+
+# 4. Commit
+git commit -m "Clean up: add .gitignore and remove unused files"
+
+# 5. Push
+git push
