@@ -133,11 +133,18 @@
     var model = s.getModel(s.ai, { model: models[Math.min(modelIdx, models.length - 1)], systemInstruction: SYSTEM, generationConfig: { maxOutputTokens: 600, temperature: 0.5 } });
     return model.startChat({ history: [] });
   }
+  // Short, key-free description of an error for the details line (and for debugging).
+  function brief(err) {
+    var msg = String(err && err.message || err || '').replace(/https?:\/\/\S+/g, '').replace(/AIza[0-9A-Za-z_-]+/g, '[key]').replace(/\s+/g, ' ').trim();
+    return ((err && err.code ? err.code + ' ' : '') + msg).slice(0, 170);
+  }
   function explain(err) {
     var t = String((err && (err.code || '')) + ' ' + (err && err.message || '')).toLowerCase();
     if (t.indexOf('quota') !== -1 || t.indexOf('429') !== -1 || t.indexOf('resource') !== -1) return 'The free AI quota is used up for now. Please try again later.';
     if (t.indexOf('app check') !== -1 || t.indexOf('app-check') !== -1 || t.indexOf('appcheck') !== -1 || t.indexOf('401') !== -1 || t.indexOf('403') !== -1 || t.indexOf('permission') !== -1) return 'The AI helper isn’t switched on for this site yet (it needs AI Logic and App Check set up in the Firebase console).';
-    if (t.indexOf('network') !== -1 || t.indexOf('fetch') !== -1) return 'Couldn’t reach the AI service. Check your connection and try again.';
+    if (t.indexOf('404') !== -1 || t.indexOf('not found') !== -1 || t.indexOf('not supported') !== -1) return 'That AI model isn’t available for this project. The model list in firebase-config.js needs updating.';
+    if (t.indexOf('400') !== -1 || t.indexOf('api has not been used') !== -1 || t.indexOf('disabled') !== -1 || t.indexOf('api key') !== -1) return 'The AI service rejected the request. Check that AI Logic is set up (Gemini Developer API) in the Firebase console.';
+    if (t.indexOf('dynamically imported') !== -1 || t.indexOf('failed to fetch') !== -1 || t.indexOf('networkerror') !== -1 || t.indexOf('network') !== -1) return 'Couldn’t reach the AI service. Check your connection (or an ad blocker) and try again.';
     if (t.indexOf('safety') !== -1 || t.indexOf('blocked') !== -1) return 'I can’t help with that one. Try rephrasing, or ask about repair, reuse or recycling.';
     return 'Something went wrong with the AI helper. Please try again in a moment.';
   }
@@ -153,14 +160,16 @@
     busy = true; send.disabled = true;
     var pending = bubble('bot'); pending.classList.add('thinking'); pending.textContent = 'Thinking…';
     var models = cfg.models && cfg.models.length ? cfg.models : [''];
+    var tried = [];
     function attempt() {
+      var name = models[Math.min(modelIdx, models.length - 1)];
       return loadSdk().then(function (s) {
         if (!chat) chat = newChat(s);
         return chat.sendMessage('[Page context: ' + pageContext() + ']\n\nQuestion: ' + text);
       }).then(function (res) { return res.response.text(); }).catch(function (err) {
-        chat = null;
+        chat = null; tried.push(name + ': ' + brief(err)); console.warn('EcoTekk AI attempt failed (' + name + ')', err);
         if (modelIdx < models.length - 1) { modelIdx++; return attempt(); }
-        throw err;
+        err.ecoTried = tried; throw err;
       });
     }
     attempt().then(function (reply) {
@@ -168,6 +177,7 @@
     }).catch(function (err) {
       console.warn('EcoTekk AI error', err); modelIdx = 0;
       pending.classList.remove('thinking'); pending.classList.add('error'); pending.textContent = explain(err);
+      var det = el('small', 'ai-detail', 'Details: ' + (err && err.ecoTried ? err.ecoTried.join(' | ') : brief(err))); pending.append(el('br'), det);
     }).then(function () { busy = false; send.disabled = false; log.scrollTop = log.scrollHeight; input.focus(); });
   }
 

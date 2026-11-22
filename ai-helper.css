@@ -32,3 +32,5 @@
 .ai-gate-link { padding: 9px 16px; border-radius: 10px; background: var(--brand); color: #073216; font: 800 13px var(--font-display); text-decoration: none; }
 @media (max-width: 520px) { .ai-panel { right: 12px; bottom: 12px; height: min(78vh, 560px); } .ai-fab-text { display: none; } .ai-fab { padding: 0 16px; } }
 @media (prefers-reduced-motion: reduce) { .ai-fab { transition: none; } }
+
+.ai-detail { display: block; margin-top: 6px; color: var(--muted); font-size: 10.5px; line-height: 1.4; word-break: break-word; }
