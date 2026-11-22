@@ -16,7 +16,7 @@ window.ECOTEKK_FIREBASE_CONFIG = {
 window.ECOTEKK_AI = {
   enabled: true,
   models: ['gemini-3.5-flash-lite', 'gemini-2.5-flash-lite', 'gemini-2.5-flash'],
-  appCheckSiteKey: '',      // reCAPTCHA SITE key (public, not the secret key). Must be set if App Check is enforced.
-  appCheckProvider: 'v3',   // 'v3' for reCAPTCHA v3, 'enterprise' if you registered reCAPTCHA Enterprise
+  appCheckSiteKey: '6LdVAi0uAAAAADRr7V-lKiY_W5R7AMm-Qh43Jo8-',      // reCAPTCHA SITE key (public, not the secret key). Must be set if App Check is enforced.
+  appCheckProvider: 'enterprise',   // 'v3' for reCAPTCHA v3, 'enterprise' if you registered reCAPTCHA Enterprise
   maxPerHour: 20            // soft per-browser limit so one person cannot burn the shared free quota
 };
