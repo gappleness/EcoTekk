@@ -47,41 +47,32 @@
   // Roles. An admin is a person with a document at admins/{uid}. Only the Firebase console (or another admin)
   // can create it; the rules never let a user write their own. The UI check below only decides what to SHOW,
   // firestore.rules is what actually protects admin data.
-  // Only definite answers are remembered (per account). A failed lookup (network blip, token not attached yet,
-  // rules mid-publish) is retried once and NEVER cached, so one bad moment can't make an admin look like a normal
-  // member until the next hard refresh.
-  const adminKnown={}, adminPending={};
-  function lookupAdmin(uid,tries){
-    return db.collection('admins').doc(uid).get().then(function(s){adminKnown[uid]=s.exists;return s.exists;}).catch(function(){
-      if(tries>0)return new Promise(function(r){setTimeout(r,700);}).then(function(){return lookupAdmin(uid,tries-1);});
-      return false;
-    });
-  }
+  let adminCache=null;
   function isAdmin(){
     if(!configured)return Promise.resolve(false);
-    return ready.then(function(){
-      const u=auth&&auth.currentUser;if(!u||u.isAnonymous)return false;
-      if(u.uid in adminKnown)return adminKnown[u.uid];
-      if(!adminPending[u.uid])adminPending[u.uid]=lookupAdmin(u.uid,1).then(function(v){delete adminPending[u.uid];return v;});
-      return adminPending[u.uid];
-    });
+    if(adminCache)return adminCache;
+    adminCache=ready.then(function(){const u=auth&&auth.currentUser;if(!u||u.isAnonymous)return false;return db.collection('admins').doc(u.uid).get().then(function(s){return s.exists;}).catch(function(){return false;});});
+    return adminCache;
   }
   // Is this account restricted by an admin (bans/{uid})? Used to explain why posting is blocked.
   function isRestricted(){
     return ready.then(function(){const u=auth&&auth.currentUser;if(!u||u.isAnonymous)return false;return db.collection('bans').doc(u.uid).get().then(function(s){return s.exists;}).catch(function(){return false;});});
   }
   // Fills the #nav-auth item on every page: Profile for members, Guest for guests, Login otherwise.
-  // Admins are sent to admin.html#profile (see below).
+  // Admins also get an Admin link.
   function renderNav(){ready.then(function(){
     const el=document.getElementById('nav-auth'),u=currentUser();
     if(el&&u)el.innerHTML='<a href="profile.html">'+(u.isGuest?'Guest':'Profile')+'</a>';
-    // Admins get one combined space: every link to the profile page (nav "Profile", footer "My space") goes to
-    // admin.html#profile instead, where the profile sits next to the admin tools.
     if(u&&!u.isGuest)isAdmin().then(function(yes){
-      if(!yes)return;
-      document.querySelectorAll('a[href="profile.html"]').forEach(function(a){a.setAttribute('href','admin.html#profile');});
-      const mine=document.querySelector('#nav-auth a');
-      if(mine&&/admin\.html$/.test(location.pathname))mine.setAttribute('aria-current','page');
+      if(!yes||document.getElementById('nav-admin'))return;
+      const ul=document.getElementById('et-nav-links');if(!ul)return;
+      const li=document.createElement('li');li.id='nav-admin';
+      const a=document.createElement('a');a.href='admin.html';a.textContent='Admin';
+      if(/admin\.html$/.test(location.pathname))a.setAttribute('aria-current','page');
+      li.appendChild(a);
+      const theme=document.getElementById('theme-toggle');
+      const themeLi=theme&&theme.closest?theme.closest('li'):null;
+      if(themeLi&&themeLi.parentNode===ul)ul.insertBefore(li,themeLi);else ul.appendChild(li);
     });
   }).catch(function(){});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',renderNav);else renderNav();

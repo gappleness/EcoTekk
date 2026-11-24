@@ -202,16 +202,7 @@
   }
 
   /* -------------------------------- shell -------------------------------- */
-  /* ------------------------------ My profile ------------------------------ */
-  // Admins land here instead of profile.html: the same account, badges and activity view, shared from profile.js.
-  function myProfile() {
-    var box = el('div', 'admin-profile');
-    if (window.EcoProfile) window.EcoProfile.mount(box, { embedded: true });
-    else box.append(el('p', 'admin-empty', 'The profile view could not load. Please refresh.'));
-    return box;
-  }
-
-  var TABS = [['profile', 'My profile', myProfile], ['overview', 'Overview', overview], ['members', 'Members', members], ['reviews', 'Reviews', reviews], ['community', 'Community', community], ['resolved', 'Resolved', resolved]];
+  var TABS = [['overview', 'Overview', overview], ['members', 'Members', members], ['reviews', 'Reviews', reviews], ['community', 'Community', community], ['resolved', 'Resolved', resolved]];
   var current = 'overview', body = el('div', 'admin-body');
   function show(id) {
     current = id; location.hash = id;
@@ -219,10 +210,6 @@
     var t = TABS.filter(function (x) { return x[0] === id; })[0]; body.replaceChildren(t[2]());
   }
   function refresh(id) { body.replaceChildren(el('p', 'admin-empty', 'Refreshing…')); return loadAll().then(function () { show(id || current); }); }
-  window.addEventListener('hashchange', function () {
-    var h = location.hash.replace('#', '');
-    if (h !== current && body.parentNode && TABS.some(function (t) { return t[0] === h; })) show(h);
-  });
   var tabs = el('div', 'admin-tabs'); tabs.setAttribute('role', 'tablist');
   TABS.forEach(function (t) { var b = el('button', 'admin-tab', t[1]); b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('data-tab', t[0]); b.onclick = function () { show(t[0]); }; tabs.append(b); });
   var reload = el('button', 'admin-btn', 'Refresh data'); reload.type = 'button'; reload.onclick = function () { refresh(); };
@@ -251,9 +238,9 @@
         });
         return;
       }
-      lead.textContent = 'Signed in as ' + me.name + '. Your profile, statistics, member management and moderation in one place.';
+      lead.textContent = 'Signed in as ' + me.name + '. Statistics, member management and moderation.';
       root.append(bar, body); body.append(el('p', 'admin-empty', 'Loading…'));
-      return loadAll().then(function () { var h = location.hash.replace('#', ''); show(TABS.some(function (t) { return t[0] === h; }) ? h : 'profile'); });
+      return loadAll().then(function () { var h = location.hash.replace('#', ''); show(TABS.some(function (t) { return t[0] === h; }) ? h : 'overview'); });
     });
   }).catch(function () { lead.textContent = 'Could not load the dashboard. Please refresh.'; });
 })();
