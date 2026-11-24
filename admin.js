@@ -220,7 +220,24 @@
     me = EcotekkAuth.currentUser();
     if (!me || me.isGuest) { lead.textContent = 'Sign in with an admin account to see this page.'; var a = el('a', 'et-btn', 'Log in'); a.href = 'login.html?next=admin.html'; root.append(a); return; }
     return EcotekkAuth.isAdmin().then(function (yes) {
-      if (!yes) { lead.textContent = 'This page is for EcoTekk admins. Your account does not have admin access.'; return; }
+      if (!yes) {
+        lead.textContent = 'This page is for EcoTekk admins. Your account does not have admin access.';
+        // Work out WHY, so setup problems are easy to fix. (isAdmin() hides the reason on purpose.)
+        var why = el('div', 'et-card admin-panel'); why.append(el('h2', '', 'Why am I seeing this?'));
+        var line = el('p', 'et-small', 'Checking…'); why.append(line);
+        var info = el('p', 'et-small', 'Signed in as ' + (me.email || me.name) + ' · UID: ' + me.uid); why.append(info);
+        root.append(why);
+        db.collection('admins').doc(me.uid).get().then(function (snap) {
+          line.textContent = snap.exists
+            ? 'The admins document exists, but the rules did not accept it. Re-publish firestore.rules (the whole file) in Firebase console > Firestore > Rules, then hard refresh.'
+            : 'No document at admins/' + me.uid + '. In Firebase console > Firestore, the admins collection needs a document whose ID is exactly the UID above (copy it from Authentication > Users). Also check you are signed in with the right account.';
+        }).catch(function (e) {
+          line.textContent = e && e.code === 'permission-denied'
+            ? 'Firestore refused the lookup (permission-denied). The new firestore.rules are not published yet: paste the whole file into Firebase console > Firestore > Rules and click Publish.'
+            : 'Could not check (' + (e && e.code || 'error') + '). Try again in a moment.';
+        });
+        return;
+      }
       lead.textContent = 'Signed in as ' + me.name + '. Statistics, member management and moderation.';
       root.append(bar, body); body.append(el('p', 'admin-empty', 'Loading…'));
       return loadAll().then(function () { var h = location.hash.replace('#', ''); show(TABS.some(function (t) { return t[0] === h; }) ? h : 'overview'); });
