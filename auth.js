@@ -47,12 +47,24 @@
   // Roles. An admin is a person with a document at admins/{uid}. Only the Firebase console (or another admin)
   // can create it; the rules never let a user write their own. The UI check below only decides what to SHOW,
   // firestore.rules is what actually protects admin data.
-  let adminCache=null;
+  // Only definite answers are remembered (per account). A failed lookup (network blip, token not attached yet,
+  // rules mid-publish) is retried once and NEVER cached, so one bad moment can't make an admin look like a normal
+  // member until the next hard refresh.
+  const adminKnown={}, adminPending={};
+  function lookupAdmin(uid,tries){
+    return db.collection('admins').doc(uid).get().then(function(s){adminKnown[uid]=s.exists;return s.exists;}).catch(function(){
+      if(tries>0)return new Promise(function(r){setTimeout(r,700);}).then(function(){return lookupAdmin(uid,tries-1);});
+      return false;
+    });
+  }
   function isAdmin(){
     if(!configured)return Promise.resolve(false);
-    if(adminCache)return adminCache;
-    adminCache=ready.then(function(){const u=auth&&auth.currentUser;if(!u||u.isAnonymous)return false;return db.collection('admins').doc(u.uid).get().then(function(s){return s.exists;}).catch(function(){return false;});});
-    return adminCache;
+    return ready.then(function(){
+      const u=auth&&auth.currentUser;if(!u||u.isAnonymous)return false;
+      if(u.uid in adminKnown)return adminKnown[u.uid];
+      if(!adminPending[u.uid])adminPending[u.uid]=lookupAdmin(u.uid,1).then(function(v){delete adminPending[u.uid];return v;});
+      return adminPending[u.uid];
+    });
   }
   // Is this account restricted by an admin (bans/{uid})? Used to explain why posting is blocked.
   function isRestricted(){
