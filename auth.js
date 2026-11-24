@@ -59,20 +59,17 @@
     return ready.then(function(){const u=auth&&auth.currentUser;if(!u||u.isAnonymous)return false;return db.collection('bans').doc(u.uid).get().then(function(s){return s.exists;}).catch(function(){return false;});});
   }
   // Fills the #nav-auth item on every page: Profile for members, Guest for guests, Login otherwise.
-  // Admins also get an Admin link.
+  // Admins are sent to admin.html#profile (see below).
   function renderNav(){ready.then(function(){
     const el=document.getElementById('nav-auth'),u=currentUser();
     if(el&&u)el.innerHTML='<a href="profile.html">'+(u.isGuest?'Guest':'Profile')+'</a>';
+    // Admins get one combined space: every link to the profile page (nav "Profile", footer "My space") goes to
+    // admin.html#profile instead, where the profile sits next to the admin tools.
     if(u&&!u.isGuest)isAdmin().then(function(yes){
-      if(!yes||document.getElementById('nav-admin'))return;
-      const ul=document.getElementById('et-nav-links');if(!ul)return;
-      const li=document.createElement('li');li.id='nav-admin';
-      const a=document.createElement('a');a.href='admin.html';a.textContent='Admin';
-      if(/admin\.html$/.test(location.pathname))a.setAttribute('aria-current','page');
-      li.appendChild(a);
-      const theme=document.getElementById('theme-toggle');
-      const themeLi=theme&&theme.closest?theme.closest('li'):null;
-      if(themeLi&&themeLi.parentNode===ul)ul.insertBefore(li,themeLi);else ul.appendChild(li);
+      if(!yes)return;
+      document.querySelectorAll('a[href="profile.html"]').forEach(function(a){a.setAttribute('href','admin.html#profile');});
+      const mine=document.querySelector('#nav-auth a');
+      if(mine&&/admin\.html$/.test(location.pathname))mine.setAttribute('aria-current','page');
     });
   }).catch(function(){});}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',renderNav);else renderNav();
